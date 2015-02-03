@@ -10,7 +10,12 @@ lazy val root = project
 lazy val conductrBundleLib = project
   .in(file("conductr-bundle-lib"))
   .dependsOn(testLib % "test->compile")
-  
+
+lazy val scalaConductRBundleLib = project
+  .in(file("scala-conductr-bundle-lib"))
+  .dependsOn(conductrBundleLib)
+  .dependsOn(testLib % "test->compile")
+
 lazy val testLib = project
   .in(file("test-lib"))
   

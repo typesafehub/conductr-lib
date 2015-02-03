@@ -7,7 +7,7 @@ package com.typesafe.conductr.bundlelib;
 
 import java.io.IOException;
 import java.net.URL;
-import static com.typesafe.conductr.bundlelib.Common.*;
+import static com.typesafe.conductr.bundlelib.Env.*;
 
 /**
  * LocationService used to look up services using the Typesafe ConductR Service Locator.
@@ -16,8 +16,6 @@ public class LocationService {
 
     private LocationService() {
     }
-
-    private static final String SERVICE_LOCATOR = System.getenv("SERVICE_LOCATOR");
 
     /**
      * Create the HttpPayload necessary to look up a service by name.
@@ -28,7 +26,8 @@ public class LocationService {
      * All other response codes are considered illegal.
      *
      * @param serviceName The name of the service
-     * @return An HttpPayload describing how to do the service lookup
+     * @return An HttpPayload describing how to do the service lookup or null if
+     * this program is not running within ConductR
      * @throws IOException
      */
     public static HttpPayload createLookupPayload(String serviceName) throws IOException {
