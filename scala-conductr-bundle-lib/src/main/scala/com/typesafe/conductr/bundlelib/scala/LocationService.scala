@@ -32,6 +32,8 @@ object LocationService {
           Option(con.getHeaderField("Location"))
             .map(new URL(_))
             .orElse(throw new IOException("Missing Location header"))
+        case 404 =>
+          None
         case _ =>
           throw new IOException(s"Illegal response code ${con.getResponseCode}")
       }

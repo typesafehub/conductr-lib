@@ -8,10 +8,14 @@ import sbt._
 object Version {
   val scala     = "2.11.5"
   val scalaTest = "2.2.3"
+  val akka                = "2.3.9"
+  val akkaHttp            = "1.0-M2"
 }
 
 object Library {
   val scalaTest       = "org.scalatest"     %% "scalatest"                      % Version.scalaTest
+  val akkaTestkit     = "com.typesafe.akka" %% "akka-testkit"                   % Version.akka
+  val akkaHttpTestkit = "com.typesafe.akka" %% "akka-http-testkit-experimental" % Version.akkaHttp
 }
 
 object Resolver {

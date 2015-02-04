@@ -6,5 +6,6 @@
 name := "test-lib"
 
 libraryDependencies ++= List(
+  Library.akkaTestkit,
   Library.scalaTest
 )
