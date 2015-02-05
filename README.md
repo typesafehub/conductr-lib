@@ -60,12 +60,12 @@ You should also prepare for timing out on a request and exit the bundle componen
 
 This library provides a reactive API using only Scala and Java types. There are no dependencies other than `conductr-bundle-lib`, Scala and the JDK and it is designed to be used where there is no Akka or Play dependency in your application.
 
-As with `conductr-bundle-lib` there is are two services:
+As with `conductr-bundle-lib` there are two services:
 
 * LocationService
 * StatusService
 
-Please read the section on `conductr-bundle-lib` for an overview of these services.
+Please read the section on `conductr-bundle-lib` for an introduction to these services.
 
 ### LocationService
 
