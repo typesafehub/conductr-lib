@@ -24,8 +24,8 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
       import system.dispatcher
       val serviceUrl = "http://service_interface:4711/known"
       withServerWithKnownService(serviceUrl) {
-        val url = LocationService.lookup("/known")
-        Await.result(url, timeout.duration) should be(Some(new URL(serviceUrl)))
+        val service = LocationService.lookup("/known")
+        Await.result(service, timeout.duration) should be(Some(new URL(serviceUrl) -> None))
       }
     }
 
@@ -33,8 +33,8 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
       import system.dispatcher
       val serviceUrl = "http://service_interface:4711/known"
       withServerWithKnownService(serviceUrl) {
-        val url = LocationService.lookup("/unknown")
-        Await.result(url, timeout.duration) should be(None)
+        val service = LocationService.lookup("/unknown")
+        Await.result(service, timeout.duration) should be(None)
       }
     }
   }
