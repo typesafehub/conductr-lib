@@ -4,6 +4,7 @@
  */
 
 import com.typesafe.sbt.SbtScalariform._
+import sbtrelease.ReleasePlugin._
 import sbt._
 import sbt.Keys._
 import scalariform.formatter.preferences._
@@ -18,10 +19,10 @@ object Build extends AutoPlugin {
 
   override def projectSettings =
     scalariformSettings ++
+    releaseSettings ++
     List(
       // Core settings
       organization := "com.typesafe.conductr",
-      version := "0.1.0",
       scalaVersion := Version.scala,
       crossScalaVersions := List(scalaVersion.value),
       scalacOptions ++= List(
@@ -39,6 +40,15 @@ object Build extends AutoPlugin {
         .setPreference(AlignSingleLineCaseStatements, true)
         .setPreference(AlignSingleLineCaseStatements.MaxArrowIndent, 100)
         .setPreference(DoubleIndentClassDeclaration, true)
-        .setPreference(PreserveDanglingCloseParenthesis, true)
+        .setPreference(PreserveDanglingCloseParenthesis, true),
+      // Publishing
+      publishTo := {
+        val typesafe = "http://private-repo.typesafe.com/typesafe/"
+        val (name, url) = if (isSnapshot.value)
+          ("typesafe-snapshots", typesafe + "maven-snapshots")
+        else
+          ("typesafe-releases", typesafe + "maven-releases")
+        Some(Resolver.url(name, new URL(url)))
+      }
     )
 }
