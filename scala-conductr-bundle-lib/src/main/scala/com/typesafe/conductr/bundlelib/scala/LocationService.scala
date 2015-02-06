@@ -6,7 +6,7 @@
 package com.typesafe.conductr.bundlelib.scala
 
 import java.io.IOException
-import java.net.URL
+import java.net.URI
 
 import com.typesafe.conductr.bundlelib.{ LocationService => JavaLocationService, Env }
 import com.typesafe.conductr.bundlelib.scala.ConnectionHandler.withConnectedRequest
@@ -23,18 +23,18 @@ object LocationService {
    * Look up a service by service name. Service names correspond to those declared in a Bundle
    * component's endpoint data structure i.e. within a bundle's bundle.conf.
    *
-   * Returns some URL representing the service or None if the service is not found or if this
+   * Returns some URI representing the service or None if the service is not found or if this
    * program is not running in the context of ConductR. An optional maxAge duration is also returned
    * indicating that the value may be cached for by the caller up to this period of time.
    */
-  def lookup(serviceName: String)(implicit ec: ExecutionContext): Future[Option[(URL, Option[FiniteDuration])]] =
+  def lookup(serviceName: String)(implicit ec: ExecutionContext): Future[Option[(URI, Option[FiniteDuration])]] =
     withConnectedRequest(Option(JavaLocationService.createLookupPayload(serviceName))) { con =>
       con.getResponseCode match {
         case 307 =>
           Option(con.getHeaderField("Location"))
             .map { location =>
-              val url = new URL(location)
-              url -> None // FIXME: Need to interpret max-age here.
+              val uri = new URI(location)
+              uri -> None // FIXME: Need to interpret max-age here.
             }
             .orElse(throw new IOException("Missing Location header"))
         case 404 =>
@@ -45,11 +45,11 @@ object LocationService {
     }
 
   /**
-   * Return a service URL if there is one, stripping out any maxAge duration.
-   * Otherwise either exit if running within ConductR, or default to another URL
+   * Return a service URI if there is one, stripping out any maxAge duration.
+   * Otherwise either exit if running within ConductR, or default to another URI
    * if running outside of ConductR e.g. when in development mode.
    */
-  def getUrlOrExit(default: URL)(service: Option[(URL, Option[FiniteDuration])]): URL =
+  def getUriOrExit(default: URI)(service: Option[(URI, Option[FiniteDuration])]): URI =
     service.map(_._1).getOrElse(exit(default))
 
   private def exit[T](default: T): T =

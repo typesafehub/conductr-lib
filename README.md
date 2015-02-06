@@ -20,7 +20,7 @@ Two services are covered by this library:
 
 ### Location Service
 
-ConductR's location service is able to respond with a URL declaring where a given service (as named by a bundle component's endpoint) resides. The http payload can be constructed as follows:
+ConductR's location service is able to respond with a URI declaring where a given service (as named by a bundle component's endpoint) resides. The http payload can be constructed as follows:
 
 ```java
 HttpPayload payload = LocationService.createLookupPayload("/someservice")
@@ -34,7 +34,7 @@ The `HttpPayload` object may then be queried for elements that will help you mak
 
 When processing the http response you should check for the following http status codes:
 
-* 308 - permanent redirect - the service can be found at the location indicated by the `Location` header
+* 307 - temporary redirect - the service can be found at the location indicated by the `Location` header. `Cache-Control` may also be supplied to indicate how long the location may be cached for.
 * 404 - not found - the service cannot be located at this time
 
 You should also prepare for timing out on a request and process as per a 404.
@@ -94,20 +94,20 @@ If the service you require is not HTTP based then you may use the `LocationServi
 val service = LocationService.lookup("/someservice")
 ```
 
-`service` is typed `Future[Option[URL, Option[FiniteDuration]]` meaning that an optional response will be returned at some time in the future. Supposing that this lookup is made during the initialisation of your program, the service you're looking for may not exist. However calling the same function later on may yield the service. This is because services can come and go.
+`service` is typed `Future[Option[URI, Option[FiniteDuration]]` meaning that an optional response will be returned at some time in the future. Supposing that this lookup is made during the initialisation of your program, the service you're looking for may not exist. However calling the same function later on may yield the service. This is because services can come and go.
 
-The service response constitutes a URL that describes its location along with an optional duration indicating how long the URL may be cached for. A value of `None` indicates that the service should not be cached.
+The service response constitutes a URI that describes its location along with an optional duration indicating how long the URI may be cached for. A value of `None` indicates that the service should not be cached.
 
 #### Static service lookup
 
 Some bundle components cannot proceed with their initialisation unless the service can be located. We encourage you to re-factor these components so that they look up services at the time when they are required, given that services can come and go. However if you are somehow stuck with this style of code then we offer a utility that causes an exit if the lookup results in no service being found:
 
 ```scala
-val default = new URL("http://127.0.0.1:9000")
-val url = LocationService.lookup("/someservice").map(LocationService.getUrlOrExit(default))
+val default = new URI("http://127.0.0.1:9000")
+val url = LocationService.lookup("/someservice").map(LocationService.getUriOrExit(default))
 ```
 
-Note that the above returns a `Future[URL]` and it will exit in the case of ConductR running and the lookup failing. If ConductR is not running and the lookup fails then the `default` value will be returned.
+Note that the above returns a `Future[URI]` and it will exit in the case of ConductR running and the lookup failing. If ConductR is not running and the lookup fails then the `default` value will be returned.
 
 ### StatusService
 

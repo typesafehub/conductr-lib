@@ -21,7 +21,8 @@ public class LocationService {
      * Create the HttpPayload necessary to look up a service by name.
      *
      * If the service is available and can bee looked up the response for the HTTP request should be
-     * 308 (Permanent Redirect), and the resulting URL to the service is in the "Location" header of the response.
+     * 307 (Temporary Redirect), and the resulting URI to the service is in the "Location" header of the response.
+     * A Cache-Control header may also be returned indicating the maxAge that the location should be cached for.
      * If the service can not be looked up the response should be 404 (Not Found).
      * All other response codes are considered illegal.
      *

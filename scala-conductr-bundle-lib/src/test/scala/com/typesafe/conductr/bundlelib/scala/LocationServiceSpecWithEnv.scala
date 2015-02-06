@@ -13,7 +13,7 @@ import akka.stream.FlowMaterializer
 import akka.testkit.TestProbe
 import com.typesafe.conductr.AkkaUnitTest
 import com.typesafe.conductr.bundlelib.Env
-import java.net.{ URL, InetSocketAddress }
+import java.net.{ URI, URL, InetSocketAddress }
 import scala.concurrent.Await
 import scala.util.{ Failure, Success }
 
@@ -22,10 +22,10 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
   "The LocationService functionality in the library" should {
     "be able to look up a named service" in {
       import system.dispatcher
-      val serviceUrl = "http://service_interface:4711/known"
-      withServerWithKnownService(serviceUrl) {
+      val serviceUri = "http://service_interface:4711/known"
+      withServerWithKnownService(serviceUri) {
         val service = LocationService.lookup("/known")
-        Await.result(service, timeout.duration) should be(Some(new URL(serviceUrl) -> None))
+        Await.result(service, timeout.duration) should be(Some(new URI(serviceUri) -> None))
       }
     }
 
