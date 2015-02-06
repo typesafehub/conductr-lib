@@ -9,6 +9,7 @@ import java.net.URL
 
 import com.typesafe.conductr.AkkaUnitTest
 import scala.concurrent.Await
+import scala.concurrent.duration.FiniteDuration
 
 class LocationServiceSpec extends AkkaUnitTest("StatusServiceSpec", "akka.loglevel = INFO") {
 
@@ -21,6 +22,13 @@ class LocationServiceSpec extends AkkaUnitTest("StatusServiceSpec", "akka.loglev
     "return a default URL when running in development mode" in {
       val default = new URL("http://127.0.0.1:9000")
       LocationService.getUrlOrExit(default)(None) should be(default)
+    }
+
+    "return the looked up URL when running in development mode" in {
+      val default = new URL("http://127.0.0.1:9000")
+      val lookedUpUrl = new URL("http://127.0.0.1:9001")
+      val lookedUp: Option[(URL, Option[FiniteDuration])] = Some(lookedUpUrl -> None)
+      LocationService.getUrlOrExit(default)(lookedUp) should be(lookedUpUrl)
     }
   }
 }

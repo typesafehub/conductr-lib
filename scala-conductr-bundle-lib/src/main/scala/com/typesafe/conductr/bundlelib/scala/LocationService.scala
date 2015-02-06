@@ -49,7 +49,7 @@ object LocationService {
    * Otherwise either exit if running within ConductR, or default to another URL
    * if running outside of ConductR e.g. when in development mode.
    */
-  def getUrlOrExit(default: URL)(service: Option[(URL, FiniteDuration)]): URL =
+  def getUrlOrExit(default: URL)(service: Option[(URL, Option[FiniteDuration])]): URL =
     service.map(_._1).getOrElse(exit(default))
 
   private def exit[T](default: T): T =
