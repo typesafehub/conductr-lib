@@ -8,7 +8,7 @@ package com.typesafe.conductr.bundlelib.scala
 import java.io.IOException
 import java.net.URL
 
-import com.typesafe.conductr.bundlelib.{ LocationService => JavaLocationService }
+import com.typesafe.conductr.bundlelib.{ LocationService => JavaLocationService, Env }
 import com.typesafe.conductr.bundlelib.scala.ConnectionHandler.withConnectedRequest
 
 import scala.concurrent._
@@ -44,4 +44,20 @@ object LocationService {
       }
     }
 
+  /**
+   * Return a service URL if there is one, stripping out any maxAge duration.
+   * Otherwise either exit if running within ConductR, or default to another URL
+   * if running outside of ConductR e.g. when in development mode.
+   */
+  def getUrlOrExit(default: URL)(service: Option[(URL, FiniteDuration)]): URL =
+    service.map(_._1).getOrElse(exit(default))
+
+  private def exit[T](default: T): T =
+    Option(Env.BUNDLE_ID) match {
+      case Some(_) =>
+        System.exit(70)
+        default
+      case None =>
+        default
+    }
 }

@@ -69,7 +69,24 @@ Please read the section on `conductr-bundle-lib` for an introduction to these se
 
 ### LocationService
 
-The following code illustrates how a service may be located in place of creating and dispatching your own payload:
+The LocationService looks up service names and processes HTTP's `307` "temporary redirect" responses to return the location of the resolved service (or a `404` if one cannot be found). Many HTTP clients allow the following of redirects, particularly when either of the `HEAD` or `GET` methods are used (other methods may be considered insecure by default). Therefore if the service you are locating is an HTTP one then using a regular HTTP client should require no further work. Here is an example of using the [Dispatch](http://dispatch.databinder.net/Dispatch.html) library:
+
+```scala
+val serviceLocator = Option(Env.SERVICE_LOCATOR).getOrElse("http://127.0.0.1:9000")
+
+val svc = Option(Env.SERVICE_LOCATOR)
+  .map(serviceLocator => s"serviceLocator/someservice")
+  .getOrElse("http://127.0.0.1:9000/someservice")
+val svcResp = Http.configure(_.setFollowRedirects(true))(url(svc).OK)
+```
+
+The above declares a `serviceLocator` val which will either be the one that ConductR provides, or one to use for development that runs on your machine.
+
+When using HTTP clients, consider having the client cache responses. ConductR will return Cache-Control header information informing the client how to cache.
+
+#### Non HTTP service lookups
+
+If the service you require is not HTTP based then you may use the `LocationService.lookup` function. The following code illustrates how a service may be located in place of creating and dispatching your own payload:
 
 ```scala
 // This will require an implicit ExecutionContext
@@ -81,6 +98,17 @@ val service = LocationService.lookup("/someservice")
 
 The service response constitutes a URL that describes its location along with an optional duration indicating how long the URL may be cached for. A value of `None` indicates that the service should not be cached.
 
+#### Static service lookup
+
+Some bundle components cannot proceed with their initialisation unless the service can be located. We encourage you to re-factor these components so that they look up services at the time when they are required, given that services can come and go. However if you are somehow stuck with this style of code then we offer a utility that causes an exit if the lookup results in no service being found:
+
+```scala
+val default = new URL("http://127.0.0.1:9000")
+val url = LocationService.lookup("/someservice").map(LocationService.getUrlOrExit(default))
+```
+
+Note that the above returns a `Future[URL]` and it will exit in the case of ConductR running and the lookup failing. If ConductR is not running and the lookup fails then the `default` value will be returned.
+
 ### StatusService
 
 The following code illustrates how your bundle component should register its initial health with ConductR. Calling this function is to be done in place of creating and dispatching your own payload:
@@ -88,7 +116,7 @@ The following code illustrates how your bundle component should register its ini
 ```scala
 // This will require an implicit ExecutionContext
 // as the signalling is performed asynchronously.
-StatusService.signalStarted()
+StatusService.signalStartedOrExit()
 ```
 
 In general, the return value of `signalStartedOrExit` is not used and your program proceeds. If ConductR fails to reply, or replies with an error status then this bundle component will exit.
