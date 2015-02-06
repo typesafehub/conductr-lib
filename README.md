@@ -72,15 +72,13 @@ Please read the section on `conductr-bundle-lib` for an introduction to these se
 The LocationService looks up service names and processes HTTP's `307` "temporary redirect" responses to return the location of the resolved service (or a `404` if one cannot be found). Many HTTP clients allow the following of redirects, particularly when either of the `HEAD` or `GET` methods are used (other methods may be considered insecure by default). Therefore if the service you are locating is an HTTP one then using a regular HTTP client should require no further work. Here is an example of using the [Dispatch](http://dispatch.databinder.net/Dispatch.html) library:
 
 ```scala
-val serviceLocator = Option(Env.SERVICE_LOCATOR).getOrElse("http://127.0.0.1:9000")
-
-val svc = Option(Env.SERVICE_LOCATOR)
-  .map(serviceLocator => s"serviceLocator/someservice")
+val svc = Option(LocationService.createLookupPayload("/someservice"))
+  .map(_.getUrl.toString)
   .getOrElse("http://127.0.0.1:9000/someservice")
 val svcResp = Http.configure(_.setFollowRedirects(true))(url(svc).OK)
 ```
 
-The above declares a `serviceLocator` val which will either be the one that ConductR provides, or one to use for development that runs on your machine.
+The above declares an `svc` val which will either be the one that ConductR provides, or one to use for development running on your machine.
 
 When using HTTP clients, consider having the client cache responses. ConductR will return Cache-Control header information informing the client how to cache.
 
