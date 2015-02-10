@@ -18,8 +18,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 object StatusService {
 
   /**
-   * Signal that the bundle has started or exit the JVM if it fails. If the bundle fails to communicate that
-   * it has started it will eventually be killed by the ConductR.
+   * Signal that the bundle has started or exit the JVM if it fails.
    *
    * This will exit the JVM if it fails with exit code 70 (EXIT_SOFTWARE, Internal Software Error,
    * as defined in BSD sysexits.h).
