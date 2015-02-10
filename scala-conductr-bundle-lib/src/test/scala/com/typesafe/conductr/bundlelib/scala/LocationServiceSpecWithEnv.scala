@@ -6,7 +6,7 @@
 package com.typesafe.conductr.bundlelib.scala
 
 import akka.http.Http
-import akka.http.model.headers.Location
+import akka.http.model.headers.{ CacheDirectives, `Cache-Control`, Location }
 import akka.http.model.{ HttpEntity, Uri, HttpResponse, StatusCodes }
 import akka.http.server.Directives._
 import akka.stream.FlowMaterializer
@@ -15,6 +15,7 @@ import com.typesafe.conductr.AkkaUnitTest
 import com.typesafe.conductr.bundlelib.Env
 import java.net.{ URI, URL, InetSocketAddress }
 import scala.concurrent.Await
+import scala.concurrent.duration._
 import scala.util.{ Failure, Success }
 
 class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEnv", "akka.loglevel = INFO") {
@@ -29,6 +30,15 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
       }
     }
 
+    "be able to look up a named service and return maxAge" in {
+      import system.dispatcher
+      val serviceUri = "http://service_interface:4711/known"
+      withServerWithKnownService(serviceUri, Some(10)) {
+        val service = LocationService.lookup("/known")
+        Await.result(service, timeout.duration) should be(Some(new URI(serviceUri) -> Some(10.seconds)))
+      }
+    }
+
     "get back None for an unknown service" in {
       import system.dispatcher
       val serviceUrl = "http://service_interface:4711/known"
@@ -39,7 +49,7 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
     }
   }
 
-  def withServerWithKnownService(serviceUrl: String)(thunk: => Unit): Unit = {
+  def withServerWithKnownService(serviceUrl: String, maxAge: Option[Int] = None)(thunk: => Unit): Unit = {
     import system.dispatcher
     implicit val materializer = FlowMaterializer()
 
@@ -54,7 +64,15 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
             serviceName match {
               case "known" =>
                 val uri = Uri(serviceUrl)
-                HttpResponse(StatusCodes.TemporaryRedirect, List(Location(uri)), HttpEntity(s"Located at $uri"))
+                val headers = Location(uri) :: (maxAge match {
+                  case Some(maxAgeSecs) =>
+                    `Cache-Control`(
+                      CacheDirectives.`private`(Location.name),
+                      CacheDirectives.`max-age`(maxAgeSecs)) :: Nil
+                  case None =>
+                    Nil
+                })
+                HttpResponse(StatusCodes.TemporaryRedirect, headers, HttpEntity(s"Located at $uri"))
               case _ =>
                 HttpResponse(StatusCodes.NotFound)
             }
@@ -64,8 +82,8 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
 
     try {
       server.localAddress(mm).onComplete {
-        case Success(address) => probe.ref ! address
-        case Failure(e)       => probe.ref ! e
+        case Success(localAddress) => probe.ref ! localAddress
+        case Failure(e)            => probe.ref ! e
       }
 
       val address = probe.expectMsgType[InetSocketAddress]

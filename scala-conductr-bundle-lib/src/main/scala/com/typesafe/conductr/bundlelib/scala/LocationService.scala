@@ -7,6 +7,7 @@ package com.typesafe.conductr.bundlelib.scala
 
 import java.io.IOException
 import java.net.URI
+import java.util.concurrent.TimeUnit
 
 import com.typesafe.conductr.bundlelib.{ LocationService => JavaLocationService, Env }
 import com.typesafe.conductr.bundlelib.scala.ConnectionHandler.withConnectedRequest
@@ -18,6 +19,8 @@ import scala.concurrent.duration._
  * LocationService used to look up services using the Typesafe ConductR Service Locator.
  */
 object LocationService {
+
+  private val MaxAgePattern = """.*max-age=(\d+).*""".r
 
   /**
    * Look up a service by service name. Service names correspond to those declared in a Bundle
@@ -34,7 +37,11 @@ object LocationService {
           Option(con.getHeaderField("Location"))
             .map { location =>
               val uri = new URI(location)
-              uri -> None // FIXME: Need to interpret max-age here.
+              val maxAge = Option(con.getHeaderField("Cache-Control")).flatMap {
+                case MaxAgePattern(maxAgeSecs) => Some(FiniteDuration(maxAgeSecs.toInt, TimeUnit.SECONDS))
+                case _                         => None
+              }
+              uri -> maxAge
             }
             .orElse(throw new IOException("Missing Location header"))
         case 404 =>
