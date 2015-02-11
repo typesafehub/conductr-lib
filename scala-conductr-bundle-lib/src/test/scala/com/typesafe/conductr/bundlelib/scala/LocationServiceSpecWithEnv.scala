@@ -12,7 +12,6 @@ import akka.http.server.Directives._
 import akka.stream.FlowMaterializer
 import akka.testkit.TestProbe
 import com.typesafe.conductr.AkkaUnitTest
-import com.typesafe.conductr.bundlelib.Env
 import java.net.{ URI, URL, InetSocketAddress }
 import scala.concurrent.Await
 import scala.util.{ Failure, Success }
@@ -25,7 +24,7 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
       val serviceUri = "http://service_interface:4711/known"
       withServerWithKnownService(serviceUri) {
         val service = LocationService.lookup("/known")
-        Await.result(service, timeout.duration) should be(Some(new URI(serviceUri) -> None))
+        Await.result(service, timeout.duration) shouldBe Some(new URI(serviceUri) -> None)
       }
     }
 
@@ -34,7 +33,7 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
       val serviceUrl = "http://service_interface:4711/known"
       withServerWithKnownService(serviceUrl) {
         val service = LocationService.lookup("/unknown")
-        Await.result(service, timeout.duration) should be(None)
+        Await.result(service, timeout.duration) shouldBe None
       }
     }
   }
@@ -45,7 +44,7 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
 
     val probe = new TestProbe(system)
 
-    val url = new URL(Env.SERVICE_LOCATOR)
+    val url = new URL(Env.serviceLocator.get)
     val server = Http(system).bind(url.getHost, url.getPort, settings = None)
     val mm = server.startHandlingWith(
       path("services" / Rest) { serviceName =>
@@ -64,8 +63,8 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
 
     try {
       server.localAddress(mm).onComplete {
-        case Success(address) => probe.ref ! address
-        case Failure(e)       => probe.ref ! e
+        case Success(localAddress) => probe.ref ! localAddress
+        case Failure(e)            => probe.ref ! e
       }
 
       val address = probe.expectMsgType[InetSocketAddress]

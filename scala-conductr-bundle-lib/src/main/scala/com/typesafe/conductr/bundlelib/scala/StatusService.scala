@@ -7,7 +7,7 @@ package com.typesafe.conductr.bundlelib.scala
 
 import java.io.IOException
 
-import com.typesafe.conductr.bundlelib.{ StatusService => JavaStatusService }
+import com.typesafe.conductr.bundlelib.{ StatusService => JavaStatusService, HttpPayload }
 import com.typesafe.conductr.bundlelib.scala.ConnectionHandler.withConnectedRequest
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -16,6 +16,16 @@ import scala.concurrent.{ ExecutionContext, Future }
  * StatusService used to communicate the bundle status to the Typesafe ConductR Status Server.
  */
 object StatusService {
+  /**
+   * Create the HttpPayload necessary to signal that a bundle has started.
+   *
+   * Any 2xx response code is considered a success. Any other response code is considered a failure.
+   *
+   * @return Some HttpPayload describing how to signal that a bundle has started or None if
+   *         this program is not running within ConductR
+   */
+  def createSignalStartedPayload: Option[HttpPayload] =
+    Option(JavaStatusService.createSignalStartedPayload)
 
   /**
    * Signal that the bundle has started or exit the JVM if it fails.
@@ -39,7 +49,7 @@ object StatusService {
    * A Future of None will be returned if this program is not running in the context of ConductR.
    */
   def signalStarted()(implicit ec: ExecutionContext): Future[Option[Unit]] =
-    withConnectedRequest(Option(JavaStatusService.createSignalStartedPayload())) { con =>
+    withConnectedRequest(createSignalStartedPayload) { con =>
       val responseCode = con.getResponseCode
       if (responseCode < 200 || responseCode >= 300)
         throw new IOException("Illegal response code " + responseCode)

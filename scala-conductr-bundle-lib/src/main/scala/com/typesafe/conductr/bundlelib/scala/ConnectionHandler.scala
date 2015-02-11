@@ -16,7 +16,7 @@ import scala.util.{ Failure, Success, Try }
 /**
  * Handles the JDK HttpURLConnection requests and responses
  */
-object ConnectionHandler {
+private[scala] object ConnectionHandler {
   private final val UserAgent = "TypesafeConductRBundleLib"
 
   /**

@@ -8,7 +8,7 @@ package com.typesafe.conductr.bundlelib.scala
 import java.io.IOException
 import java.net.URI
 
-import com.typesafe.conductr.bundlelib.{ LocationService => JavaLocationService, Env }
+import com.typesafe.conductr.bundlelib.{ HttpPayload, LocationService => JavaLocationService }
 import com.typesafe.conductr.bundlelib.scala.ConnectionHandler.withConnectedRequest
 
 import scala.concurrent._
@@ -20,6 +20,22 @@ import scala.concurrent.duration._
 object LocationService {
 
   /**
+   * Create the HttpPayload necessary to look up a service by name.
+   *
+   * If the service is available and can bee looked up the response for the HTTP request should be
+   * 307 (Temporary Redirect), and the resulting URI to the service is in the "Location" header of the response.
+   * A Cache-Control header may also be returned indicating the maxAge that the location should be cached for.
+   * If the service can not be looked up the response should be 404 (Not Found).
+   * All other response codes are considered illegal.
+   *
+   * @param serviceName The name of the service
+   * @return Some HttpPayload describing how to do the service lookup or None if
+   * this program is not running within ConductR
+   */
+  def createLookupPayload(serviceName: String): Option[HttpPayload] =
+    Option(JavaLocationService.createLookupPayload(serviceName))
+
+  /**
    * Look up a service by service name. Service names correspond to those declared in a Bundle
    * component's endpoint data structure i.e. within a bundle's bundle.conf.
    *
@@ -28,7 +44,7 @@ object LocationService {
    * indicating that the value may be cached for by the caller up to this period of time.
    */
   def lookup(serviceName: String)(implicit ec: ExecutionContext): Future[Option[(URI, Option[FiniteDuration])]] =
-    withConnectedRequest(Option(JavaLocationService.createLookupPayload(serviceName))) { con =>
+    withConnectedRequest(createLookupPayload(serviceName)) { con =>
       con.getResponseCode match {
         case 307 =>
           Option(con.getHeaderField("Location"))
@@ -42,22 +58,5 @@ object LocationService {
         case _ =>
           throw new IOException(s"Illegal response code ${con.getResponseCode}")
       }
-    }
-
-  /**
-   * Return a service URI if there is one, stripping out any maxAge duration.
-   * Otherwise either exit if running within ConductR, or default to another URI
-   * if running outside of ConductR e.g. when in development mode.
-   */
-  def getUriOrExit(default: URI)(service: Option[(URI, Option[FiniteDuration])]): URI =
-    service.map(_._1).getOrElse(exit(default))
-
-  private def exit[T](default: T): T =
-    Option(Env.BUNDLE_ID) match {
-      case Some(_) =>
-        System.exit(70)
-        default
-      case None =>
-        default
     }
 }

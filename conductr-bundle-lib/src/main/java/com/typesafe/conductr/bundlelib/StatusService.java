@@ -27,11 +27,10 @@ public class StatusService {
      * @throws IOException
      */
     public static HttpPayload createSignalStartedPayload() throws IOException {
-        // if we have no BUNDLE_ID, we are in development mode and do nothing
-        if (BUNDLE_ID == null)
-            return null;
-        else
+        if (isRunByConductR())
             return createSignalStartedPayload(CONDUCTR_STATUS, BUNDLE_ID);
+        else
+            return null;
     }
 
     static HttpPayload createSignalStartedPayload(String conductrControl, String bundleId) throws IOException {
