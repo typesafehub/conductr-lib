@@ -98,14 +98,22 @@ The service response constitutes a URI that describes its location along with an
 
 #### Static service lookup
 
-Some bundle components cannot proceed with their initialisation unless the service can be located. We encourage you to re-factor these components so that they look up services at the time when they are required, given that services can come and go. However if you are somehow stuck with this style of code then we offer a utility that causes an exit if the lookup results in no service being found:
+Some bundle components cannot proceed with their initialisation unless the service can be located. We encourage you to re-factor these components so that they look up services at the time when they are required, given that services can come and go. However if you are somehow stuck with this style of code then you must block - regard this as a temporary measure though for the reason just stated:
 
 ```scala
-val default = new URI("http://127.0.0.1:9000")
-val url = LocationService.lookup("/someservice").map(LocationService.getUriOrExit(default))
+val service = Await.result(LocationService.lookup("/someservice"), someTimeout)
+val uri = service.map { case (uri, _) => uri }.getOrElse {
+  if (Env.isRunByConductR) System.exit(70)
+  new URI("http://127.0.0.1:9000")
+}
 ```
 
-Note that the above returns a `Future[URI]` and it will exit in the case of ConductR running and the lookup failing. If ConductR is not running and the lookup fails then the `default` value will be returned.
+With the above scenario the program will always exit when run by ConductR and it cannot locate the service. However for development mode, or a situation where the program is run outside of ConductR, an alternate URI is supplied.
+
+Be warned though: blocking is bad and the above code should be addressed at your earliest convenience. You may want to consider using an Actor for your service as the following psuedo-code illustrates:
+
+```scala
+```
 
 ### StatusService
 
