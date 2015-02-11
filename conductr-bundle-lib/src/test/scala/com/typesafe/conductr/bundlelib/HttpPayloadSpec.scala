@@ -16,9 +16,9 @@ class HttpPayloadSpec extends UnitTest {
       val method = "GET"
       val redirects = true
       val payload = new HttpPayload(url, method, redirects)
-      payload.getFollowRedirects should be(redirects)
-      payload.getRequestMethod should be(method)
-      payload.getUrl should be(url)
+      payload.getFollowRedirects shouldBe redirects
+      payload.getRequestMethod shouldBe method
+      payload.getUrl shouldBe url
     }
   }
 }

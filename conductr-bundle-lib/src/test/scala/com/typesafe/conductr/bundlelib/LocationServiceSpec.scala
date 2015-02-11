@@ -11,7 +11,7 @@ class LocationServiceSpec extends UnitTest {
 
   "The LocationService functionality in the library" should {
     "return null when running in development mode" in {
-      LocationService.createLookupPayload("/whatever") should be(null)
+      LocationService.createLookupPayload("/whatever") shouldBe null
     }
   }
 }

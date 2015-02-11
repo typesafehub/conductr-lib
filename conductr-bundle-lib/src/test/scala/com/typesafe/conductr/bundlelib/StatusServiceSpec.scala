@@ -12,7 +12,7 @@ class StatusServiceSpec extends UnitTest {
   "The StatusService functionality in the library" should {
 
     "not fail when running in development mode" in {
-      StatusService.createSignalStartedPayload() should be(null)
+      StatusService.createSignalStartedPayload() shouldBe null
     }
   }
 }

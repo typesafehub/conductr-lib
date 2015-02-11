@@ -26,4 +26,11 @@ public class Env {
      * The URL associated with locating services known to ConductR
      */
     public static final String SERVICE_LOCATOR = System.getenv("SERVICE_LOCATOR");
+
+    /**
+     * @return true if ConductR started this process.
+     */
+    public static boolean isRunByConductR() {
+        return BUNDLE_ID != null;
+    }
 }

@@ -13,7 +13,7 @@ class StatusServiceSpec extends AkkaUnitTest("StatusServiceSpec", "akka.loglevel
   "The StatusService functionality in the library" should {
     "return None when running in development mode" in {
       import system.dispatcher
-      Await.result(StatusService.signalStarted(), timeout.duration) should be(None)
+      Await.result(StatusService.signalStarted(), timeout.duration) shouldBe None
     }
   }
 }

@@ -32,11 +32,10 @@ public class LocationService {
      * @throws IOException
      */
     public static HttpPayload createLookupPayload(String serviceName) throws IOException {
-        // if we have no BUNDLE_ID, we are in development mode and do nothing
-        if (BUNDLE_ID == null)
-            return null;
-        else
+        if (isRunByConductR())
             return createLookupPayload(SERVICE_LOCATOR, serviceName);
+        else
+            return null;
     }
 
     static HttpPayload createLookupPayload(String serviceLocator, String serviceName) throws IOException {

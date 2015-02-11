@@ -11,7 +11,6 @@ import akka.http.server.Directives._
 import akka.stream.FlowMaterializer
 import akka.testkit.TestProbe
 import com.typesafe.conductr.AkkaUnitTest
-import com.typesafe.conductr.bundlelib.Env
 import java.net.{ InetSocketAddress, URL }
 import scala.concurrent.Await
 import scala.util.{ Failure, Success }
@@ -25,7 +24,7 @@ class StatusServiceSpecWithEnv extends AkkaUnitTest("StatusServiceSpecWithEnv", 
 
       val probe = new TestProbe(system)
 
-      val url = new URL(Env.CONDUCTR_STATUS)
+      val url = new URL(Env.conductRStatus.get)
       val server = Http(system).bind(url.getHost, url.getPort, settings = None)
       val mm = server.startHandlingWith(
         path("bundles" / Segment) { bundleId =>
@@ -41,18 +40,18 @@ class StatusServiceSpecWithEnv extends AkkaUnitTest("StatusServiceSpecWithEnv", 
 
       try {
         server.localAddress(mm).onComplete {
-          case Success(address) => probe.ref ! address
-          case Failure(e)       => probe.ref ! e
+          case Success(localAddress) => probe.ref ! localAddress
+          case Failure(e)            => probe.ref ! e
         }
 
         val address = probe.expectMsgType[InetSocketAddress]
         address.getHostString should be(url.getHost)
         address.getPort should be(url.getPort)
 
-        Await.result(StatusService.signalStarted(), timeout.duration).isDefined should be(true)
+        Await.result(StatusService.signalStarted(), timeout.duration).isDefined shouldBe true
 
         val receivedId = probe.expectMsgType[String]
-        receivedId should be(Env.BUNDLE_ID)
+        receivedId should be(Env.bundleId.get)
       } finally {
         server.unbind(mm)
       }
