@@ -46,6 +46,15 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
         Await.result(service, timeout.duration) shouldBe None
       }
     }
+
+    "Conveniently map to an Option[URI]" in {
+      import system.dispatcher
+      val serviceUri = "http://service_interface:4711/known"
+      withServerWithKnownService(serviceUri, Some(10)) {
+        val service = LocationService.lookup("/known").map(LocationService.toUri)
+        Await.result(service, timeout.duration) should be(Some(new URI(serviceUri)))
+      }
+    }
   }
 
   def withServerWithKnownService(serviceUrl: String, maxAge: Option[Int] = None)(thunk: => Unit): Unit = {

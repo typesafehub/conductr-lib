@@ -66,4 +66,15 @@ object LocationService {
           throw new IOException(s"Illegal response code ${con.getResponseCode}")
       }
     }
+
+  /**
+   * A convenience for extracting a uri from a lookup e.g.
+   * {{{
+   *   LocationService.lookup("/someservice").map(LocationService.toUri)
+   * }}}
+   */
+  val toUri: PartialFunction[Option[(URI, Option[FiniteDuration])], Option[URI]] = {
+    case Some((u, _)) => Some(u)
+    case None         => None
+  }
 }
