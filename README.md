@@ -129,7 +129,7 @@ class MyService extends Actor {
       context.become(service(someService))
  
     case None =>
-      self ! if (Env.isRunByConductR) PoisonPill else Some(new URI("http://127.0.0.1:9000"))
+      self ! (if (Env.isRunByConductR) PoisonPill else Some(new URI("http://127.0.0.1:9000")))
   }
   
   private def service(someService: URI): Receive = {
