@@ -73,8 +73,6 @@ object LocationService {
    *   LocationService.lookup("/someservice").map(LocationService.toUri)
    * }}}
    */
-  val toUri: PartialFunction[Option[(URI, Option[FiniteDuration])], Option[URI]] = {
-    case Some((u, _)) => Some(u)
-    case None         => None
-  }
+  def toUri(service: Option[(URI, Option[FiniteDuration])]): Option[URI] =
+    service.map(_._1)
 }
