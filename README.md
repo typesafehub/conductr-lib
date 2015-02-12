@@ -98,22 +98,45 @@ The service response constitutes a URI that describes its location along with an
 
 #### Static service lookup
 
-Some bundle components cannot proceed with their initialisation unless the service can be located. We encourage you to re-factor these components so that they look up services at the time when they are required, given that services can come and go. However if you are somehow stuck with this style of code then you must block - regard this as a temporary measure though for the reason just stated:
+Some bundle components cannot proceed with their initialisation unless the service can be located. We encourage you to re-factor these components so that they look up services at the time when they are required, given that services can come and go. However if you are somehow stuck with this style of code then you may consider the following blocking code as a temporary measure:
 
 ```scala
-val service = Await.result(LocationService.lookup("/someservice"), someTimeout)
-val uri = service.map { case (uri, _) => uri }.getOrElse {
+val service = Await.result(LocationService.lookup("/someservice"))
+val serviceUri = service.map { case Some(uri, _) => uri }.getOrElse {
   if (Env.isRunByConductR) System.exit(70)
   new URI("http://127.0.0.1:9000")
 }
 ```
 
-With the above scenario the program will always exit when run by ConductR and it cannot locate the service. However for development mode, or a situation where the program is run outside of ConductR, an alternate URI is supplied.
-
-Be warned though: blocking is bad and the above code should be addressed at your earliest convenience. You may want to consider using an Actor for your service as the following psuedo-code illustrates:
+In the above, the program will exit if a service cannot be located at the time the program initializes; unless the program has not been started by ConductR in which case an alternate URI is provided. Instead of blocking you may also consider using an actor:
 
 ```scala
+class MyService extends Actor {
+  import context.dispatcher
+ 
+  override def preStart: Unit =
+    LocationService.lookup("/someservice").map { case (uri, _) => uri }.pipeTo(self)
+ 
+  override def receive: Receive = 
+    initial
+    
+  private def initial: Receive = {
+    case Some(someService: URI) =>
+      // We now have the service
+      
+      context.become(service(someService))
+ 
+    case None =>
+      self ! if (Env.isRunByConductR) PoisonPill else new URI("http://127.0.0.1:9000") 
+  }
+  
+  private def service(someService: URI): Receive = {
+    // Regular actor receive handling goes here given that we have a service URI now.
+  }
+}
 ```
+
+This type of actor is used to handle service processing and should only receive service oriented messages once its dependent service URI is known. This is an improvement on the blocking example provided before, as it will not block. However it still has the requirement that `someservice` must be running at the point of initialisation, and that it continues to run. Neither of these requirements may always be satisfied with a distributed system.
 
 ### StatusService
 
