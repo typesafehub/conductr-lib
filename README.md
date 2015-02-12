@@ -101,7 +101,7 @@ The service response constitutes a URI that describes its location along with an
 Some bundle components cannot proceed with their initialisation unless the service can be located. We encourage you to re-factor these components so that they look up services at the time when they are required, given that services can come and go. However if you are somehow stuck with this style of code then you may consider the following blocking code as a temporary measure:
 
 ```scala
-val service = Await.result(LocationService.lookup("/someservice"))
+val service = Await.result(LocationService.lookup("/someservice"), sometimeout)
 val serviceUri = service.map { case Some(uri, _) => uri }.getOrElse {
   if (Env.isRunByConductR) System.exit(70)
   new URI("http://127.0.0.1:9000")
