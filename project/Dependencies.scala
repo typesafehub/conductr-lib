@@ -13,7 +13,8 @@ object Version {
 }
 
 object Library {
-  val scalaTest       = "org.scalatest"     %% "scalatest"                      % Version.scalaTest
+  val akkaCluster     = "com.typesafe.akka" %% "akka-cluster"                   % Version.akka
   val akkaTestkit     = "com.typesafe.akka" %% "akka-testkit"                   % Version.akka
   val akkaHttpTestkit = "com.typesafe.akka" %% "akka-http-testkit-experimental" % Version.akkaHttp
+  val scalaTest       = "org.scalatest"     %% "scalatest"                      % Version.scalaTest
 }
