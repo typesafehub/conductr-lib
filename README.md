@@ -51,7 +51,7 @@ The `HttpPayload` object may then be queried for elements in the same way as for
 
 When processing the http response you should check for the following http status codes:
 
-* 2xx - success - any 200 series response is a success meaning that ConductR has
+* 2xx - success - any 200 series response is a success meaning that ConductR has successfully acknowledged the startup signal
 * xxx - failure - anything else constitutes an error and you should cause the bundle component to exit
 
 You should also prepare for timing out on a request and exit the bundle component if this occurs.
@@ -92,7 +92,7 @@ If the service you require is not HTTP based then you may use the `LocationServi
 val service = LocationService.lookup("/someservice")
 ```
 
-`service` is typed `Future[Option[URI, Option[FiniteDuration]]` meaning that an optional response will be returned at some time in the future. Supposing that this lookup is made during the initialisation of your program, the service you're looking for may not exist. However calling the same function later on may yield the service. This is because services can come and go.
+`service` is typed `Future[Option[(URI, Option[FiniteDuration])]` meaning that an optional response will be returned at some time in the future. Supposing that this lookup is made during the initialisation of your program, the service you're looking for may not exist. However calling the same function later on may yield the service. This is because services can come and go.
 
 The service response constitutes a URI that describes its location along with an optional duration indicating how long the URI may be cached for. A value of `None` indicates that the service should not be cached.
 
@@ -115,23 +115,23 @@ In the above, the program will exit if a service cannot be located at the time t
 ```scala
 class MyService extends Actor {
   import context.dispatcher
- 
+
   override def preStart: Unit =
     LocationService.lookup("/someservice").map(LocationService.toUri).pipeTo(self)
- 
-  override def receive: Receive = 
+
+  override def receive: Receive =
     initial
-    
+
   private def initial: Receive = {
     case Some(someService: URI) =>
       // We now have the service
-      
+
       context.become(service(someService))
- 
+
     case None =>
       self ! (if (Env.isRunByConductR) PoisonPill else Some(new URI("http://127.0.0.1:9000")))
   }
-  
+
   private def service(someService: URI): Receive = {
     // Regular actor receive handling goes here given that we have a service URI now.
   }
