@@ -19,13 +19,13 @@ def groupByFirst(tests: Seq[TestDefinition]) =
   tests
     .groupBy(t => if (t.name.endsWith("SpecWithEnv")) "WithEnv" else "WithoutEnv")
     .map {
-      case ("WithEnv", tests) =>
-        new Group("WithEnv", tests, SubProcess(ForkOptions(envVars = Map(
+      case ("WithEnv", t) =>
+        new Group("WithEnv", t, SubProcess(ForkOptions(envVars = Map(
           "BUNDLE_ID" -> "0BADF00DDEADBEEF",
           "CONDUCTR_STATUS" -> "http://127.0.0.1:50007",
           "SERVICE_LOCATOR" -> "http://127.0.0.1:50008/services"))))
-      case ("WithoutEnv", tests) =>
-        new Group("WithoutEnv", tests, SubProcess(ForkOptions()))
+      case ("WithoutEnv", t) =>
+        new Group("WithoutEnv", t, SubProcess(ForkOptions()))
     }
     .toSeq
 
