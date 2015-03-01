@@ -72,9 +72,7 @@ Please read the section on `conductr-bundle-lib` for an introduction to these se
 The LocationService looks up service names and processes HTTP's `307` "temporary redirect" responses to return the location of the resolved service (or a `404` if one cannot be found). Many HTTP clients allow the following of redirects, particularly when either of the `HEAD` or `GET` methods are used (other methods may be considered insecure by default). Therefore if the service you are locating is an HTTP one then using a regular HTTP client should require no further work. Here is an example of using the [Dispatch](http://dispatch.databinder.net/Dispatch.html) library:
 
 ```scala
-val svc = LocationService.createLookupPayload("/someservice")
-  .map(_.getUrl.toString)
-  .getOrElse("http://127.0.0.1:9000/someservice")
+val svc = LocationService.lookupUrlOrElse("/someservice", "http://127.0.0.1:9000/someservice")
 val svcResp = Http.configure(_.setFollowRedirects(true))(url(svc).OK)
 ```
 
