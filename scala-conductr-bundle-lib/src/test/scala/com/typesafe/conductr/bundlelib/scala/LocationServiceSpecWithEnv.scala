@@ -22,7 +22,7 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
 
   "The LocationService functionality in the library" should {
     "return the lookup url" in {
-      LocationService.lookupUrlOrElse("/whatever", "http://127.0.0.1/whatever") shouldBe "http://127.0.0.1:50008/services/whatever"
+      LocationService.getLookupUrl("/whatever", "http://127.0.0.1/whatever") shouldBe "http://127.0.0.1:50008/services/whatever"
     }
 
     "be able to look up a named service" in {

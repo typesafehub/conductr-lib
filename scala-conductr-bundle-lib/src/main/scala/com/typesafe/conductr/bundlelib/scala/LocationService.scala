@@ -43,8 +43,8 @@ object LocationService {
    * A convenience function for [[createLookupPayload]] where the payload url is created when this bundle component
    * is running in the context of ConductR. If it is not then a fallbackUrl is returned.
    */
-  def lookupUrlOrElse(serviceName: String, fallbackUrl: String): String =
-    JavaLocationService.lookupUrlOrElse(serviceName, fallbackUrl)
+  def getLookupUrl(serviceName: String, fallbackUrl: String): String =
+    JavaLocationService.getLookupUrl(serviceName, fallbackUrl)
 
   /**
    * Look up a service by service name. Service names correspond to those declared in a Bundle

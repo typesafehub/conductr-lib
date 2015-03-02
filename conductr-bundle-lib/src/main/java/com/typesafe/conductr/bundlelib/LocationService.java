@@ -46,7 +46,7 @@ public class LocationService {
      * @param fallbackUrl The url to use when not running with ConductR
      * @throws MalformedURLException
      */
-    public static String lookupUrlOrElse(String serviceName, String fallbackUrl) throws MalformedURLException {
+    public static String getLookupUrl(String serviceName, String fallbackUrl) throws MalformedURLException {
         HttpPayload payload = createLookupPayload(serviceName);
         if (payload == null) {
             return fallbackUrl;

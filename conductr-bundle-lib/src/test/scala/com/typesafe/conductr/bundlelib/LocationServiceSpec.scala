@@ -16,7 +16,7 @@ class LocationServiceSpec extends UnitTest {
     }
 
     "return the fallback when running in development mode" in {
-      LocationService.lookupUrlOrElse("/whatever", "http://127.0.0.1/whatever") shouldBe "http://127.0.0.1/whatever"
+      LocationService.getLookupUrl("/whatever", "http://127.0.0.1/whatever") shouldBe "http://127.0.0.1/whatever"
     }
   }
 }
