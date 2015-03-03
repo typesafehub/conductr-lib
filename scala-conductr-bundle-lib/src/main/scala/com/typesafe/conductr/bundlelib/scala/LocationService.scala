@@ -7,7 +7,7 @@
 package com.typesafe.conductr.bundlelib.scala
 
 import java.io.IOException
-import java.net.URI
+import java.net.{ URL, URI }
 import java.util.concurrent.TimeUnit
 
 import com.typesafe.conductr.bundlelib.{ HttpPayload, LocationService => JavaLocationService }
@@ -38,6 +38,13 @@ object LocationService {
    */
   def createLookupPayload(serviceName: String): Option[HttpPayload] =
     Option(JavaLocationService.createLookupPayload(serviceName))
+
+  /**
+   * A convenience function for [[createLookupPayload]] where the payload url is created when this bundle component
+   * is running in the context of ConductR. If it is not then a fallbackUrl is returned.
+   */
+  def getLookupUrl(serviceName: String, fallbackUrl: String): String =
+    JavaLocationService.getLookupUrl(serviceName, fallbackUrl)
 
   /**
    * Look up a service by service name. Service names correspond to those declared in a Bundle

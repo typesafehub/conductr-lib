@@ -6,6 +6,7 @@
 package com.typesafe.conductr.bundlelib;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import static com.typesafe.conductr.bundlelib.Env.*;
 
@@ -29,16 +30,32 @@ public class LocationService {
      * @param serviceName The name of the service
      * @return An HttpPayload describing how to do the service lookup or null if
      * this program is not running within ConductR
-     * @throws IOException
+     * @throws MalformedURLException
      */
-    public static HttpPayload createLookupPayload(String serviceName) throws IOException {
+    public static HttpPayload createLookupPayload(String serviceName) throws MalformedURLException {
         if (isRunByConductR())
             return createLookupPayload(SERVICE_LOCATOR, serviceName);
         else
             return null;
     }
 
-    static HttpPayload createLookupPayload(String serviceLocator, String serviceName) throws IOException {
+    /**
+     * A convenience function for [[createLookupPayload]] where the payload url is created when this bundle component
+     * is running in the context of ConductR. If it is not then a fallbackUrl is returned.
+     * @param serviceName The name of the service
+     * @param fallbackUrl The url to use when not running with ConductR
+     * @throws MalformedURLException
+     */
+    public static String getLookupUrl(String serviceName, String fallbackUrl) throws MalformedURLException {
+        HttpPayload payload = createLookupPayload(serviceName);
+        if (payload == null) {
+            return fallbackUrl;
+        } else {
+            return payload.getUrl().toString();
+        }
+    }
+
+    static HttpPayload createLookupPayload(String serviceLocator, String serviceName) throws MalformedURLException {
         URL locatorUrl = new URL(serviceLocator + serviceName);
         return new HttpPayload(locatorUrl);
     }

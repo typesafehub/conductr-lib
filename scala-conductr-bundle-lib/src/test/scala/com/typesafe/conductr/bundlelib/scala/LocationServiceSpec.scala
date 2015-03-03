@@ -16,5 +16,9 @@ class LocationServiceSpec extends AkkaUnitTest("StatusServiceSpec", "akka.loglev
       import system.dispatcher
       Await.result(LocationService.lookup("/whatever"), timeout.duration) shouldBe None
     }
+
+    "return the fallback url when running in development mode" in {
+      LocationService.getLookupUrl("/whatever", "http://127.0.0.1/whatever") shouldBe "http://127.0.0.1/whatever"
+    }
   }
 }
