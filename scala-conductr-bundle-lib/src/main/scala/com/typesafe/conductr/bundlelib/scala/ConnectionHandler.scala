@@ -11,44 +11,64 @@ import java.net.HttpURLConnection
 
 import com.typesafe.conductr.bundlelib.HttpPayload
 
-import scala.concurrent.{ blocking, Future, ExecutionContext }
+import scala.concurrent._
 import scala.util.{ Failure, Success, Try }
+
+object ConnectionContext {
+  def apply(executionContext: ExecutionContext): ConnectionContext =
+    new ConnectionContext()(executionContext)
+}
+
+/**
+ * When performing pure Scala connections, this is the connection context to use. Pass in the
+ * execution context to be used for blocking IO.
+ */
+class ConnectionContext()(implicit val executionContext: ExecutionContext) extends AbstractConnectionContext
 
 /**
  * Handles the JDK HttpURLConnection requests and responses
  */
-private[scala] object ConnectionHandler {
-  private final val UserAgent = "TypesafeConductRBundleLib"
+private[bundlelib] class ConnectionHandler extends AbstractConnectionHandler {
+
+  override protected type CC = ConnectionContext
 
   /**
    * Make a request to a ConductR service given a payload. Returns a future of an option. If there is some response
    * then a Some() will convey the result, otherwise None indicates that this program is not running in the context
    * of ConductR.
    */
-  def withConnectedRequest[T](
-    payload: Option[HttpPayload])(thunk: HttpURLConnection => Option[T])(implicit ec: ExecutionContext): Future[Option[T]] =
+  override def withConnectedRequest[T](
+    payload: Option[HttpPayload])(thunk: (Int, Map[String, Option[String]]) => Option[T])(implicit cc: CC): Future[Option[T]] = {
 
+    import cc.executionContext
     payload.fold[Future[Option[T]]](Future.successful(None)) { p =>
       Future {
         Try(p.getUrl.openConnection) match {
-          case Success(con: HttpURLConnection) =>
-            con.setRequestMethod(p.getRequestMethod)
-            con.setInstanceFollowRedirects(p.getFollowRedirects)
-            con.setRequestProperty("User-Agent", UserAgent)
+          case Success(connection: HttpURLConnection) =>
+            connection.setRequestMethod(p.getRequestMethod)
+            connection.setInstanceFollowRedirects(p.getFollowRedirects)
+            connection.setRequestProperty("User-Agent", UserAgent)
             blocking {
-              con.connect()
+              connection.connect()
+              import scala.collection.JavaConverters._
               try {
-                thunk(con)
+                thunk(
+                  connection.getResponseCode,
+                  connection.getHeaderFields.asScala.foldLeft(Map.empty[String, Option[String]]) {
+                    case (m, (k, v)) => m.updated(k, v.asScala.lastOption)
+                  })
+
               } finally {
-                con.disconnect()
+                connection.disconnect()
               }
             }
-          case Success(con) =>
-            throw new IOException(s"Unexpected type of connection $con for $p")
+          case Success(connection) =>
+            throw new IOException(s"Unexpected type of connection $connection for $p")
           case Failure(e) =>
             throw new IOException(s"Connection failed for $p", e)
         }
       }
     }
+  }
 
 }

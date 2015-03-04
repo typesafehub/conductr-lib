@@ -13,7 +13,7 @@ class LocationServiceSpec extends AkkaUnitTest("StatusServiceSpec", "akka.loglev
 
   "The LocationService functionality in the library" should {
     "return None when running in development mode" in {
-      import system.dispatcher
+      implicit val cc = ConnectionContext(system.dispatcher)
       Await.result(LocationService.lookup("/whatever"), timeout.duration) shouldBe None
     }
 

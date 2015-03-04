@@ -4,9 +4,9 @@
 
 This project provides a number of libraries to facilitate ConductR's status service and its service lookup service. The libraries are intended to be delivered by the Typesafe Reactive Platform (Typesafe RP) and are structured as follows:
 
-* "com.typesafe.conductr" % "conductr-bundle-lib" % "0.3.0"
-* "com.typesafe.conductr" %% "scala-conductr-bundle-lib" % "0.3.0"
-* akka-conductr-bundle-lib
+* `"com.typesafe.conductr" %  "conductr-bundle-lib"       % "0.3.0"`
+* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib" % "0.3.0"`
+* `"com.typesafe.conductr" %% "akka-conductr-bundle-lib"  % "0.3.0"`
 * play-conductr-bundle-lib
 
 ## conductr-bundle-lib
@@ -15,8 +15,8 @@ This library provides a base level of functionality mainly formed around constru
 
 Two services are covered by this library:
 
-* LocationService
-* StatusService
+* `com.typesafe.conductr.bundlelib.LocationService`
+* `com.typesafe.conductr.bundlelib.StatusService`
 
 ### Location Service
 
@@ -62,8 +62,8 @@ This library provides a reactive API using only Scala and Java types. There are 
 
 As with `conductr-bundle-lib` there are two services:
 
-* LocationService
-* StatusService
+* `com.typesafe.conductr.bundlelib.scala.LocationService`
+* `com.typesafe.conductr.bundlelib.scala.StatusService`
 
 Please read the section on `conductr-bundle-lib` for an introduction to these services.
 
@@ -85,8 +85,15 @@ When using HTTP clients, consider having the client cache responses. ConductR wi
 If the service you require is not HTTP based then you may use the `LocationService.lookup` function. The following code illustrates how a service may be located in place of creating and dispatching your own payload:
 
 ```scala
-// This will require an implicit ExecutionContext
-// as "service" is returned as a Future.
+// This will require an implicit ConnectionContext to
+// hold a Scala ExecutionContext. There are different
+// ConnectionContexts depending on which flavor of the
+// library is being used. For the Scala falvor, an
+// ExecutionContext is composed. The ExecutionContext
+// is needed as "service" is returned as a Future.
+import scala.concurrent.ExecutionContext.Implicits.global
+
+implicit val cc = ConnectionContext(global)
 val service = LocationService.lookup("/someservice")
 ```
 
@@ -112,7 +119,8 @@ In the above, the program will exit if a service cannot be located at the time t
 
 ```scala
 class MyService extends Actor {
-  import context.dispatcher
+
+  private implicit val cc = ConnectionContext(context.dispatcher)
 
   override def preStart: Unit =
     LocationService.lookup("/someservice").map(LocationService.toUri).pipeTo(self)
@@ -143,11 +151,51 @@ This type of actor is used to handle service processing and should only receive 
 The following code illustrates how your bundle component should register its initial health with ConductR. Calling this function is to be done in place of creating and dispatching your own payload:
 
 ```scala
-// This will require an implicit ExecutionContext
-// as the signalling is performed asynchronously.
 StatusService.signalStartedOrExit()
 ```
 
 In general, the return value of `signalStartedOrExit` is not used and your program proceeds. If ConductR fails to reply, or replies with an error status then this bundle component will exit.
 
 In case you are interested, the function returns a `Future[Option[Unit]]` where a future `Some(())` indicates that ConductR has successfully acknowledged the startup signal. A future of `None` indicates that the bundle has not been started by ConductR.
+
+## akka-conductr-bundle-lib
+
+This library provides a reactive API using [Akka Http](http://akka.io/docs/) and should be used when you are using Akka. The library depends on `scala-conductr-bundle-lib` and can be used for both Java and Scala.
+
+As with `conductr-bundle-lib` there are two services:
+
+* `com.typesafe.conductr.bundlelib.akka.LocationService`
+* `com.typesafe.conductr.bundlelib.akka.StatusService`
+
+Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle-lib` for an introduction to these services. Other than the `import`s for the types, the only difference in terms of API are usage is how a `ConnectionContext` is established. A `ConnectionContext` for Akka requires an `ActorSystem` at a minimum e.g.:
+
+```scala
+implicit val cc = ConnectionContext(system)
+```
+
+There is also a lower level method where the `HttpExt` and `ActorFlowMaterializer` are passed in:
+
+```scala
+// Establish the http extension and flow materializer in
+// consideration of your needs.
+val httpExt = Http(system)
+val actorFlowMaterializer = ActorFlowMaterializer.create(system)
+
+implicit val cc = ConnectionContext(httpExt, actorFlowMaterializer)
+```
+
+### Java
+
+The following example illustrates how status is signalled using the Akka Java API:
+
+```java
+ConnectionContext cc = ConnectionContext.create(system);
+StatusService.getInstance().signalStartedWithContext(cc);
+```
+
+Similarly here is a service lookup:
+
+```java
+ConnectionContext cc = ConnectionContext.create(system);
+LocationService.getInstance().lookupWithContext("/whatever", cc)
+```

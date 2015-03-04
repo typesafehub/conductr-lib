@@ -9,12 +9,15 @@ object Version {
   val scala     = "2.11.5"
   val scalaTest = "2.2.3"
   val akka      = "2.3.9"
-  val akkaHttp  = "1.0-M2"
+  val akkaHttp  = "1.0-M4"
+  val junit     = "4.12"
 }
 
 object Library {
   val akkaCluster     = "com.typesafe.akka" %% "akka-cluster"                   % Version.akka
+  val akkaHttp        = "com.typesafe.akka" %% "akka-http-experimental"         % Version.akkaHttp
   val akkaTestkit     = "com.typesafe.akka" %% "akka-testkit"                   % Version.akka
   val akkaHttpTestkit = "com.typesafe.akka" %% "akka-http-testkit-experimental" % Version.akkaHttp
+  val junit           = "junit"             %  "junit"                          % Version.junit
   val scalaTest       = "org.scalatest"     %% "scalatest"                      % Version.scalaTest
 }
