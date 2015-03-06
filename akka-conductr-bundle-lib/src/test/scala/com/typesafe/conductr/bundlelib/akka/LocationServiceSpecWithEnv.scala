@@ -4,30 +4,28 @@
  * or by any means without the express written permission of Typesafe, Inc.
  */
 
-package com.typesafe.conductr.bundlelib.scala
+package com.typesafe.conductr.bundlelib.akka
+
+import java.net.{ InetSocketAddress, URI, URL }
 
 import akka.http.Http
-import akka.http.model.headers.{ CacheDirectives, `Cache-Control`, Location }
-import akka.http.model.{ HttpEntity, Uri, HttpResponse, StatusCodes }
+import akka.http.model.headers.{ CacheDirectives, Location, `Cache-Control` }
+import akka.http.model.{ HttpEntity, HttpResponse, StatusCodes, Uri }
 import akka.http.server.Directives._
 import akka.stream.ActorFlowMaterializer
 import akka.testkit.TestProbe
-import com.typesafe.conductr._
-import com.typesafe.conductr.AkkaUnitTest
-import java.net.{ URI, URL, InetSocketAddress }
+import com.typesafe.conductr.bundlelib.scala.Env
+import com.typesafe.conductr.{ AkkaUnitTest, _ }
+
 import scala.concurrent.Await
-import scala.concurrent.duration._
 import scala.util.{ Failure, Success }
 
 class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEnv", "akka.loglevel = INFO") {
 
   "The LocationService functionality in the library" should {
-    "return the lookup url" in {
-      LocationService.getLookupUrl("/whatever", "http://127.0.0.1/whatever") shouldBe "http://127.0.0.1:50008/services/whatever"
-    }
 
     "be able to look up a named service" in {
-      implicit val cc = ConnectionContext(system.dispatcher)
+      implicit val cc = ConnectionContext(system)
       val serviceUri = "http://service_interface:4711/known"
       withServerWithKnownService(serviceUri) {
         val service = LocationService.lookup("/known")
@@ -35,37 +33,11 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
       }
     }
 
-    "be able to look up a named service and return maxAge" in {
-      implicit val cc = ConnectionContext(system.dispatcher)
-      val serviceUri = "http://service_interface:4711/known"
-      withServerWithKnownService(serviceUri, Some(10)) {
-        val service = LocationService.lookup("/known")
-        Await.result(service, timeout.duration) should be(Some(new URI(serviceUri) -> Some(10.seconds)))
-      }
-    }
-
-    "get back None for an unknown service" in {
-      implicit val cc = ConnectionContext(system.dispatcher)
-      val serviceUrl = "http://service_interface:4711/known"
-      withServerWithKnownService(serviceUrl) {
-        val service = LocationService.lookup("/unknown")
-        Await.result(service, timeout.duration) shouldBe None
-      }
-    }
-
-    "Conveniently map to an Option[URI]" in {
-      implicit val cc = ConnectionContext(system.dispatcher)
-      val serviceUri = "http://service_interface:4711/known"
-      withServerWithKnownService(serviceUri, Some(10)) {
-        val service = LocationService.lookup("/known").map(LocationService.toUri)(system.dispatcher)
-        Await.result(service, timeout.duration) should be(Some(new URI(serviceUri)))
-      }
-    }
   }
 
   def withServerWithKnownService(serviceUrl: String, maxAge: Option[Int] = None)(thunk: => Unit): Unit = {
     import system.dispatcher
-    implicit val materializer = ActorFlowMaterializer()
+    implicit val materializer = ActorFlowMaterializer.create(system)
 
     val probe = new TestProbe(system)
 

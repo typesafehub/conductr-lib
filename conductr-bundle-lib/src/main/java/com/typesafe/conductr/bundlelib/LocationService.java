@@ -5,7 +5,6 @@
 
 package com.typesafe.conductr.bundlelib;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import static com.typesafe.conductr.bundlelib.Env.*;

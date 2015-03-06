@@ -8,8 +8,8 @@ import Tests._
 name := "scala-conductr-bundle-lib"
 
 libraryDependencies ++= List(
-  Library.akkaTestkit     % "test",
   Library.akkaHttpTestkit % "test",
+  Library.akkaTestkit     % "test",
   Library.scalaTest       % "test"
 )
 
