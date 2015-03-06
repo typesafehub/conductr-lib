@@ -36,10 +36,6 @@ object Build extends AutoPlugin {
         "-target:jvm-1.6",
         "-encoding", "UTF-8"
       ),
-      javacOptions ++= List(
-        "-source", "1.6",
-        "-target", "1.6"
-      ),
       // Scalariform settings
       ScalariformKeys.preferences := ScalariformKeys.preferences.value
         .setPreference(AlignSingleLineCaseStatements, true)
