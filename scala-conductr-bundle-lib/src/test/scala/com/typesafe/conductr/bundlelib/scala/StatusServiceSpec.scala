@@ -14,6 +14,8 @@ class StatusServiceSpec extends AkkaUnitTest("StatusServiceSpec", "akka.loglevel
   "The StatusService functionality in the library" should {
     "return None when running in development mode" in {
       implicit val cc = ConnectionContext(system.dispatcher)
+
+      Await.result(StatusService.signalStartedOrExit(), timeout.duration) shouldBe None
       Await.result(StatusService.signalStarted(), timeout.duration) shouldBe None
     }
   }

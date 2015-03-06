@@ -10,7 +10,6 @@ import java.io.IOException
 
 import com.typesafe.conductr.bundlelib.{ StatusService => JavaStatusService, HttpPayload }
 
-import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
 /**
@@ -40,10 +39,7 @@ abstract class AbstractStatusService(handler: AbstractConnectionHandler) {
    * The returned future will complete successfully if the ConductR acknowledges the start signal.
    * A Future of None will be returned if this program is not running in the context of ConductR.
    */
-  def signalStartedOrExit()(implicit cc: CC): Future[Option[Unit]] =
-    signalStarted().recover {
-      case _: Throwable => Some(System.exit(70))
-    }(Implicits.global)
+  def signalStartedOrExit()(implicit cc: CC): Future[Option[Unit]]
 
   /**
    * Signal that the bundle has started or throw IOException if it fails. If the bundle fails to communicate that
@@ -53,6 +49,10 @@ abstract class AbstractStatusService(handler: AbstractConnectionHandler) {
    * A Future of None will be returned if this program is not running in the context of ConductR.
    */
   def signalStarted()(implicit cc: CC): Future[Option[Unit]]
+
+  protected def handleSignalOrExit: PartialFunction[Throwable, Option[Unit]] = {
+    case _: Throwable => Some(System.exit(70))
+  }
 
   protected def handleSignal(responseCode: Int, headers: Map[String, Option[String]]): Option[Unit] = {
     if (responseCode < 200 || responseCode >= 300)

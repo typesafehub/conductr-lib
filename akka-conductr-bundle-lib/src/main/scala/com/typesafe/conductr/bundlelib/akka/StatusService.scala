@@ -10,6 +10,7 @@ import com.typesafe.conductr.bundlelib.scala.AbstractStatusService
 
 import akka.japi.{ Option => JOption }
 
+import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
 object StatusService extends StatusService(new ConnectionHandler) {
@@ -25,8 +26,17 @@ class StatusService(handler: ConnectionHandler) extends AbstractStatusService(ha
 
   override protected type CC = ConnectionContext
 
+  override def signalStartedOrExit()(implicit cc: CC): Future[Option[Unit]] =
+    signalStarted().recover(handleSignalOrExit)(Implicits.global)
+
   override def signalStarted()(implicit cc: CC): Future[Option[Unit]] =
     handler.withConnectedRequest(createSignalStartedPayload)(handleSignal)
+
+  /** JAVA API */
+  def signalStartedOrExitWithContext(cc: CC): Future[JOption[Unit]] = {
+    import scala.concurrent.ExecutionContext.Implicits.global
+    signalStartedOrExit()(cc).map(JOption.fromScalaOption)
+  }
 
   /** JAVA API */
   def signalStartedWithContext(cc: CC): Future[JOption[Unit]] = {
