@@ -17,13 +17,14 @@ import java.net.{ InetSocketAddress, URL }
 import scala.concurrent.Await
 import scala.util.{ Failure, Success }
 
+import com.typesafe.conductr.bundlelib.scala.ConnectionContext.Implicits.global
+
 class StatusServiceSpecWithEnv extends AkkaUnitTest("StatusServiceSpecWithEnv", "akka.loglevel = INFO") {
 
   "The StatusService functionality in the library" should {
     "be able to call the right URL to signal that it is up" in {
 
       import system.dispatcher
-      implicit val cc = ConnectionContext(system.dispatcher)
       implicit val materializer = ActorFlowMaterializer()
 
       val probe = new TestProbe(system)

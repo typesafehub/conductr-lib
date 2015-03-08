@@ -17,6 +17,15 @@ import scala.util.{ Failure, Success, Try }
 object ConnectionContext {
   def apply(executionContext: ExecutionContext): ConnectionContext =
     new ConnectionContext()(executionContext)
+
+  object Implicits {
+    /**
+     * An implicit global ConnectionContext.
+     * Import global when you want to provide the global ConnectionContext implicitly.
+     * This global ConnectionContext uses Scala's global execution context.
+     */
+    implicit val global = ConnectionContext(ExecutionContext.Implicits.global)
+  }
 }
 
 /**

@@ -8,10 +8,10 @@ package com.typesafe.conductr.bundlelib.akka
 
 import java.net.{ InetSocketAddress, URL }
 
+import akka.actor.ActorRefFactory
 import akka.http.Http
 import akka.http.model.StatusCodes
 import akka.http.server.Directives._
-import akka.stream.ActorFlowMaterializer
 import akka.testkit.TestProbe
 import com.typesafe.conductr.bundlelib.scala.Env
 import com.typesafe.conductr.{ AkkaUnitTest, _ }
@@ -24,9 +24,9 @@ class StatusServiceSpecWithEnv extends AkkaUnitTest("StatusServiceSpecWithEnv", 
   "The StatusService functionality in the library" should {
     "be able to call the right URL to signal that it is up" in {
 
-      implicit val cc = ConnectionContext(system)
-
       val probe = new TestProbe(system)
+
+      implicit val cc = ConnectionContext()
 
       import system.dispatcher
       import cc.actorFlowMaterializer

@@ -9,11 +9,12 @@ package com.typesafe.conductr.bundlelib.scala
 import com.typesafe.conductr.AkkaUnitTest
 import scala.concurrent.Await
 
-class LocationServiceSpec extends AkkaUnitTest("StatusServiceSpec", "akka.loglevel = INFO") {
+import com.typesafe.conductr.bundlelib.scala.ConnectionContext.Implicits.global
+
+class LocationServiceSpec extends AkkaUnitTest {
 
   "The LocationService functionality in the library" should {
     "return None when running in development mode" in {
-      implicit val cc = ConnectionContext(system.dispatcher)
       Await.result(LocationService.lookup("/whatever"), timeout.duration) shouldBe None
     }
 

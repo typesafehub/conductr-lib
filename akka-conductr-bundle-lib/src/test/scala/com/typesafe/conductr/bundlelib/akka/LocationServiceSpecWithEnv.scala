@@ -8,6 +8,7 @@ package com.typesafe.conductr.bundlelib.akka
 
 import java.net.{ InetSocketAddress, URI, URL }
 
+import akka.actor._
 import akka.http.Http
 import akka.http.model.headers.{ CacheDirectives, Location, `Cache-Control` }
 import akka.http.model.{ HttpEntity, HttpResponse, StatusCodes, Uri }
@@ -25,14 +26,45 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
   "The LocationService functionality in the library" should {
 
     "be able to look up a named service" in {
-      implicit val cc = ConnectionContext(system)
+      implicit val cc = ConnectionContext()
+
       val serviceUri = "http://service_interface:4711/known"
       withServerWithKnownService(serviceUri) {
+
         val service = LocationService.lookup("/known")
         Await.result(service, timeout.duration) shouldBe Some(new URI(serviceUri) -> None)
       }
     }
 
+    "be able to look up a named service within an actor" in {
+      import akka.pattern.pipe
+
+      class MyService(observer: ActorRef) extends Actor with ImplicitConnectionContext {
+
+        import context.dispatcher
+
+        override def preStart(): Unit =
+          LocationService.lookup("/known").map(LocationService.toUri).pipeTo(self)
+
+        override def receive: Receive = {
+          case Some(someService: URI) =>
+            // We now have the service
+
+            observer ! someService.toString
+
+          case None =>
+            self ! (if (Env.isRunByConductR) PoisonPill else Some(new URI("http://127.0.0.1:9000")))
+        }
+      }
+
+      val serviceUri = "http://service_interface:4711/known"
+      withServerWithKnownService(serviceUri) {
+
+        val testProbe = TestProbe()
+        val myService = system.actorOf(Props(new MyService(testProbe.ref)))
+        testProbe.expectMsg(serviceUri)
+      }
+    }
   }
 
   def withServerWithKnownService(serviceUrl: String, maxAge: Option[Int] = None)(thunk: => Unit): Unit = {
