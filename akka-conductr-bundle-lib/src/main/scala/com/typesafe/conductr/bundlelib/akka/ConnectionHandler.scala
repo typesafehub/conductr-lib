@@ -6,7 +6,7 @@
 
 package com.typesafe.conductr.bundlelib.akka
 
-import akka.actor.ActorSystem
+import akka.actor._
 import akka.http.client.RequestBuilding.{ Get, Post, Put, Patch, Delete, Options, Head }
 import akka.http.{ Http, HttpExt }
 import akka.http.model.headers.{ Host, `User-Agent` }
@@ -18,24 +18,55 @@ import com.typesafe.conductr.bundlelib.scala.{ AbstractConnectionHandler, Abstra
 import scala.concurrent.Future
 
 object ConnectionContext {
-  def apply(system: ActorSystem): ConnectionContext =
+  def apply()(implicit context: ActorRefFactory): ConnectionContext = {
+    val system = actorSystemOf(context)
     apply(Http(system), ActorFlowMaterializer.create(system))
+  }
 
   def apply(httpExt: HttpExt, actorFlowMaterializer: ActorFlowMaterializer): ConnectionContext =
     new ConnectionContext(httpExt, actorFlowMaterializer)
 
   /** JAVA API */
-  def create(system: ActorSystem): ConnectionContext =
-    apply(system)
+  def create(context: ActorRefFactory): ConnectionContext =
+    apply()(context)
 
   /** JAVA API */
   def create(httpExt: HttpExt, actorFlowMaterializer: ActorFlowMaterializer): ConnectionContext =
     apply(httpExt, actorFlowMaterializer)
+
+  private def actorSystemOf(context: ActorRefFactory): ActorSystem = {
+    val system = context match {
+      case s: ExtendedActorSystem => s
+      case c: ActorContext        => c.system
+      case null                   => throw new IllegalArgumentException("ActorRefFactory context must be defined")
+      case _ =>
+        throw new IllegalArgumentException(s"ActorRefFactory context must be a ActorSystem or ActorContext, got [${context.getClass.getName}]")
+    }
+    system
+  }
 }
 
 class ConnectionContext(
   val httpExt: HttpExt,
   implicit val actorFlowMaterializer: ActorFlowMaterializer) extends AbstractConnectionContext
+
+/**
+ * Mix this trait into your Actor if you need an implicit
+ * ConnectionContext in scope.
+ *
+ * Subclass may override `httpExt` and `actorFlowMaterializer to define custom
+ * values for the `ConnectionContext`.
+ */
+trait ImplicitConnectionContext { this: Actor =>
+
+  def httpExt: HttpExt =
+    Http(context.system)
+
+  def actorFlowMaterializer: ActorFlowMaterializer =
+    ActorFlowMaterializer.create(context)
+
+  final implicit val cc: ConnectionContext = ConnectionContext(httpExt, actorFlowMaterializer)
+}
 
 /**
  * INTERNAL API

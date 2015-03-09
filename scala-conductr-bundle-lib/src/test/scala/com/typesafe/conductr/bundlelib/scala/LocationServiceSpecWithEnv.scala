@@ -15,11 +15,14 @@ import akka.testkit.TestProbe
 import com.typesafe.conductr._
 import com.typesafe.conductr.AkkaUnitTest
 import java.net.{ URI, URL, InetSocketAddress }
+
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.util.{ Failure, Success }
 
 class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEnv", "akka.loglevel = INFO") {
+
+  import com.typesafe.conductr.bundlelib.scala.ConnectionContext.Implicits.global
 
   "The LocationService functionality in the library" should {
     "return the lookup url" in {
@@ -27,7 +30,6 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
     }
 
     "be able to look up a named service" in {
-      implicit val cc = ConnectionContext(system.dispatcher)
       val serviceUri = "http://service_interface:4711/known"
       withServerWithKnownService(serviceUri) {
         val service = LocationService.lookup("/known")
@@ -36,7 +38,6 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
     }
 
     "be able to look up a named service and return maxAge" in {
-      implicit val cc = ConnectionContext(system.dispatcher)
       val serviceUri = "http://service_interface:4711/known"
       withServerWithKnownService(serviceUri, Some(10)) {
         val service = LocationService.lookup("/known")
@@ -45,7 +46,6 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
     }
 
     "get back None for an unknown service" in {
-      implicit val cc = ConnectionContext(system.dispatcher)
       val serviceUrl = "http://service_interface:4711/known"
       withServerWithKnownService(serviceUrl) {
         val service = LocationService.lookup("/unknown")
@@ -54,7 +54,6 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
     }
 
     "Conveniently map to an Option[URI]" in {
-      implicit val cc = ConnectionContext(system.dispatcher)
       val serviceUri = "http://service_interface:4711/known"
       withServerWithKnownService(serviceUri, Some(10)) {
         val service = LocationService.lookup("/known").map(LocationService.toUri)(system.dispatcher)

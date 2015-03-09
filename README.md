@@ -88,12 +88,13 @@ If the service you require is not HTTP based then you may use the `LocationServi
 // This will require an implicit ConnectionContext to
 // hold a Scala ExecutionContext. There are different
 // ConnectionContexts depending on which flavor of the
-// library is being used. For the Scala falvor, an
+// library is being used. For the Scala flavor, a Scala
 // ExecutionContext is composed. The ExecutionContext
 // is needed as "service" is returned as a Future.
-import scala.concurrent.ExecutionContext.Implicits.global
+// For convenience, we provide a global ConnectionContext
+// that may be imported.
+import com.typesafe.conductr.bundlelib.scala.ConnectionContext.Implicits.global
 
-implicit val cc = ConnectionContext(global)
 val service = LocationService.lookup("/someservice")
 ```
 
@@ -115,36 +116,7 @@ val serviceUri = resultUri.getOrElse {
 }
 ```
 
-In the above, the program will exit if a service cannot be located at the time the program initializes; unless the program has not been started by ConductR in which case an alternate URI is provided. Instead of blocking you may also consider using an actor:
-
-```scala
-class MyService extends Actor {
-
-  private implicit val cc = ConnectionContext(context.dispatcher)
-
-  override def preStart: Unit =
-    LocationService.lookup("/someservice").map(LocationService.toUri).pipeTo(self)
-
-  override def receive: Receive =
-    initial
-
-  private def initial: Receive = {
-    case Some(someService: URI) =>
-      // We now have the service
-
-      context.become(service(someService))
-
-    case None =>
-      self ! (if (Env.isRunByConductR) PoisonPill else Some(new URI("http://127.0.0.1:9000")))
-  }
-
-  private def service(someService: URI): Receive = {
-    // Regular actor receive handling goes here given that we have a service URI now.
-  }
-}
-```
-
-This type of actor is used to handle service processing and should only receive service oriented messages once its dependent service URI is known. This is an improvement on the blocking example provided before, as it will not block. However it still has the requirement that `someservice` must be running at the point of initialisation, and that it continues to run. Neither of these requirements may always be satisfied with a distributed system.
+In the above, the program will exit if a service cannot be located at the time the program initializes; unless the program has not been started by ConductR in which case an alternate URI is provided.
 
 ### StatusService
 
@@ -167,10 +139,10 @@ As with `conductr-bundle-lib` there are two services:
 * `com.typesafe.conductr.bundlelib.akka.LocationService`
 * `com.typesafe.conductr.bundlelib.akka.StatusService`
 
-Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle-lib` for an introduction to these services. Other than the `import`s for the types, the only difference in terms of API are usage is how a `ConnectionContext` is established. A `ConnectionContext` for Akka requires an `ActorSystem` at a minimum e.g.:
+Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle-lib` for an introduction to these services. Other than the `import`s for the types, the only difference in terms of API are usage is how a `ConnectionContext` is established. A `ConnectionContext` for Akka requires an implicit `ActorSystem` or `ActorContext` at a minimum e.g.:
 
 ```scala
-implicit val cc = ConnectionContext(system)
+ implicit val cc = ConnectionContext()
 ```
 
 There is also a lower level method where the `HttpExt` and `ActorFlowMaterializer` are passed in:
@@ -183,6 +155,43 @@ val actorFlowMaterializer = ActorFlowMaterializer.create(system)
 
 implicit val cc = ConnectionContext(httpExt, actorFlowMaterializer)
 ```
+
+When in the context of an actor, a convenient `ImplicitConnectionContext` trait may be mixed in to establish the `ConnectionContext`. The next section illustrates this in its sample `MyService` actor.
+
+### Static Service Lookup
+
+As a reminder, some bundle components cannot proceed with their initialisation unless the service can be located. We encourage you to re-factor these components so that they look up services at the time when they are required, given that services can come and go. That said, here is a non-blocking improvement on the example provided for the `scala-conductr-bundle-lib`:
+
+
+```scala
+class MyService extends Actor with ImplicitConnectionContext {
+
+  import context.dispatcher
+
+  override def preStart(): Unit =
+    LocationService.lookup("/someservice").map(LocationService.toUri).pipeTo(self)
+
+  override def receive: Receive =
+    initial
+
+  private def initial: Receive = {
+    case Some(someService: URI) =>
+      // We now have the service
+
+      context.become(service(someService))
+
+    case None =>
+      self ! (if (Env.isRunByConductR) PoisonPill else Some(new URI("http://127.0.0.1:9000")))
+  }
+
+  private def service(someService: URI): Receive = {
+    // Regular actor receive handling goes here given that we have a service URI now.
+    ...
+  }
+}
+```
+
+This type of actor is used to handle service processing and should only receive service oriented messages once its dependent service URI is known. This is an improvement on the blocking example provided before, as it will not block. However it still has the requirement that `someservice` must be running at the point of initialisation, and that it continues to run. Neither of these requirements may always be satisfied with a distributed system.
 
 ### Java
 
