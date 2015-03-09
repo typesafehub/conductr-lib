@@ -82,7 +82,7 @@ When using HTTP clients, consider having the client cache responses. ConductR wi
 
 #### Non HTTP service lookups
 
-If the service you require is not HTTP based then you may use the `LocationService.lookup` function. The following code illustrates how a service may be located in place of creating and dispatching your own payload:
+If the service you require is not HTTP based then you may use the `LocationService.lookup` function. The following code illustrates how a service may be located in place of creating and dispatching your own payload. The sample also shows how to use a cache provided specifically for these lookups:
 
 ```scala
 // This will require an implicit ConnectionContext to
@@ -95,12 +95,14 @@ If the service you require is not HTTP based then you may use the `LocationServi
 // that may be imported.
 import com.typesafe.conductr.bundlelib.scala.ConnectionContext.Implicits.global
 
-val service = LocationService.lookup("/someservice")
+val locationCache = LocationCache()
+
+val service = LocationService.lookup("/someservice", locationCache)
 ```
 
-`service` is typed `Future[Option[(URI, Option[FiniteDuration])]` meaning that an optional response will be returned at some time in the future. Supposing that this lookup is made during the initialisation of your program, the service you're looking for may not exist. However calling the same function later on may yield the service. This is because services can come and go.
+`service` is typed `Future[Option[String]]` meaning that an optional URI response will be returned at some time in the future. Supposing that this lookup is made during the initialisation of your program, the service you're looking for may not exist. However calling the same function later on may yield the service. This is because services can come and go.
 
-The service response constitutes a URI that describes its location along with an optional duration indicating how long the URI may be cached for. A value of `None` indicates that the service should not be cached.
+The service response constitutes a URI that describes its location.
 
 #### Static service lookup
 
@@ -108,11 +110,11 @@ Some bundle components cannot proceed with their initialisation unless the servi
 
 ```scala
 val resultUri = Await.result(
-  LocationService.lookup("/someservice").map(LocationService.toUri),
+  LocationService.lookup("/someservice"),
   sometimeout)
 val serviceUri = resultUri.getOrElse {
   if (Env.isRunByConductR) System.exit(70)
-  new URI("http://127.0.0.1:9000")
+  "http://127.0.0.1:9000"
 }
 ```
 
@@ -169,22 +171,22 @@ class MyService extends Actor with ImplicitConnectionContext {
   import context.dispatcher
 
   override def preStart(): Unit =
-    LocationService.lookup("/someservice").map(LocationService.toUri).pipeTo(self)
+    LocationService.lookup("/someservice").pipeTo(self)
 
   override def receive: Receive =
     initial
 
   private def initial: Receive = {
-    case Some(someService: URI) =>
+    case Some(someService: String) =>
       // We now have the service
 
       context.become(service(someService))
 
     case None =>
-      self ! (if (Env.isRunByConductR) PoisonPill else Some(new URI("http://127.0.0.1:9000")))
+      self ! (if (Env.isRunByConductR) PoisonPill else Some("http://127.0.0.1:9000"))
   }
 
-  private def service(someService: URI): Receive = {
+  private def service(someService: String): Receive = {
     // Regular actor receive handling goes here given that we have a service URI now.
     ...
   }

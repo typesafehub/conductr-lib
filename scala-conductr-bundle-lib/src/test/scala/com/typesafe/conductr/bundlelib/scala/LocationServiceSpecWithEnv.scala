@@ -14,10 +14,9 @@ import akka.stream.ActorFlowMaterializer
 import akka.testkit.TestProbe
 import com.typesafe.conductr._
 import com.typesafe.conductr.AkkaUnitTest
-import java.net.{ URI, URL, InetSocketAddress }
+import java.net.{ URL, InetSocketAddress }
 
 import scala.concurrent.Await
-import scala.concurrent.duration._
 import scala.util.{ Failure, Success }
 
 class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEnv", "akka.loglevel = INFO") {
@@ -33,7 +32,16 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
       val serviceUri = "http://service_interface:4711/known"
       withServerWithKnownService(serviceUri) {
         val service = LocationService.lookup("/known")
-        Await.result(service, timeout.duration) shouldBe Some(new URI(serviceUri) -> None)
+        Await.result(service, timeout.duration) shouldBe Some(serviceUri)
+      }
+    }
+
+    "be able to look up a named service using a cache" in {
+      val serviceUri = "http://service_interface:4711/known"
+      withServerWithKnownService(serviceUri) {
+        val cache = LocationCache()
+        val service = LocationService.lookup("/known", cache)
+        Await.result(service, timeout.duration) shouldBe Some(serviceUri)
       }
     }
 
@@ -41,7 +49,7 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
       val serviceUri = "http://service_interface:4711/known"
       withServerWithKnownService(serviceUri, Some(10)) {
         val service = LocationService.lookup("/known")
-        Await.result(service, timeout.duration) should be(Some(new URI(serviceUri) -> Some(10.seconds)))
+        Await.result(service, timeout.duration) shouldBe Some(serviceUri)
       }
     }
 
@@ -50,14 +58,6 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
       withServerWithKnownService(serviceUrl) {
         val service = LocationService.lookup("/unknown")
         Await.result(service, timeout.duration) shouldBe None
-      }
-    }
-
-    "Conveniently map to an Option[URI]" in {
-      val serviceUri = "http://service_interface:4711/known"
-      withServerWithKnownService(serviceUri, Some(10)) {
-        val service = LocationService.lookup("/known").map(LocationService.toUri)(system.dispatcher)
-        Await.result(service, timeout.duration) should be(Some(new URI(serviceUri)))
       }
     }
   }

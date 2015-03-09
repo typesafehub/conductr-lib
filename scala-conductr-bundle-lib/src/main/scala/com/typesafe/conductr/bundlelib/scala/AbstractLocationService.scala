@@ -7,7 +7,6 @@
 package com.typesafe.conductr.bundlelib.scala
 
 import java.io.IOException
-import java.net.URI
 import java.util.concurrent.TimeUnit
 
 import com.typesafe.conductr.bundlelib.{ HttpPayload, LocationService => JavaLocationService }
@@ -19,6 +18,10 @@ import scala.concurrent.duration._
  * A Location Service is used to look up services using the Typesafe ConductR Service Locator.
  */
 abstract class AbstractLocationService(handler: AbstractConnectionHandler) {
+
+  type CacheLike = {
+    def getOrElseUpdate(serviceName: String)(op: => Future[Option[(String, Option[FiniteDuration])]]): Future[Option[String]]
+  }
 
   protected type CC <: AbstractConnectionContext
 
@@ -50,31 +53,32 @@ abstract class AbstractLocationService(handler: AbstractConnectionHandler) {
    * component's endpoint data structure i.e. within a bundle's bundle.conf.
    *
    * Returns some URI representing the service or None if the service is not found or if this
-   * program is not running in the context of ConductR. An optional maxAge duration is also returned
-   * indicating that the value may be cached for by the caller up to this period of time.
+   * program is not running in the context of ConductR.
    */
-  def lookup(serviceName: String)(implicit cc: CC): Future[Option[(URI, Option[FiniteDuration])]]
+  def lookup(serviceName: String)(implicit cc: CC): Future[Option[String]]
 
   /**
-   * A convenience for extracting a uri from a lookup e.g.
-   * {{{
-   *   LocationService.lookup("/someservice").map(LocationService.toUri)
-   * }}}
+   * Look up a service by service name using a cache. Service names correspond to those declared in a Bundle
+   * component's endpoint data structure i.e. within a bundle's bundle.conf.
+   *
+   * Returns some URI representing the service or None if the service is not found or if this
+   * program is not running in the context of ConductR.
    */
-  def toUri(service: Option[(URI, Option[FiniteDuration])]): Option[URI] =
+  def lookup(serviceName: String, cache: CacheLike)(implicit cc: CC): Future[Option[String]]
+
+  protected def toUri(service: Option[(String, Option[FiniteDuration])]): Option[String] =
     service.map(_._1)
 
   private val MaxAgePattern = """.*max-age=(\d+).*""".r
 
-  protected def handleLookup(responseCode: Int, headers: Map[String, Option[String]]): Option[(URI, Option[FiniteDuration])] =
+  protected def handleLookup(responseCode: Int, headers: Map[String, Option[String]]): Option[(String, Option[FiniteDuration])] =
     responseCode match {
       case 307 =>
-        val location = for (Some(location) <- headers.get("Location")) yield {
-          val uri = new URI(location)
+        val locationAndMaxAge = for (Some(location) <- headers.get("Location")) yield {
           val maxAge = for (Some(MaxAgePattern(maxAgeSecs)) <- headers.get("Cache-Control")) yield FiniteDuration(maxAgeSecs.toInt, TimeUnit.SECONDS)
-          uri -> maxAge
+          location -> maxAge
         }
-        location.orElse(throw new IOException("Missing Location header"))
+        locationAndMaxAge.orElse(throw new IOException("Missing Location header"))
       case 404 =>
         None
       case _ =>

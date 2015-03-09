@@ -6,16 +6,16 @@
 
 package com.typesafe.conductr.bundlelib.akka
 
-import java.net.{ InetSocketAddress, URI, URL }
+import java.net.{ InetSocketAddress, URL }
 
 import akka.actor._
 import akka.http.Http
 import akka.http.model.headers.{ CacheDirectives, Location, `Cache-Control` }
-import akka.http.model.{ HttpEntity, HttpResponse, StatusCodes, Uri }
+import akka.http.model.{ HttpEntity, HttpResponse, StatusCodes }
 import akka.http.server.Directives._
 import akka.stream.ActorFlowMaterializer
 import akka.testkit.TestProbe
-import com.typesafe.conductr.bundlelib.scala.Env
+import com.typesafe.conductr.bundlelib.scala.{ LocationCache, Env }
 import com.typesafe.conductr.{ AkkaUnitTest, _ }
 
 import scala.concurrent.Await
@@ -32,7 +32,19 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
       withServerWithKnownService(serviceUri) {
 
         val service = LocationService.lookup("/known")
-        Await.result(service, timeout.duration) shouldBe Some(new URI(serviceUri) -> None)
+        Await.result(service, timeout.duration) shouldBe Some(serviceUri)
+      }
+    }
+
+    "be able to look up a named service using a cache" in {
+      implicit val cc = ConnectionContext()
+
+      val serviceUri = "http://service_interface:4711/known"
+      withServerWithKnownService(serviceUri) {
+
+        val cache = LocationCache()
+        val service = LocationService.lookup("/known", cache)
+        Await.result(service, timeout.duration) shouldBe Some(serviceUri)
       }
     }
 
@@ -44,16 +56,16 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
         import context.dispatcher
 
         override def preStart(): Unit =
-          LocationService.lookup("/known").map(LocationService.toUri).pipeTo(self)
+          LocationService.lookup("/known").pipeTo(self)
 
         override def receive: Receive = {
-          case Some(someService: URI) =>
+          case Some(someService: String) =>
             // We now have the service
 
-            observer ! someService.toString
+            observer ! someService
 
           case None =>
-            self ! (if (Env.isRunByConductR) PoisonPill else Some(new URI("http://127.0.0.1:9000")))
+            self ! (if (Env.isRunByConductR) PoisonPill else Some("http://127.0.0.1:9000"))
         }
       }
 
@@ -61,7 +73,7 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
       withServerWithKnownService(serviceUri) {
 
         val testProbe = TestProbe()
-        val myService = system.actorOf(Props(new MyService(testProbe.ref)))
+        system.actorOf(Props(new MyService(testProbe.ref)))
         testProbe.expectMsg(serviceUri)
       }
     }
@@ -79,8 +91,7 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
           complete {
             serviceName match {
               case "known" =>
-                val uri = Uri(serviceUrl)
-                val headers = Location(uri) :: (maxAge match {
+                val headers = Location(serviceUrl) :: (maxAge match {
                   case Some(maxAgeSecs) =>
                     `Cache-Control`(
                       CacheDirectives.`private`(Location.name),
@@ -88,7 +99,7 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
                   case None =>
                     Nil
                 })
-                HttpResponse(StatusCodes.TemporaryRedirect, headers, HttpEntity(s"Located at $uri"))
+                HttpResponse(StatusCodes.TemporaryRedirect, headers, HttpEntity(s"Located at $serviceUrl"))
               case _ =>
                 HttpResponse(StatusCodes.NotFound)
             }
