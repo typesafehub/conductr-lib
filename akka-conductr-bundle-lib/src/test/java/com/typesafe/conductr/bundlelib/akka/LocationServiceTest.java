@@ -3,6 +3,7 @@ package com.typesafe.conductr.bundlelib.akka;
 import akka.actor.ActorSystem;
 import akka.japi.Option;
 import akka.util.Timeout;
+import com.typesafe.conductr.bundlelib.scala.LocationCache;
 import org.junit.Test;
 import org.scalatest.junit.JUnitSuite;
 import scala.concurrent.Await;
@@ -16,9 +17,10 @@ public class LocationServiceTest extends JUnitSuite {
         ActorSystem system = ActorSystem.create("MySystem");
 
         ConnectionContext cc = ConnectionContext.create(system);
+        LocationCache cache = new LocationCache();
         Timeout timeout = new Timeout(Duration.create(5, "seconds"));
         assertEquals(
-                Await.result(LocationService.getInstance().lookupWithContext("/whatever", cc), timeout.duration()),
+                Await.result(LocationService.getInstance().lookupWithContext("/whatever", cc, cache), timeout.duration()),
                 Option.none()
         );
     }

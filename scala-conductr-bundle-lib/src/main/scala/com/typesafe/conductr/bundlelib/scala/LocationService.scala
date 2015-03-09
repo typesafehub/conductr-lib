@@ -6,10 +6,8 @@
 
 package com.typesafe.conductr.bundlelib.scala
 
-import java.net.URI
-
 import scala.concurrent.Future
-import scala.concurrent.duration.FiniteDuration
+import scala.language.reflectiveCalls
 
 object LocationService extends LocationService(new ConnectionHandler)
 
@@ -17,6 +15,11 @@ class LocationService(handler: ConnectionHandler) extends AbstractLocationServic
 
   override protected type CC = ConnectionContext
 
-  override def lookup(serviceName: String)(implicit cc: CC): Future[Option[(URI, Option[FiniteDuration])]] =
-    handler.withConnectedRequest(createLookupPayload(serviceName))(handleLookup)
+  override def lookup(serviceName: String)(implicit cc: CC): Future[Option[String]] =
+    handler.withConnectedRequest(createLookupPayload(serviceName))(handleLookup).map(toUri)(cc.executionContext)
+
+  override def lookup(serviceName: String, cache: CacheLike)(implicit cc: CC): Future[Option[String]] =
+    cache.getOrElseUpdate(serviceName) {
+      handler.withConnectedRequest(createLookupPayload(serviceName))(handleLookup)
+    }
 }

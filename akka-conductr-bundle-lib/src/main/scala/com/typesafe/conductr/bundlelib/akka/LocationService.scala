@@ -6,14 +6,13 @@
 
 package com.typesafe.conductr.bundlelib.akka
 
-import java.net.URI
-
 import com.typesafe.conductr.bundlelib.scala.AbstractLocationService
 
 import akka.japi.{ Option => JOption }
 
+import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
-import scala.concurrent.duration.FiniteDuration
+import scala.language.reflectiveCalls
 
 object LocationService extends LocationService(new ConnectionHandler) {
   /** JAVA API */
@@ -27,15 +26,17 @@ object LocationService extends LocationService(new ConnectionHandler) {
 class LocationService(handler: ConnectionHandler) extends AbstractLocationService(handler) {
   override protected type CC = ConnectionContext
 
-  override def lookup(serviceName: String)(implicit cc: CC): Future[Option[(URI, Option[FiniteDuration])]] =
-    handler.withConnectedRequest(createLookupPayload(serviceName))(handleLookup)
+  override def lookup(serviceName: String)(implicit cc: CC): Future[Option[String]] =
+    handler.withConnectedRequest(createLookupPayload(serviceName))(handleLookup).map(toUri)(Implicits.global)
+
+  override def lookup(serviceName: String, cache: CacheLike)(implicit cc: CC): Future[Option[String]] =
+    cache.getOrElseUpdate(serviceName) {
+      handler.withConnectedRequest(createLookupPayload(serviceName))(handleLookup)
+    }
 
   /** JAVA API */
-  def lookupWithContext(serviceName: String, cc: CC): Future[JOption[(URI, JOption[FiniteDuration])]] = {
+  def lookupWithContext(serviceName: String, cc: CC, cache: CacheLike): Future[JOption[String]] = {
     import scala.concurrent.ExecutionContext.Implicits.global
-    lookup(serviceName)(cc).map {
-      case Some((uri, maxAge)) => JOption.some((uri, JOption.fromScalaOption(maxAge)))
-      case None                => JOption.none
-    }
+    lookup(serviceName, cache)(cc).map(JOption.fromScalaOption)
   }
 }
