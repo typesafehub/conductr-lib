@@ -4,9 +4,9 @@
 
 This project provides a number of libraries to facilitate ConductR's status service and its service lookup service. The libraries are intended to be delivered by the Typesafe Reactive Platform (Typesafe RP) and are structured as follows:
 
-* `"com.typesafe.conductr" %  "conductr-bundle-lib"       % "0.4.1"`
-* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib" % "0.4.1"`
-* `"com.typesafe.conductr" %% "akka-conductr-bundle-lib"  % "0.4.1"`
+* `"com.typesafe.conductr" %  "conductr-bundle-lib"       % "0.5.0"`
+* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib" % "0.5.0"`
+* `"com.typesafe.conductr" %% "akka-conductr-bundle-lib"  % "0.5.0"`
 * play-conductr-bundle-lib - COMING SOON!
 
 ## conductr-bundle-lib
