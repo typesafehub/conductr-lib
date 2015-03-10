@@ -4,13 +4,13 @@
  * or by any means without the express written permission of Typesafe, Inc.
  */
 
-package com.typesafe.conductr.bundlelib.akka
+package com.typesafe.conductr.bundlelib.play
 
 import com.typesafe.conductr.bundlelib.scala.AbstractStatusService
 
-import akka.japi.{ Option => JOption }
+import play.api.libs.concurrent.Execution.Implicits
+import play.libs.F
 
-import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
 object StatusService extends StatusService(new ConnectionHandler) {
@@ -27,7 +27,7 @@ class StatusService(handler: ConnectionHandler) extends AbstractStatusService(ha
   override protected type CC = ConnectionContext
 
   override def signalStartedOrExit()(implicit cc: CC): Future[Option[Unit]] = {
-    import Implicits.global
+    import Implicits.defaultContext
     signalStarted().recover(handleSignalOrExit)
   }
 
@@ -35,14 +35,14 @@ class StatusService(handler: ConnectionHandler) extends AbstractStatusService(ha
     handler.withConnectedRequest(createSignalStartedPayload)(handleSignal)
 
   /** JAVA API */
-  def signalStartedOrExitWithContext(cc: CC): Future[JOption[Unit]] = {
-    import Implicits.global
-    signalStartedOrExit()(cc).map(JOption.fromScalaOption)
+  def signalStartedOrExitWithContext(cc: CC): F.Promise[F.Option[Unit]] = {
+    import Implicits.defaultContext
+    signalStartedOrExit()(cc).map(_.toF).toF
   }
 
   /** JAVA API */
-  def signalStartedWithContext(cc: CC): Future[JOption[Unit]] = {
-    import Implicits.global
-    signalStarted()(cc).map(JOption.fromScalaOption)
+  def signalStartedWithContext(cc: CC): F.Promise[F.Option[Unit]] = {
+    import Implicits.defaultContext
+    signalStarted()(cc).map(_.toF).toF
   }
 }

@@ -19,13 +19,13 @@ public class StatusServiceTest extends JUnitSuite {
         Timeout timeout = new Timeout(Duration.create(5, "seconds"));
 
         assertEquals(
-                Await.result(StatusService.getInstance().signalStartedOrExitWithContext(cc), timeout.duration()),
-                Option.none()
+            Await.result(StatusService.getInstance().signalStartedOrExitWithContext(cc), timeout.duration()),
+            Option.none()
         );
 
         assertEquals(
-                Await.result(StatusService.getInstance().signalStartedWithContext(cc), timeout.duration()),
-                Option.none()
+            Await.result(StatusService.getInstance().signalStartedWithContext(cc), timeout.duration()),
+            Option.none()
         );
     }
 }

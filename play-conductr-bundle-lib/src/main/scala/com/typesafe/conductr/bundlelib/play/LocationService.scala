@@ -4,13 +4,12 @@
  * or by any means without the express written permission of Typesafe, Inc.
  */
 
-package com.typesafe.conductr.bundlelib.akka
+package com.typesafe.conductr.bundlelib.play
 
 import com.typesafe.conductr.bundlelib.scala.AbstractLocationService
+import play.api.libs.concurrent.Execution.Implicits
+import play.libs.F
 
-import akka.japi.{ Option => JOption }
-
-import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 import scala.language.reflectiveCalls
 
@@ -27,7 +26,7 @@ class LocationService(handler: ConnectionHandler) extends AbstractLocationServic
   override protected type CC = ConnectionContext
 
   override def lookup(serviceName: String)(implicit cc: CC): Future[Option[String]] = {
-    import Implicits.global
+    import Implicits.defaultContext
     handler.withConnectedRequest(createLookupPayload(serviceName))(handleLookup).map(toUri)
   }
 
@@ -37,8 +36,9 @@ class LocationService(handler: ConnectionHandler) extends AbstractLocationServic
     }
 
   /** JAVA API */
-  def lookupWithContext(serviceName: String, cc: CC, cache: CacheLike): Future[JOption[String]] = {
-    import Implicits.global
-    lookup(serviceName, cache)(cc).map(JOption.fromScalaOption)
+  def lookupWithContext(serviceName: String, cc: CC, cache: CacheLike): F.Promise[F.Option[String]] = {
+    import Implicits.defaultContext
+    lookup(serviceName, cache)(cc).map(_.toF).toF
   }
+
 }

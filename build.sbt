@@ -5,7 +5,7 @@
 
 lazy val root = project
   .in(file("."))
-  .aggregate(conductRBundleLib, scalaConductRBundleLib, akkaConductRBundleLib)
+  .aggregate(conductRBundleLib, scalaConductRBundleLib, akkaConductRBundleLib, playConductRBundleLib)
 
 lazy val conductRBundleLib = project
   .in(file("conductr-bundle-lib"))
@@ -18,6 +18,11 @@ lazy val scalaConductRBundleLib = project
 
 lazy val akkaConductRBundleLib = project
   .in(file("akka-conductr-bundle-lib"))
+  .dependsOn(scalaConductRBundleLib)
+  .dependsOn(testLib % "test->compile")
+
+lazy val playConductRBundleLib = project
+  .in(file("play-conductr-bundle-lib"))
   .dependsOn(scalaConductRBundleLib)
   .dependsOn(testLib % "test->compile")
 

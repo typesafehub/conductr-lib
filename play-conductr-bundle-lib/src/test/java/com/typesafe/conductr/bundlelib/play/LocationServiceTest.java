@@ -1,12 +1,13 @@
-package com.typesafe.conductr.bundlelib.akka;
+package com.typesafe.conductr.bundlelib.play;
 
-import akka.actor.ActorSystem;
-import akka.japi.Option;
 import akka.util.Timeout;
 import com.typesafe.conductr.bundlelib.scala.LocationCache;
 import org.junit.Test;
 import org.scalatest.junit.JUnitSuite;
-import scala.concurrent.Await;
+import play.Application;
+import play.libs.F;
+import play.libs.HttpExecution;
+import play.test.Helpers;
 import scala.concurrent.duration.Duration;
 
 import static org.junit.Assert.assertEquals;
@@ -14,14 +15,16 @@ import static org.junit.Assert.assertEquals;
 public class LocationServiceTest extends JUnitSuite {
     @Test
     public void return_None_when_running_in_development_mode() throws Exception {
-        ActorSystem system = ActorSystem.create("MySystem");
-
-        ConnectionContext cc = ConnectionContext.create(system);
+        ConnectionContext cc = ConnectionContext.create(
+            HttpExecution.defaultContext(),
+            new Application(Helpers.fakeApplication().getWrappedApplication())
+        );
         LocationCache cache = new LocationCache();
         Timeout timeout = new Timeout(Duration.create(5, "seconds"));
+
         assertEquals(
-            Await.result(LocationService.getInstance().lookupWithContext("/whatever", cc, cache), timeout.duration()),
-            Option.none()
+            LocationService.getInstance().lookupWithContext("/whatever", cc, cache).get(timeout.duration().toMillis()),
+            F.None()
         );
     }
 }

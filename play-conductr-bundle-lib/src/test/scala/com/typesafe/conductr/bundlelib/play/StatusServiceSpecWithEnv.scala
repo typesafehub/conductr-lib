@@ -4,32 +4,37 @@
  * or by any means without the express written permission of Typesafe, Inc.
  */
 
-package com.typesafe.conductr.bundlelib.scala
+package com.typesafe.conductr.bundlelib.play
+
+import java.net.{ InetSocketAddress, URL }
 
 import akka.http.Http
 import akka.http.model.StatusCodes
 import akka.http.server.Directives._
 import akka.stream.ActorFlowMaterializer
 import akka.testkit.TestProbe
-import com.typesafe.conductr._
-import com.typesafe.conductr.AkkaUnitTest
-import java.net.{ InetSocketAddress, URL }
-import com.typesafe.conductr.bundlelib.scala.ConnectionContext.Implicits
+import com.typesafe.conductr.bundlelib.play.ConnectionContext.Implicits
+import com.typesafe.conductr.bundlelib.scala.Env
+import com.typesafe.conductr.{ AkkaUnitTest, _ }
+import play.api.Play
+import play.api.test.FakeApplication
 
 import scala.concurrent.Await
 import scala.util.{ Failure, Success }
 
 class StatusServiceSpecWithEnv extends AkkaUnitTest("StatusServiceSpecWithEnv", "akka.loglevel = INFO") {
 
-  import Implicits.global
+  Play.start(FakeApplication())
 
   "The StatusService functionality in the library" should {
     "be able to call the right URL to signal that it is up" in {
 
+      val probe = new TestProbe(system)
+
+      import Implicits.defaultContext
+
       import system.dispatcher
       implicit val materializer = ActorFlowMaterializer()
-
-      val probe = new TestProbe(system)
 
       val handler =
         path("bundles" / Segment) { bundleId =>
