@@ -27,5 +27,5 @@ object Library {
 }
 
 object Resolvers {
-  val typesafeReleases = "typesafe-releases" at "http://repo.typesafe.com/typesafe/maven-releases"
+  val playTypesafeReleases = "play-typesafe-releases" at "http://repo.typesafe.com/typesafe/maven-releases"
 }

@@ -14,7 +14,7 @@ libraryDependencies ++= List(
   Library.scalaTest       % "test"
 )
 
-resolvers += Resolvers.typesafeReleases
+resolvers += Resolvers.playTypesafeReleases
 
 fork in Test := true
 
