@@ -83,6 +83,7 @@ private[bundlelib] class ConnectionHandler extends AbstractConnectionHandler {
       val connection = cc.httpExt.outgoingConnection(p.getUrl.getHost, p.getUrl.getPort)
       val url = p.getUrl
       val urlStr = url.toString
+
       val requestMethod = p.getRequestMethod match {
         case "GET"     => Get(urlStr)
         case "POST"    => Post(urlStr)
@@ -92,7 +93,7 @@ private[bundlelib] class ConnectionHandler extends AbstractConnectionHandler {
         case "OPTIONS" => Options(urlStr)
         case "HEAD"    => Head(urlStr)
       }
-      //TODO: Perhaps support redirects, although not necessary for our present use-cases. Use p.getFollowRedirects.
+
       val request =
         requestMethod
           .addHeader(`User-Agent`(UserAgent))

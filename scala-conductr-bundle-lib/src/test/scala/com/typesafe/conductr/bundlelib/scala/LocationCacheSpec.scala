@@ -41,6 +41,11 @@ class LocationCacheSpec extends AkkaUnitTest {
       val location3 = getFromCache("/someservice")
       Await.result(location3, timeout.duration) shouldBe Some("/somelocation")
       updates shouldBe 2
+
+      cache.remove("/someservice") shouldBe Some(location3)
+      val location4 = getFromCache("/someservice")
+      Await.result(location4, timeout.duration) shouldBe Some("/somelocation")
+      updates shouldBe 3
     }
   }
 }

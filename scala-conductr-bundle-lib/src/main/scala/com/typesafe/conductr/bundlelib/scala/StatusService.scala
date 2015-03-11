@@ -6,7 +6,6 @@
 
 package com.typesafe.conductr.bundlelib.scala
 
-import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.Future
 
 object StatusService extends StatusService(new ConnectionHandler)
@@ -15,8 +14,10 @@ class StatusService(handler: ConnectionHandler) extends AbstractStatusService(ha
 
   override protected type CC = ConnectionContext
 
-  override def signalStartedOrExit()(implicit cc: CC): Future[Option[Unit]] =
-    signalStarted().recover(handleSignalOrExit)(Implicits.global)
+  override def signalStartedOrExit()(implicit cc: CC): Future[Option[Unit]] = {
+    import cc.executionContext
+    signalStarted().recover(handleSignalOrExit)
+  }
 
   override def signalStarted()(implicit cc: CC): Future[Option[Unit]] =
     handler.withConnectedRequest(createSignalStartedPayload)(handleSignal)

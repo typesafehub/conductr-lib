@@ -58,4 +58,7 @@ class LocationCache {
     }
     cache.getOrElseUpdate(serviceName, dualOp)
   }
+
+  def remove(serviceName: String): Option[Future[Option[String]]] =
+    cache.remove(serviceName)
 }

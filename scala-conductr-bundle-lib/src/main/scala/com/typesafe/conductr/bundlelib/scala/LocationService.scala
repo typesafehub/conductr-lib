@@ -15,8 +15,10 @@ class LocationService(handler: ConnectionHandler) extends AbstractLocationServic
 
   override protected type CC = ConnectionContext
 
-  override def lookup(serviceName: String)(implicit cc: CC): Future[Option[String]] =
-    handler.withConnectedRequest(createLookupPayload(serviceName))(handleLookup).map(toUri)(cc.executionContext)
+  override def lookup(serviceName: String)(implicit cc: CC): Future[Option[String]] = {
+    import cc.executionContext
+    handler.withConnectedRequest(createLookupPayload(serviceName))(handleLookup).map(toUri)
+  }
 
   override def lookup(serviceName: String, cache: CacheLike)(implicit cc: CC): Future[Option[String]] =
     cache.getOrElseUpdate(serviceName) {

@@ -7,11 +7,12 @@
 package com.typesafe.conductr.bundlelib.scala
 
 import com.typesafe.conductr.AkkaUnitTest
+import com.typesafe.conductr.bundlelib.scala.ConnectionContext.Implicits
 import scala.concurrent.Await
 
-import com.typesafe.conductr.bundlelib.scala.ConnectionContext.Implicits.global
-
 class LocationServiceSpec extends AkkaUnitTest {
+
+  import Implicits.global
 
   "The LocationService functionality in the library" should {
     "return None when running in development mode" in {

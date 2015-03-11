@@ -4,35 +4,38 @@
  * or by any means without the express written permission of Typesafe, Inc.
  */
 
-package com.typesafe.conductr.bundlelib.scala
+package com.typesafe.conductr.bundlelib.play
 
+import java.net.{ InetSocketAddress, URL }
+
+import akka.actor._
 import akka.http.Http
-import akka.http.model.headers.{ CacheDirectives, `Cache-Control`, Location }
-import akka.http.model.{ HttpEntity, Uri, HttpResponse, StatusCodes }
+import akka.http.model.headers.{ CacheDirectives, Location, `Cache-Control` }
+import akka.http.model.{ HttpEntity, HttpResponse, StatusCodes }
 import akka.http.server.Directives._
 import akka.stream.ActorFlowMaterializer
 import akka.testkit.TestProbe
-import com.typesafe.conductr._
-import com.typesafe.conductr.AkkaUnitTest
-import java.net.{ URL, InetSocketAddress }
-
-import com.typesafe.conductr.bundlelib.scala.ConnectionContext.Implicits
+import com.typesafe.conductr.bundlelib.play.ConnectionContext.Implicits
+import com.typesafe.conductr.bundlelib.scala.{ LocationCache, Env }
+import com.typesafe.conductr.{ AkkaUnitTest, _ }
+import play.api.Play
+import play.api.test.FakeApplication
 
 import scala.concurrent.Await
 import scala.util.{ Failure, Success }
 
 class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEnv", "akka.loglevel = INFO") {
 
-  import Implicits.global
+  Play.start(FakeApplication())
+
+  import Implicits.defaultContext
 
   "The LocationService functionality in the library" should {
-    "return the lookup url" in {
-      LocationService.getLookupUrl("/whatever", "http://127.0.0.1/whatever") shouldBe "http://127.0.0.1:50008/services/whatever"
-    }
 
     "be able to look up a named service" in {
       val serviceUri = "http://service_interface:4711/known"
       withServerWithKnownService(serviceUri) {
+
         val service = LocationService.lookup("/known")
         Await.result(service, timeout.duration) shouldBe Some(serviceUri)
       }
@@ -41,32 +44,17 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
     "be able to look up a named service using a cache" in {
       val serviceUri = "http://service_interface:4711/known"
       withServerWithKnownService(serviceUri) {
+
         val cache = LocationCache()
         val service = LocationService.lookup("/known", cache)
         Await.result(service, timeout.duration) shouldBe Some(serviceUri)
-      }
-    }
-
-    "be able to look up a named service and return maxAge" in {
-      val serviceUri = "http://service_interface:4711/known"
-      withServerWithKnownService(serviceUri, Some(10)) {
-        val service = LocationService.lookup("/known")
-        Await.result(service, timeout.duration) shouldBe Some(serviceUri)
-      }
-    }
-
-    "get back None for an unknown service" in {
-      val serviceUrl = "http://service_interface:4711/known"
-      withServerWithKnownService(serviceUrl) {
-        val service = LocationService.lookup("/unknown")
-        Await.result(service, timeout.duration) shouldBe None
       }
     }
   }
 
   def withServerWithKnownService(serviceUrl: String, maxAge: Option[Int] = None)(thunk: => Unit): Unit = {
     import system.dispatcher
-    implicit val materializer = ActorFlowMaterializer()
+    implicit val materializer = ActorFlowMaterializer.create(system)
 
     val probe = new TestProbe(system)
 
@@ -76,8 +64,7 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
           complete {
             serviceName match {
               case "known" =>
-                val uri = Uri(serviceUrl)
-                val headers = Location(uri) :: (maxAge match {
+                val headers = Location(serviceUrl) :: (maxAge match {
                   case Some(maxAgeSecs) =>
                     `Cache-Control`(
                       CacheDirectives.`private`(Location.name),
@@ -85,7 +72,7 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
                   case None =>
                     Nil
                 })
-                HttpResponse(StatusCodes.TemporaryRedirect, headers, HttpEntity(s"Located at $uri"))
+                HttpResponse(StatusCodes.TemporaryRedirect, headers, HttpEntity(s"Located at $serviceUrl"))
               case _ =>
                 HttpResponse(StatusCodes.NotFound)
             }

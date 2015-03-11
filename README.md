@@ -150,11 +150,6 @@ Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle
 There is also a lower level method where the `HttpExt` and `ActorFlowMaterializer` are passed in:
 
 ```scala
-// Establish the http extension and flow materializer in
-// consideration of your needs.
-val httpExt = Http(system)
-val actorFlowMaterializer = ActorFlowMaterializer.create(system)
-
 implicit val cc = ConnectionContext(httpExt, actorFlowMaterializer)
 ```
 
@@ -201,12 +196,57 @@ The following example illustrates how status is signalled using the Akka Java AP
 
 ```java
 ConnectionContext cc = ConnectionContext.create(system);
-StatusService.getInstance().signalStartedWithContext(cc);
+StatusService.getInstance().signalStartedOrExitWithContext(cc);
 ```
 
 Similarly here is a service lookup:
 
 ```java
 ConnectionContext cc = ConnectionContext.create(system);
-LocationService.getInstance().lookupWithContext("/whatever", cc)
+LocationService.getInstance().lookupWithContext("/whatever", cc, cache)
+```
+
+## play-conductr-bundle-lib
+
+This library provides a reactive API using [Play WS](https://www.playframework.com/documentation/2.3.x/ScalaWS) and should be used when you are using Play. The library depends on `scala-conductr-bundle-lib` and can be used for both Java and Scala.
+
+As with `conductr-bundle-lib` there are two services:
+
+* `com.typesafe.conductr.bundlelib.play.LocationService`
+* `com.typesafe.conductr.bundlelib.play.StatusService`
+
+Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle-lib` for an introduction to these services. Other than the `import`s for the types, the only difference in terms of API are usage is how a `ConnectionContext` is established. A `ConnectionContext` for Play requires an `ExecutionContext` and `Application` at a minimum. For convenience, we provide a default ConnectionContext using the default execution context and Play application. This may be imported e.g.:
+
+```scala
+  import com.typesafe.conductr.bundlelib.play.ConnectionContext.Implicits.defaultContext
+```
+
+There is also a lower level method where the `ExecutionContext` and `Application` are passed in:
+
+```scala
+implicit val cc = ConnectionContext(executionContext, application)
+```
+
+### Java
+
+The following example illustrates how status is signalled using the Play Java API:
+
+```java
+ConnectionContext cc =
+    ConnectionContext.create(HttpExecution.defaultContext(), Play.application());
+
+  ...
+
+StatusService.getInstance().signalStartedOrExitWithContext(cc);
+```
+
+Similarly here is a service lookup:
+
+```java
+ConnectionContext cc =
+    ConnectionContext.create(HttpExecution.defaultContext(), Play.application());
+
+  ...
+
+LocationService.getInstance().lookupWithContext("/whatever", cc, cache)
 ```

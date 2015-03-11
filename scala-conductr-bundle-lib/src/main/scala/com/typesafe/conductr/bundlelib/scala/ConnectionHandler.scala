@@ -35,6 +35,7 @@ object ConnectionContext {
 class ConnectionContext()(implicit val executionContext: ExecutionContext) extends AbstractConnectionContext
 
 /**
+ * INTERNAL API
  * Handles the JDK HttpURLConnection requests and responses
  */
 private[bundlelib] class ConnectionHandler extends AbstractConnectionHandler {
