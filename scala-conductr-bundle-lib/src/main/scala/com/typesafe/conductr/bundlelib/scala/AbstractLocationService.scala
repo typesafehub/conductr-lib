@@ -19,10 +19,6 @@ import scala.concurrent.duration._
  */
 abstract class AbstractLocationService(handler: AbstractConnectionHandler) {
 
-  type CacheLike = {
-    def getOrElseUpdate(serviceName: String)(op: => Future[Option[(String, Option[FiniteDuration])]]): Future[Option[String]]
-  }
-
   protected type CC <: AbstractConnectionContext
 
   /**

@@ -6,7 +6,7 @@
 
 package com.typesafe.conductr.bundlelib.play
 
-import com.typesafe.conductr.bundlelib.scala.AbstractLocationService
+import com.typesafe.conductr.bundlelib.scala.{ CacheLike, AbstractLocationService }
 import play.api.libs.concurrent.Execution.Implicits
 import play.libs.F
 
