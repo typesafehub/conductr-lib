@@ -14,6 +14,14 @@ import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
 import scala.util.Success
 
+/**
+ * A structure that describes what we require from a cache.
+ */
+trait CacheLike {
+  def getOrElseUpdate(serviceName: String)(op: => Future[Option[(String, Option[FiniteDuration])]]): Future[Option[String]]
+  def remove(serviceName: String): Option[Future[Option[String]]]
+}
+
 object LocationCache {
   def apply() = new LocationCache
 }
@@ -29,13 +37,13 @@ object LocationCache {
  * (this should be rare) then the cache entry is quickly removed after it has been determined.
  * This removal also occurs when the entry cannot be established successfully.
  */
-class LocationCache {
+class LocationCache extends CacheLike {
 
   private val cache = TrieMap.empty[String, Future[Option[String]]]
 
   val reaperTimer = new Timer()
 
-  def getOrElseUpdate(serviceName: String)(op: => Future[Option[(String, Option[FiniteDuration])]]): Future[Option[String]] = {
+  override def getOrElseUpdate(serviceName: String)(op: => Future[Option[(String, Option[FiniteDuration])]]): Future[Option[String]] = {
     def dualOp: Future[Option[String]] = {
       val locationAndMaxAge = op
 
@@ -59,6 +67,6 @@ class LocationCache {
     cache.getOrElseUpdate(serviceName, dualOp)
   }
 
-  def remove(serviceName: String): Option[Future[Option[String]]] =
+  override def remove(serviceName: String): Option[Future[Option[String]]] =
     cache.remove(serviceName)
 }

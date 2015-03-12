@@ -6,7 +6,7 @@
 
 package com.typesafe.conductr.bundlelib.akka
 
-import com.typesafe.conductr.bundlelib.scala.AbstractLocationService
+import com.typesafe.conductr.bundlelib.scala.{ CacheLike, AbstractLocationService }
 
 import akka.japi.{ Option => JOption }
 
