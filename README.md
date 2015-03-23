@@ -225,7 +225,7 @@ ClusterProperties.initialize()
 Clusters will then be formed correctly. The above call looks for an endpoint named `seed` by default. Therefore if you must declare the Akka remoting port as seed. The following endpoint declaration within a `build.sbt` shows how:
 
 ```scala
-BundleKeys.endpoints := Map("seed" -> Endpoint("tcp", 0, Set(URI("tcp://:2552"))))
+BundleKeys.endpoints := Map("seed" -> Endpoint("tcp", 0, Set.empty))
 ```
 
 ## play-conductr-bundle-lib
