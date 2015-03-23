@@ -222,10 +222,10 @@ In order for an application or service to take advantage of this guarantee provi
 ClusterProperties.initialize()
 ```
 
-Clusters will then be formed correctly. The above call looks for an endpoint named `seed` by default. Therefore if you must declare the Akka remoting port as seed. The following endpoint declaration within a `build.sbt` shows how:
+Clusters will then be formed correctly. The above call looks for an endpoint named `akka-remote` by default. Therefore if you must declare the Akka remoting port as seed. The following endpoint declaration within a `build.sbt` shows how:
 
 ```scala
-BundleKeys.endpoints := Map("seed" -> Endpoint("tcp", 0, Set.empty))
+BundleKeys.endpoints := Map("akka-remote" -> Endpoint("tcp", 0, Set.empty))
 ```
 
 ## play-conductr-bundle-lib
