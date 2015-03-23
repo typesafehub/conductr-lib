@@ -136,12 +136,18 @@ In case you are interested, the function returns a `Future[Option[Unit]]` where 
 
 This library provides a reactive API using [Akka Http](http://akka.io/docs/) and should be used when you are using Akka. The library depends on `scala-conductr-bundle-lib` and can be used for both Java and Scala.
 
-As with `conductr-bundle-lib` there are two services:
+As with `conductr-bundle-lib` there are these two services:
 
 * `com.typesafe.conductr.bundlelib.akka.LocationService`
 * `com.typesafe.conductr.bundlelib.akka.StatusService`
 
-Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle-lib` for an introduction to these services. Other than the `import`s for the types, the only difference in terms of API are usage is how a `ConnectionContext` is established. A `ConnectionContext` for Akka requires an implicit `ActorSystem` or `ActorContext` at a minimum e.g.:
+and there is also another:
+
+* `com.typesafe.conductr.bundlelib.akka.ClusterProperties`
+
+Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle-lib` for an introduction to these services. The `ClusterProperties` one is discussed in the "Akka Clustering" section below.
+
+Other than the `import`s for the types, the only difference in terms of API are usage is how a `ConnectionContext` is established. A `ConnectionContext` for Akka requires an implicit `ActorSystem` or `ActorContext` at a minimum e.g.:
 
 ```scala
  implicit val cc = ConnectionContext()
@@ -204,6 +210,22 @@ Similarly here is a service lookup:
 ```java
 ConnectionContext cc = ConnectionContext.create(system);
 LocationService.getInstance().lookupWithContext("/whatever", cc, cache)
+```
+
+### Akka Clustering
+
+[Akka cluster](http://doc.akka.io/docs/akka/snapshot/scala/cluster-usage.html) based applications or services have a requirement where the first node in a cluster must form the cluster, and the subsequent nodes join with any of the ones that come before them (seed nodes). Where bundles share the same `system` property in their `bundle.conf`, and have an intersection of endpoint names, then ConductR will ensure that only one bundle is started at a time. Thus the first bundle can determine whether it is the first bundle, and subsequent bundles can determine the IP and port numbers of the bundles that have started before them.
+
+In order for an application or service to take advantage of this guarantee provided by ConductR, the following call is all that is required within the program:
+
+```scala
+ClusterProperties.initialize()
+```
+
+Clusters will then be formed correctly. The above call looks for an endpoint named `seed` by default. Therefore if you must declare the Akka remoting port as seed. The following endpoint declaration within a `build.sbt` shows how:
+
+```scala
+BundleKeys.endpoints := Map("seed" -> Endpoint("tcp", 0, Set(URI("tcp://:2552"))))
 ```
 
 ## play-conductr-bundle-lib
