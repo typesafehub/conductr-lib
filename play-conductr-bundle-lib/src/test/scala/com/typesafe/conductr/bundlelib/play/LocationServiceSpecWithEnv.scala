@@ -18,15 +18,11 @@ import akka.testkit.TestProbe
 import com.typesafe.conductr.bundlelib.play.ConnectionContext.Implicits
 import com.typesafe.conductr.bundlelib.scala.{ LocationCache, Env }
 import com.typesafe.conductr.{ AkkaUnitTest, _ }
-import play.api.Play
-import play.api.test.FakeApplication
 
 import scala.concurrent.Await
 import scala.util.{ Failure, Success }
 
 class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEnv", "akka.loglevel = INFO") {
-
-  Play.start(FakeApplication())
 
   import Implicits.defaultContext
 

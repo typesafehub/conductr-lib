@@ -237,16 +237,16 @@ As with `conductr-bundle-lib` there are two services:
 * `com.typesafe.conductr.bundlelib.play.LocationService`
 * `com.typesafe.conductr.bundlelib.play.StatusService`
 
-Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle-lib` for an introduction to these services. Other than the `import`s for the types, the only difference in terms of API are usage is how a `ConnectionContext` is established. A `ConnectionContext` for Play requires an `ExecutionContext` and `Application` at a minimum. For convenience, we provide a default ConnectionContext using the default execution context and Play application. This may be imported e.g.:
+Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle-lib` for an introduction to these services. Other than the `import`s for the types, the only difference in terms of API are usage is how a `ConnectionContext` is established. A `ConnectionContext` for Play requires an `ExecutionContext` at a minimum. For convenience, we provide a default ConnectionContext using the default execution context. This may be imported e.g.:
 
 ```scala
   import com.typesafe.conductr.bundlelib.play.ConnectionContext.Implicits.defaultContext
 ```
 
-There is also a lower level method where the `ExecutionContext` and `Application` are passed in:
+There is also a lower level method where the `ExecutionContext` is passed in:
 
 ```scala
-implicit val cc = ConnectionContext(executionContext, application)
+implicit val cc = ConnectionContext(executionContext)
 ```
 
 ### Java
@@ -255,7 +255,7 @@ The following example illustrates how status is signalled using the Play Java AP
 
 ```java
 ConnectionContext cc =
-    ConnectionContext.create(HttpExecution.defaultContext(), Play.application());
+    ConnectionContext.create(HttpExecution.defaultContext());
 
   ...
 
@@ -266,7 +266,7 @@ Similarly here is a service lookup:
 
 ```java
 ConnectionContext cc =
-    ConnectionContext.create(HttpExecution.defaultContext(), Play.application());
+    ConnectionContext.create(HttpExecution.defaultContext());
 
   ...
 
