@@ -10,8 +10,8 @@ name := "akka-conductr-bundle-lib"
 libraryDependencies ++= List(
   Library.akkaCluster,
   Library.akkaHttp,
-  Library.akkaTestkit     % "test",
-  Library.scalaTest       % "test"
+  Library.akkaTestkit % "test",
+  Library.scalaTest   % "test"
 )
 
 fork in Test := true
@@ -24,7 +24,7 @@ def groupByFirst(tests: Seq[TestDefinition]) =
         new Group("WithEnvForHost", t, SubProcess(ForkOptions(envVars = Map(
           "BUNDLE_HOST_IP" -> "10.0.1.10",
           "BUNDLE_SYSTEM" -> "some-system",
-          "AKKA_REMOTE_HOST_PROTOCOL" -> "tcp",
+          "AKKA_REMOTE_PROTOCOL" -> "tcp",
           "AKKA_REMOTE_HOST_PORT" -> "10000",
           "AKKA_REMOTE_OTHER_PROTOCOLS" -> "",
           "AKKA_REMOTE_OTHER_IPS" -> "",
@@ -33,7 +33,7 @@ def groupByFirst(tests: Seq[TestDefinition]) =
         new Group("WithEnvForOneOther", t, SubProcess(ForkOptions(envVars = Map(
           "BUNDLE_HOST_IP" -> "10.0.1.10",
           "BUNDLE_SYSTEM" -> "some-system",
-          "AKKA_REMOTE_HOST_PROTOCOL" -> "tcp",
+          "AKKA_REMOTE_PROTOCOL" -> "tcp",
           "AKKA_REMOTE_HOST_PORT" -> "10000",
           "AKKA_REMOTE_OTHER_PROTOCOLS" -> "udp",
           "AKKA_REMOTE_OTHER_IPS" -> "10.0.1.11",
@@ -42,7 +42,7 @@ def groupByFirst(tests: Seq[TestDefinition]) =
         new Group("WithEnvForOthers", t, SubProcess(ForkOptions(envVars = Map(
           "BUNDLE_HOST_IP" -> "10.0.1.10",
           "BUNDLE_SYSTEM" -> "some-system",
-          "AKKA_REMOTE_HOST_PROTOCOL" -> "tcp",
+          "AKKA_REMOTE_PROTOCOL" -> "tcp",
           "AKKA_REMOTE_HOST_PORT" -> "10000",
           "AKKA_REMOTE_OTHER_PROTOCOLS" -> "udp:tcp",
           "AKKA_REMOTE_OTHER_IPS" -> "10.0.1.11:10.0.1.12",
