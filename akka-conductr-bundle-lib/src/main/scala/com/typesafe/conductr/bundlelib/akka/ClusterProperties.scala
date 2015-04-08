@@ -35,7 +35,7 @@ object ClusterProperties {
     val akkaSeeds = (for {
       bundleHostIp <- sys.env.get("BUNDLE_HOST_IP")
       bundleSystem <- sys.env.get("BUNDLE_SYSTEM")
-      akkaRemoteHostProtocol <- sys.env.get(s"${akkaRemoteEndpointName}_PROTOCOL")
+      akkaRemoteProtocol <- sys.env.get(s"${akkaRemoteEndpointName}_PROTOCOL")
       akkaRemoteHostPort <- sys.env.get(s"${akkaRemoteEndpointName}_HOST_PORT")
       akkaRemoteOtherProtocolsConcat <- sys.env.get(s"${akkaRemoteEndpointName}_OTHER_PROTOCOLS")
       akkaRemoteOtherIpsConcat <- sys.env.get(s"${akkaRemoteEndpointName}_OTHER_IPS")
@@ -49,7 +49,7 @@ object ClusterProperties {
       } yield presentSeedNode(protocol, bundleSystem, ip, port, n)
       otherAkkaRemoteNodes.toList
     } else
-      List(presentSeedNode(akkaRemoteHostProtocol, bundleSystem, bundleHostIp, akkaRemoteHostPort, 0))
+      List(presentSeedNode(akkaRemoteProtocol, bundleSystem, bundleHostIp, akkaRemoteHostPort, 0))
     ).toList.flatten
 
     sys.props ++= akkaSeeds
