@@ -26,7 +26,10 @@ def groupByFirst(tests: Seq[TestDefinition]) =
         new Group("WithEnv", t, SubProcess(ForkOptions(envVars = Map(
           "BUNDLE_ID" -> "0BADF00DDEADBEEF",
           "CONDUCTR_STATUS" -> "http://127.0.0.1:40007",
-          "SERVICE_LOCATOR" -> "http://127.0.0.1:40008/services"))))
+          "SERVICE_LOCATOR" -> "http://127.0.0.1:40008/services",
+          "WEB_BIND_IP" -> "127.0.0.1",
+          "WEB_BIND_PORT" -> "9000"
+        ))))
       case (x, t) =>
         new Group("WithoutEnv", t, SubProcess(ForkOptions()))
     }.toSeq

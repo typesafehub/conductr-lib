@@ -14,8 +14,8 @@ object AkkaProperties {
   private final val MultiValDelim = ':'
 
   /**
-   * Overrides properties describing Akka seed nodes given the environment that ConductR's provides. If ConductR did
-   * not start this program there is no effect.
+   * Overrides various Akka related properties, e.g. Akka seed nodes, given the environment that ConductR's provides.
+   * If ConductR did not start this program there is no effect.
    *
    * If ConductR did start this then the seed node properties for an Akka cluster are automatically overridden.
    * In this case, if the AKKA_REMOTE_OTHER_IPS env is non empty then this node will join the cluster indicated by that
