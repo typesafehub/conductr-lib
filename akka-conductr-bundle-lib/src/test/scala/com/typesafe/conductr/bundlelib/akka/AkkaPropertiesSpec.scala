@@ -8,9 +8,9 @@ package com.typesafe.conductr.bundlelib.akka
 
 import com.typesafe.conductr.AkkaUnitTest
 
-class ClusterPropertiesSpec extends AkkaUnitTest("ClusterPropertiesSpec", "akka.loglevel = INFO") {
+class AkkaPropertiesSpec extends AkkaUnitTest("ClusterPropertiesSpec", "akka.loglevel = INFO") {
 
-  ClusterProperties.initialize()
+  AkkaProperties.initialize()
 
   "The ClusterProperties functionality in the library" should {
     "return no seed properties when running in development mode" in {

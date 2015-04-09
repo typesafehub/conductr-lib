@@ -9,7 +9,7 @@ package com.typesafe.conductr.bundlelib.akka
 /**
  * Provides functions to set up the Akka cluster environment in accordance with what ConductR provides.
  */
-object ClusterProperties {
+object AkkaProperties {
 
   private final val MultiValDelim = ':'
 
