@@ -15,6 +15,7 @@ class ClusterPropertiesSpecWithEnvForHost extends AkkaUnitTest("ClusterPropertie
   "The ClusterProperties functionality in the library" should {
     "return seed properties when running with no other seed nodes" in {
       sys.props.get("akka.cluster.seed-nodes.0") shouldBe Some("akka.tcp://some-system@10.0.1.10:10000")
+      sys.props.get("akka.remote.netty.tcp.port") shouldBe Some("10000")
     }
   }
 }

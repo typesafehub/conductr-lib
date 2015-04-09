@@ -52,6 +52,8 @@ object ClusterProperties {
       List(presentSeedNode(akkaRemoteProtocol, bundleSystem, bundleHostIp, akkaRemoteHostPort, 0))
     ).toList.flatten
 
-    sys.props ++= akkaSeeds
+    val port = sys.env.get(s"${akkaRemoteEndpointName}_HOST_PORT").toList.map("akka.remote.netty.tcp.port" -> _)
+
+    sys.props ++= (akkaSeeds ++ port)
   }
 }
