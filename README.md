@@ -143,9 +143,9 @@ As with `conductr-bundle-lib` there are these two services:
 
 and there is also another:
 
-* `com.typesafe.conductr.bundlelib.akka.ClusterProperties`
+* `com.typesafe.conductr.bundlelib.akka.AkkaProperties`
 
-Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle-lib` for an introduction to these services. The `ClusterProperties` one is discussed in the "Akka Clustering" section below.
+Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle-lib` for an introduction to these services. The `AkkaProperties` one is discussed in the "Akka Clustering" section below.
 
 Other than the `import`s for the types, the only difference in terms of API are usage is how a `ConnectionContext` is established. A `ConnectionContext` for Akka requires an implicit `ActorSystem` or `ActorContext` at a minimum e.g.:
 
@@ -219,7 +219,7 @@ LocationService.getInstance().lookupWithContext("/whatever", cc, cache)
 In order for an application or service to take advantage of this guarantee provided by ConductR, the following call is all that is required within the program:
 
 ```scala
-ClusterProperties.initialize()
+AkkaProperties.initialize()
 ```
 
 Clusters will then be formed correctly. The above call looks for an endpoint named `akka-remote` by default. Therefore if you must declare the Akka remoting port as seed. The following endpoint declaration within a `build.sbt` shows how:
@@ -237,7 +237,11 @@ As with `conductr-bundle-lib` there are two services:
 * `com.typesafe.conductr.bundlelib.play.LocationService`
 * `com.typesafe.conductr.bundlelib.play.StatusService`
 
-Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle-lib` for an introduction to these services. Other than the `import`s for the types, the only difference in terms of API are usage is how a `ConnectionContext` is established. A `ConnectionContext` for Play requires an `ExecutionContext` at a minimum. For convenience, we provide a default ConnectionContext using the default execution context. This may be imported e.g.:
+and there is also another:
+
+* `com.typesafe.conductr.bundlelib.play.PlayProperties`
+
+Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle-lib` for an introduction to these services. The `PlayProperties` one is discussed in the section below. Other than the `import`s for the types, the only difference in terms of API are usage is how a `ConnectionContext` is established. A `ConnectionContext` for Play requires an `ExecutionContext` at a minimum. For convenience, we provide a default ConnectionContext using the default execution context. This may be imported e.g.:
 
 ```scala
   import com.typesafe.conductr.bundlelib.play.ConnectionContext.Implicits.defaultContext
@@ -271,4 +275,10 @@ ConnectionContext cc =
   ...
 
 LocationService.getInstance().lookupWithContext("/whatever", cc, cache)
+```
+
+In order for an application or service to take advantage of setting important Play related properties, the following call is all that is required within the program:
+
+```scala
+PlayProperties.initialize()
 ```
