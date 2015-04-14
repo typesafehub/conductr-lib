@@ -10,7 +10,7 @@ object Version {
   val scala     = "2.11.6"
   val scalaTest = "2.2.3"
   val akka      = "2.3.9"
-  val akkaHttp  = "1.0-M4"
+  val akkaHttp  = "1.0-M5"
   val play      = "2.3.8"
   val junit     = "4.12"
 }

@@ -107,7 +107,7 @@ private[bundlelib] class ConnectionHandler extends AbstractConnectionHandler {
               case (m, header) => m.updated(header.name(), Some(header.value()))
             })
         }
-      requestSource.runWith(Sink.head())(cc.actorFlowMaterializer)
+      requestSource.runWith(Sink.head)(cc.actorFlowMaterializer)
     }
 
   }
