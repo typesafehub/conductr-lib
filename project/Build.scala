@@ -79,6 +79,8 @@ object Build extends AutoPlugin {
         else
           ("typesafe-releases", typesafe + "maven-releases")
         Some(Resolver.url(name, new URL(url)))
-      }
+      },
+      // Release settings
+      ReleaseKeys.versionBump := sbtrelease.Version.Bump.Minor
     )
 }
