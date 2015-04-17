@@ -8,14 +8,14 @@ package com.typesafe.conductr.bundlelib.play
 
 import com.typesafe.conductr.AkkaUnitTest
 
-class PlayPropertiesSpecWithEnv extends AkkaUnitTest("AkkaPropertiesSpecWithEnvForHost", "akka.loglevel = INFO") {
+class EnvSpecWithEnv extends AkkaUnitTest("EnvSpecWithEnvForHost", "akka.loglevel = INFO") {
 
-  PlayProperties.initialize()
+  val config = Env.asConfig
 
-  "The PlayProperties functionality in the library" should {
+  "The Env functionality in the library" should {
     "initialize the env like expected" in {
-      sys.props.get("http.address") shouldBe Some("127.0.0.1")
-      sys.props.get("http.port") shouldBe Some("9000")
+      config.getString("http.address") shouldBe "127.0.0.1"
+      config.getString("http.port") shouldBe "9000"
     }
   }
 }

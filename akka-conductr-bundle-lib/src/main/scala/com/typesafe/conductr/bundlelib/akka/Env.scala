@@ -6,15 +6,18 @@
 
 package com.typesafe.conductr.bundlelib.akka
 
+import com.typesafe.config.{ ConfigFactory, Config }
+import scala.collection.JavaConverters._
+
 /**
  * Provides functions to set up the Akka cluster environment in accordance with what ConductR provides.
  */
-object AkkaProperties {
+object Env extends com.typesafe.conductr.bundlelib.scala.Env {
 
   private final val MultiValDelim = ':'
 
   /**
-   * Overrides various Akka related properties, e.g. Akka seed nodes, given the environment that ConductR's provides.
+   * Provides various Akka related properties, e.g. Akka seed nodes, given the environment that ConductR's provides.
    * If ConductR did not start this program there is no effect.
    *
    * If ConductR did start this then the seed node properties for an Akka cluster are automatically overridden.
@@ -26,7 +29,7 @@ object AkkaProperties {
    * Also in the case where ConductR did start this bundle but there is no AKKA_REMOTE_OTHER_IPS value then the current
    * node is assumed to be starting the cluster.
    */
-  def initialize(): Unit = {
+  def asConfig: Config = {
     val akkaRemoteEndpointName = sys.env.getOrElse("AKKA_REMOTE_ENDPOINT_NAME", "AKKA_REMOTE")
 
     def presentSeedNode(protocol: String, bundleSystem: String, ip: String, port: String, n: Int): (String, String) =
@@ -57,6 +60,6 @@ object AkkaProperties {
     val hostname = sys.env.get("BUNDLE_HOST_IP").toList.map("akka.remote.netty.tcp.hostname" -> _)
     val port = sys.env.get(s"${akkaRemoteEndpointName}_HOST_PORT").toList.map("akka.remote.netty.tcp.port" -> _)
 
-    sys.props ++= (akkaSeeds ++ hostname ++ port)
+    ConfigFactory.parseMap((akkaSeeds ++ hostname ++ port).toMap.asJava)
   }
 }
