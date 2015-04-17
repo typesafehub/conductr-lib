@@ -6,20 +6,23 @@
 
 package com.typesafe.conductr.bundlelib.play
 
+import com.typesafe.config.{ ConfigFactory, Config }
+import scala.collection.JavaConverters._
+
 /**
  * Provides functions to set up the Play environment in accordance with what ConductR provides.
  */
-object PlayProperties {
+object Env extends com.typesafe.conductr.bundlelib.scala.Env {
 
   /**
-   * Overrides various Play related properties.
+   * Provides various Play related properties.
    */
-  def initialize(): Unit = {
+  def asConfig: Config = {
     val webName = sys.env.getOrElse("WEB_NAME", "WEB")
 
     val httpAddress = sys.env.get(s"${webName}_BIND_IP").toList.map("http.address" -> _)
     val httpPort = sys.env.get(s"${webName}_BIND_PORT").toList.map("http.port" -> _)
 
-    sys.props ++= (httpAddress ++ httpPort)
+    ConfigFactory.parseMap((httpAddress ++ httpPort).toMap.asJava)
   }
 }

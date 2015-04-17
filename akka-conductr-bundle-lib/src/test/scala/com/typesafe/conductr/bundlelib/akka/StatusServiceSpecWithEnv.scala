@@ -8,12 +8,10 @@ package com.typesafe.conductr.bundlelib.akka
 
 import java.net.{ InetSocketAddress, URL }
 
-import akka.actor.ActorRefFactory
 import akka.http.Http
 import akka.http.model.StatusCodes
 import akka.http.server.Directives._
 import akka.testkit.TestProbe
-import com.typesafe.conductr.bundlelib.scala.Env
 import com.typesafe.conductr.{ AkkaUnitTest, _ }
 
 import scala.concurrent.Await

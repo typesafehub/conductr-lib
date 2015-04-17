@@ -8,10 +8,12 @@ package com.typesafe.conductr.bundlelib.scala
 
 import com.typesafe.conductr.bundlelib.{ Env => JavaEnv }
 
+object Env extends Env
+
 /**
  * Standard ConductR environment vars.
  */
-object Env {
+class Env {
   /**
    * The bundle id of the current bundle
    */

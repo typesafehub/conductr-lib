@@ -143,9 +143,9 @@ As with `conductr-bundle-lib` there are these two services:
 
 and there is also another:
 
-* `com.typesafe.conductr.bundlelib.akka.AkkaProperties`
+* `com.typesafe.conductr.bundlelib.akka.Env`
 
-Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle-lib` for an introduction to these services. The `AkkaProperties` one is discussed in the "Akka Clustering" section below.
+Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle-lib` for an introduction to these services. The `Env` one is discussed in the "Akka Clustering" section below.
 
 Other than the `import`s for the types, the only difference in terms of API are usage is how a `ConnectionContext` is established. A `ConnectionContext` for Akka requires an implicit `ActorSystem` or `ActorContext` at a minimum e.g.:
 
@@ -216,10 +216,13 @@ LocationService.getInstance().lookupWithContext("/whatever", cc, cache)
 
 [Akka cluster](http://doc.akka.io/docs/akka/snapshot/scala/cluster-usage.html) based applications or services have a requirement where the first node in a cluster must form the cluster, and the subsequent nodes join with any of the ones that come before them (seed nodes). Where bundles share the same `system` property in their `bundle.conf`, and have an intersection of endpoint names, then ConductR will ensure that only one bundle is started at a time. Thus the first bundle can determine whether it is the first bundle, and subsequent bundles can determine the IP and port numbers of the bundles that have started before them.
 
-In order for an application or service to take advantage of this guarantee provided by ConductR, the following call is all that is required within the program:
+In order for an application or service to take advantage of this guarantee provided by ConductR, the following call is required to obtain configuration that will be used when establishing your actor system:
 
 ```scala
-AkkaProperties.initialize()
+import com.typesafe.conductr.bundlelib.akka.Env
+
+val config = Env.asConfig
+val app1 = ActorSystem("MyApp1", config.withFallback(ConfigFactory.load()))
 ```
 
 Clusters will then be formed correctly. The above call looks for an endpoint named `akka-remote` by default. Therefore if you must declare the Akka remoting port as seed. The following endpoint declaration within a `build.sbt` shows how:
@@ -239,9 +242,9 @@ As with `conductr-bundle-lib` there are two services:
 
 and there is also another:
 
-* `com.typesafe.conductr.bundlelib.play.PlayProperties`
+* `com.typesafe.conductr.bundlelib.play.Env`
 
-Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle-lib` for an introduction to these services. The `PlayProperties` one is discussed in the section below. Other than the `import`s for the types, the only difference in terms of API are usage is how a `ConnectionContext` is established. A `ConnectionContext` for Play requires an `ExecutionContext` at a minimum. For convenience, we provide a default ConnectionContext using the default execution context. This may be imported e.g.:
+Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle-lib` for an introduction to these services. The `Env` one is discussed in the section below. Other than the `import`s for the types, the only difference in terms of API are usage is how a `ConnectionContext` is established. A `ConnectionContext` for Play requires an `ExecutionContext` at a minimum. For convenience, we provide a default ConnectionContext using the default execution context. This may be imported e.g.:
 
 ```scala
   import com.typesafe.conductr.bundlelib.play.ConnectionContext.Implicits.defaultContext
@@ -277,8 +280,10 @@ ConnectionContext cc =
 LocationService.getInstance().lookupWithContext("/whatever", cc, cache)
 ```
 
-In order for an application or service to take advantage of setting important Play related properties, the following call is all that is required within the program:
+In order for an application or service to take advantage of setting important Play related properties, the following call is required in order to obtain configuration:
 
 ```scala
-PlayProperties.initialize()
+import com.typesafe.conductr.bundlelib.play.Env
+
+val config = Env.asConfig
 ```

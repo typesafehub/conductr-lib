@@ -15,7 +15,7 @@ import akka.http.model.{ HttpEntity, HttpResponse, StatusCodes }
 import akka.http.server.Directives._
 import akka.stream.ActorFlowMaterializer
 import akka.testkit.TestProbe
-import com.typesafe.conductr.bundlelib.scala.{ LocationCache, Env }
+import com.typesafe.conductr.bundlelib.scala.LocationCache
 import com.typesafe.conductr.{ AkkaUnitTest, _ }
 
 import scala.concurrent.Await
