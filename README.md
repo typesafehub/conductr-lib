@@ -7,7 +7,7 @@ This project provides a number of libraries to facilitate ConductR's status serv
 * `"com.typesafe.conductr" %  "conductr-bundle-lib"       % "0.8.0"`
 * `"com.typesafe.conductr" %% "scala-conductr-bundle-lib" % "0.8.0"`
 * `"com.typesafe.conductr" %% "akka-conductr-bundle-lib"  % "0.8.0"`
-* `"com.typesafe.conductr" %% "play-conductr-bundle-lib"  % "0.8.0"`
+* `"com.typesafe.conductr" %% "play-conductr-bundle-lib"  % "0.8.0-3fbcfb1ea8c0d4fdd53222166a7be7a9d2846058"`
 
 ## conductr-bundle-lib
 
@@ -280,10 +280,26 @@ ConnectionContext cc =
 LocationService.getInstance().lookupWithContext("/whatever", cc, cache)
 ```
 
-In order for an application or service to take advantage of setting important Play related properties, the following call is required in order to obtain configuration:
+In order for an application or service to take advantage of setting important Play related properties, the following  is required in order to associate ConductR configuration with that of Play:
 
 ```scala
-import com.typesafe.conductr.bundlelib.play.Env
+package modules
 
-val config = Env.asConfig
+import com.typesafe.conductr.bundlelib.akka.Env
+import play.api.inject.guice.GuiceApplicationLoader
+import play.api.{Configuration, Application, ApplicationLoader}
+
+class CustomApplicationLoader extends ApplicationLoader {
+  def load(context: ApplicationLoader.Context): Application = {
+    val newConfig = context.initialConfiguration ++ Configuration(Env.asConfig)
+    val newContext = context.copy(initialConfiguration = newConfig)
+    (new GuiceApplicationLoader).load(newContext)
+  }
+}
+```
+
+In addition your `application.conf` will include the following line to use the above loader:
+
+```
+play.application.loader = "modules.CustomApplicationLoader"
 ```
