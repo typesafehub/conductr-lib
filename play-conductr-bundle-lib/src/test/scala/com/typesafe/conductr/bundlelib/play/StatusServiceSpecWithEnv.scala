@@ -14,7 +14,6 @@ import akka.http.server.Directives._
 import akka.stream.ActorFlowMaterializer
 import akka.testkit.TestProbe
 import com.typesafe.conductr.bundlelib.play.ConnectionContext.Implicits
-import com.typesafe.conductr.bundlelib.scala.Env
 import com.typesafe.conductr.{ AkkaUnitTest, _ }
 
 import scala.concurrent.Await
