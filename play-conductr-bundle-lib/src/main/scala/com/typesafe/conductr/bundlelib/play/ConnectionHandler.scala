@@ -9,7 +9,7 @@ package com.typesafe.conductr.bundlelib.play
 import com.ning.http.client.AsyncHttpClientConfig
 import com.typesafe.conductr.bundlelib.HttpPayload
 import com.typesafe.conductr.bundlelib.scala.{ AbstractConnectionHandler, AbstractConnectionContext }
-import play.api.libs.ws.ning.{ NingWSClient, NingAsyncHttpClientConfigBuilder }
+import play.api.libs.ws.ning.{ DefaultNingWSClientConfig, NingWSClientConfig, NingWSClient, NingAsyncHttpClientConfigBuilder }
 import play.api.libs.ws.{ DefaultWSClientConfig, WSClient }
 import play.api.libs.concurrent.Execution.{ Implicits => PlayImplicits }
 
@@ -28,7 +28,7 @@ object ConnectionContext {
      * A WS client for the purposes of communicating with ConductR.
      */
     implicit val wsClient = {
-      val ningClientConfig = new NingAsyncHttpClientConfigBuilder(new DefaultWSClientConfig()).build()
+      val ningClientConfig = new NingAsyncHttpClientConfigBuilder(new DefaultNingWSClientConfig()).build()
       val clientConfig = new AsyncHttpClientConfig.Builder(ningClientConfig)
         .setCompressionEnabled(true)
         .build()
