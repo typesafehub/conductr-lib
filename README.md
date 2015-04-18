@@ -280,10 +280,16 @@ ConnectionContext cc =
 LocationService.getInstance().lookupWithContext("/whatever", cc, cache)
 ```
 
-In order for an application or service to take advantage of setting important Play related properties, the following call is required in order to obtain configuration:
+In order for an application or service to take advantage of setting important Play related properties, the following  is required in order to associate ConductR configuration with that of Play:
 
 ```scala
+import play.api._
 import com.typesafe.conductr.bundlelib.play.Env
 
-val config = Env.asConfig
+object Global extends GlobalSettings {
+  val totalConfiguration = this.configuration ++ Configuration(Env.asConfig)
+
+  override def configuration: Configuration =
+    totalConfiguration
+}
 ```
