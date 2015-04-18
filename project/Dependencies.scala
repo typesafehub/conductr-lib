@@ -3,7 +3,6 @@
  * transmitted in any form or by any means without the express written permission of Typesafe, Inc.
  */
 
-import sbt.Resolver._
 import sbt._
 
 object Version {
