@@ -25,6 +25,7 @@ def groupByFirst(tests: Seq[TestDefinition]) =
       case ("WithEnv", t) =>
         new Group("WithEnv", t, SubProcess(ForkOptions(envVars = Map(
           "BUNDLE_ID" -> "0BADF00DDEADBEEF",
+          "BUNDLE_SYSTEM" -> "somesys",
           "CONDUCTR_STATUS" -> "http://127.0.0.1:40007",
           "SERVICE_LOCATOR" -> "http://127.0.0.1:40008/services",
           "WEB_BIND_IP" -> "127.0.0.1",
