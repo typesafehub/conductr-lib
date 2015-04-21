@@ -229,10 +229,10 @@ val app1 = ActorSystem(systemName, config.withFallback(ConfigFactory.load()))
 Clusters will then be formed correctly. The above call looks for an endpoint named `akka-remote` by default. Therefore if you must declare the Akka remoting port as seed. The following endpoint declaration within a `build.sbt` shows how:
 
 ```scala
-BundleKeys.endpoints := Map("akka-remote" -> Endpoint("tcp", 2552))
+BundleKeys.endpoints := Map("akka-remote" -> Endpoint("tcp"))
 ```
 
-In the above, no declaration of `services` is required as akka remoting is an internal, cluster-wide TCP service on port 2552. Note that you will need to manage a range of TCP ports for Akka cluster based applications (not just `2552` which is the conventional port for akka remoting). For each distinct cluster and Akka remote service on each node of the cluster, a port number must be reserved. Furthermore you will need to configure firewall rules so that each cluster node's service(s) can connect to the others that it needs to.
+In the above, no declaration of `services` is required as akka remoting is an internal, cluster-wide TCP service.
 
 ## play-conductr-bundle-lib
 
