@@ -6,23 +6,26 @@
 import sbt._
 
 object Version {
-  val scala     = "2.11.6"
-  val scalaTest = "2.2.3"
-  val akka      = "2.3.9"
-  val akkaHttp  = "1.0-M5"
-  val play      = "2.3.8"
-  val junit     = "4.12"
+  val scala      = "2.11.6"
+  val scalaTest  = "2.2.3"
+  val akka23     = "2.3.9"
+  val akka23Http = "1.0-M5"
+  val play23     = "2.3.8"
+  val play24     = "2.4.0-M3"
+  val junit      = "4.12"
 }
 
 object Library {
-  val akkaCluster     = "com.typesafe.akka" %% "akka-cluster"                   % Version.akka
-  val akkaHttp        = "com.typesafe.akka" %% "akka-http-experimental"         % Version.akkaHttp
-  val akkaTestkit     = "com.typesafe.akka" %% "akka-testkit"                   % Version.akka
-  val akkaHttpTestkit = "com.typesafe.akka" %% "akka-http-testkit-experimental" % Version.akkaHttp
-  val playTest        = "com.typesafe.play" %% "play-test"                      % Version.play
-  val playWs          = "com.typesafe.play" %% "play-ws"                        % Version.play
-  val junit           = "junit"             %  "junit"                          % Version.junit
-  val scalaTest       = "org.scalatest"     %% "scalatest"                      % Version.scalaTest
+  val akka23Cluster     = "com.typesafe.akka" %% "akka-cluster"                   % Version.akka23
+  val akka23Http        = "com.typesafe.akka" %% "akka-http-experimental"         % Version.akka23Http
+  val akka23Testkit     = "com.typesafe.akka" %% "akka-testkit"                   % Version.akka23
+  val akka23HttpTestkit = "com.typesafe.akka" %% "akka-http-testkit-experimental" % Version.akka23Http
+  val play23Test        = "com.typesafe.play" %% "play-test"                      % Version.play23
+  val play23Ws          = "com.typesafe.play" %% "play-ws"                        % Version.play23
+  val play24Test        = "com.typesafe.play" %% "play-test"                      % Version.play24
+  val play24Ws          = "com.typesafe.play" %% "play-ws"                        % Version.play24
+  val junit             = "junit"             %  "junit"                          % Version.junit
+  val scalaTest         = "org.scalatest"     %% "scalatest"                      % Version.scalaTest
 }
 
 object Resolvers {
