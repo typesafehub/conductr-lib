@@ -5,13 +5,13 @@
 
 import Tests._
 
-name := "akka-conductr-bundle-lib"
+name := "akka23-conductr-bundle-lib"
 
 libraryDependencies ++= List(
-  Library.akkaCluster,
-  Library.akkaHttp,
-  Library.akkaTestkit % "test",
-  Library.scalaTest   % "test"
+  Library.akka23Cluster,
+  Library.akka23Http,
+  Library.akka23Testkit % "test",
+  Library.scalaTest     % "test"
 )
 
 fork in Test := true

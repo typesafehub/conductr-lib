@@ -5,13 +5,13 @@
 
 import Tests._
 
-name := "play-conductr-bundle-lib"
+name := "play24-conductr-bundle-lib"
 
 libraryDependencies ++= List(
-  Library.playWs,
-  Library.akkaTestkit     % "test",
-  Library.playTest        % "test",
-  Library.scalaTest       % "test"
+  Library.play24Ws,
+  Library.akka23Testkit % "test",
+  Library.play24Test    % "test",
+  Library.scalaTest     % "test"
 )
 
 resolvers += Resolvers.playTypesafeReleases

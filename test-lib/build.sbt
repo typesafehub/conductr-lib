@@ -6,8 +6,8 @@
 name := "test-lib"
 
 libraryDependencies ++= List(
-  Library.akkaTestkit,
-  Library.akkaHttpTestkit,
+  Library.akka23Testkit,
+  Library.akka23HttpTestkit,
   Library.junit,
   Library.scalaTest
 )
