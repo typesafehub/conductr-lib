@@ -9,10 +9,10 @@ package com.typesafe.conductr.bundlelib.akka
 import java.net.{ InetSocketAddress, URL }
 
 import akka.actor._
-import akka.http.Http
-import akka.http.model.headers.{ CacheDirectives, Location, `Cache-Control` }
-import akka.http.model.{ HttpEntity, HttpResponse, StatusCodes }
-import akka.http.server.Directives._
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.headers.{ CacheDirectives, Location, `Cache-Control` }
+import akka.http.scaladsl.model.{ HttpEntity, HttpResponse, StatusCodes }
+import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorFlowMaterializer
 import akka.testkit.TestProbe
 import com.typesafe.conductr.bundlelib.scala.LocationCache
@@ -108,7 +108,7 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
       }
 
     val url = new URL(Env.serviceLocator.get)
-    val server = Http(system).bindAndStartHandlingWith(handler, url.getHost, url.getPort, settings = None)
+    val server = Http(system).bindAndHandle(handler, url.getHost, url.getPort)
 
     try {
       server.onComplete {

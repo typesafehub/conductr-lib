@@ -7,9 +7,9 @@
 package com.typesafe.conductr.bundlelib.akka
 
 import akka.actor._
-import akka.http.client.RequestBuilding.{ Get, Post, Put, Patch, Delete, Options, Head }
-import akka.http.{ Http, HttpExt }
-import akka.http.model.headers.{ Host, `User-Agent` }
+import akka.http.scaladsl.client.RequestBuilding.{ Get, Post, Put, Patch, Delete, Options, Head }
+import akka.http.scaladsl.{ Http, HttpExt }
+import akka.http.scaladsl.model.headers.{ Host, `User-Agent` }
 import akka.stream.ActorFlowMaterializer
 import akka.stream.scaladsl.{ Sink, Source }
 import com.typesafe.conductr.bundlelib.HttpPayload
