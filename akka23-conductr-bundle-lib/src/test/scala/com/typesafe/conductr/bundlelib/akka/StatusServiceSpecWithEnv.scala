@@ -8,9 +8,9 @@ package com.typesafe.conductr.bundlelib.akka
 
 import java.net.{ InetSocketAddress, URL }
 
-import akka.http.Http
-import akka.http.model.StatusCodes
-import akka.http.server.Directives._
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.server.Directives._
 import akka.testkit.TestProbe
 import com.typesafe.conductr.{ AkkaUnitTest, _ }
 
@@ -42,7 +42,7 @@ class StatusServiceSpecWithEnv extends AkkaUnitTest("StatusServiceSpecWithEnv", 
         }
 
       val url = new URL(Env.conductRStatus.get)
-      val server = Http(system).bindAndStartHandlingWith(handler, url.getHost, url.getPort, settings = None)
+      val server = Http(system).bindAndHandle(handler, url.getHost, url.getPort)
 
       try {
         server.onComplete {
