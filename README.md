@@ -295,7 +295,7 @@ import play.api._
 import com.typesafe.conductr.bundlelib.play.Env
 
 object Global extends GlobalSettings {
-  val totalConfiguration = this.configuration ++ Configuration(Env.asConfig)
+  val totalConfiguration = super.configuration ++ Configuration(Env.asConfig)
 
   override def configuration: Configuration =
     totalConfiguration
@@ -304,24 +304,23 @@ object Global extends GlobalSettings {
 
 #### Play 2.4
 
+Your `application.conf` should contain the following:
+
+```
+play.application.loader = "com.typesafe.conductr.bundlelib.play.ConductRApplicationLoader"
+
+play.modules.enabled += "com.typesafe.conductr.bundlelib.play.ConductRLifecycleModule"
+```
+
+Note that if you are using your own application loader then you should ensure that the Akka and Play ConductR-related properties are loaded. Here's a complete implementation:
+
 ```scala
-package modules
-
-import com.typesafe.conductr.bundlelib.akka.Env
-import play.api.inject.guice.GuiceApplicationLoader
-import play.api.{Configuration, Application, ApplicationLoader}
-
-class CustomApplicationLoader extends ApplicationLoader {
+class MyCustomApplicationLoader extends ApplicationLoader {
   def load(context: ApplicationLoader.Context): Application = {
-    val newConfig = context.initialConfiguration ++ Configuration(Env.asConfig)
+    val conductRConfig = Configuration(AkkaEnv.asConfig) ++ Configuration(PlayEnv.asConfig)
+    val newConfig = context.initialConfiguration ++ conductRConfig
     val newContext = context.copy(initialConfiguration = newConfig)
     (new GuiceApplicationLoader).load(newContext)
   }
 }
-```
-
-In addition your `application.conf` will include the following line to use the above loader:
-
-```
-play.application.loader = "modules.CustomApplicationLoader"
 ```
