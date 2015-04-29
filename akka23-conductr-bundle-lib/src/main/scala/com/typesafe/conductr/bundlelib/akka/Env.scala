@@ -63,7 +63,10 @@ object Env extends com.typesafe.conductr.bundlelib.scala.Env {
     ConfigFactory.parseMap((akkaSeeds ++ hostname ++ port).toMap.asJava)
   }
 
-  private def mkSystem(system: String): String =
+  /**
+   * take a string representing a system name and form a valid actor system name from it.
+   */
+  def mkSystem(system: String): String =
     system.dropWhile(!_.isLetterOrDigit).collect {
       case c if c.isLetterOrDigit || c == '-' || c == '_' => c
       case c if c == '.'                                  => '_'
