@@ -15,8 +15,8 @@ class EnvSpecWithEnvForOthers extends AkkaUnitTest("EnvSpecWithEnvForOthers", "a
 
   "The Env functionality in the library" should {
     "return seed properties when running with other seed nodes" in {
-      config.getString("akka.cluster.seed-nodes.0") shouldBe "akka.udp://some-system@10.0.1.11:10001"
-      config.getString("akka.cluster.seed-nodes.1") shouldBe "akka.tcp://some-system@10.0.1.12:10000"
+      config.getString("akka.cluster.seed-nodes.0") shouldBe "akka.udp://some-system-1_0_0@10.0.1.11:10001"
+      config.getString("akka.cluster.seed-nodes.1") shouldBe "akka.tcp://some-system-1_0_0@10.0.1.12:10000"
       intercept[Missing](config.getString("akka.cluster.seed-nodes.2"))
     }
   }

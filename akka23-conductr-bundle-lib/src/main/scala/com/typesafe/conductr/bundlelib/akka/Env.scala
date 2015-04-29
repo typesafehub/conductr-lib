@@ -51,10 +51,10 @@ object Env extends com.typesafe.conductr.bundlelib.scala.Env {
           val akkaRemoteOtherPorts = akkaRemoteOtherPortsConcat.split(MultiValDelim)
           val otherAkkaRemoteNodes = for {
             (((protocol, ip), port), n) <- akkaRemoteOtherProtocols.zip(akkaRemoteOtherIps).zip(akkaRemoteOtherPorts).zipWithIndex
-          } yield presentSeedNode(protocol, bundleSystem, ip, port, n)
+          } yield presentSeedNode(protocol, mkSystem(bundleSystem), ip, port, n)
           otherAkkaRemoteNodes.toList
         } else
-          List(presentSeedNode(akkaRemoteProtocol, bundleSystem, bundleHostIp, akkaRemoteHostPort, 0))
+          List(presentSeedNode(akkaRemoteProtocol, mkSystem(bundleSystem), bundleHostIp, akkaRemoteHostPort, 0))
       akkaSeeds.flatten
     }
     val hostname = sys.env.get("BUNDLE_HOST_IP").toList.map("akka.remote.netty.tcp.hostname" -> _)
@@ -62,4 +62,10 @@ object Env extends com.typesafe.conductr.bundlelib.scala.Env {
 
     ConfigFactory.parseMap((akkaSeeds ++ hostname ++ port).toMap.asJava)
   }
+
+  private def mkSystem(system: String): String =
+    system.dropWhile(!_.isLetterOrDigit).collect {
+      case c if c.isLetterOrDigit || c == '-' || c == '_' => c
+      case c if c == '.'                                  => '_'
+    }
 }
