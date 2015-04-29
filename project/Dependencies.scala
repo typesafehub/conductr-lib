@@ -10,7 +10,7 @@ object Version {
   val akka23Http = "1.0-RC1"
   val junit      = "4.12"
   val play23     = "2.3.8"
-  val play24     = "2.4.0-M3"
+  val play24     = "2.4.0-RC1"
   val scala      = "2.11.6"
   val scalaTest  = "2.2.4"
 }

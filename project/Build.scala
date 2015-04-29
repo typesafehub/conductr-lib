@@ -3,6 +3,8 @@
  * transmitted in any form or by any means without the express written permission of Typesafe, Inc.
  */
 
+import bintray.Plugin.bintrayPublishSettings
+import bintray.Keys._
 import com.typesafe.sbt.SbtScalariform._
 import de.heikoseeberger.sbtheader.SbtHeader.autoImport._
 import sbtrelease.ReleasePlugin._
@@ -23,6 +25,7 @@ object Build extends AutoPlugin {
     inConfig(Compile)(compileInputs.in(compile) <<= compileInputs.in(compile).dependsOn(createHeaders.in(compile))) ++
     inConfig(Test)(compileInputs.in(compile) <<= compileInputs.in(compile).dependsOn(createHeaders.in(compile))) ++
     releaseSettings ++
+    bintrayPublishSettings ++
     List(
       // Core settings
       organization := "com.typesafe.conductr",
@@ -71,15 +74,9 @@ object Build extends AutoPlugin {
             |""".stripMargin
           )
       ),
-      // Publishing
-      publishTo := {
-        val typesafe = "http://private-repo.typesafe.com/typesafe/"
-        val (name, url) = if (isSnapshot.value)
-          ("typesafe-snapshots", typesafe + "maven-snapshots")
-        else
-          ("typesafe-releases", typesafe + "maven-releases")
-        Some(Resolver.url(name, new URL(url)))
-      },
+      // Bintray settings
+      bintrayOrganization in bintray := Some("typesafe"),
+      repository in bintray := "maven-releases",
       // Release settings
       ReleaseKeys.versionBump := sbtrelease.Version.Bump.Minor
     )

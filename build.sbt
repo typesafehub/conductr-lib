@@ -33,7 +33,7 @@ lazy val play23ConductRBundleLib = project
 
 lazy val play24ConductRBundleLib = project
   .in(file("play24-conductr-bundle-lib"))
-  .dependsOn(scalaConductRBundleLib)
+  .dependsOn(akka23ConductRBundleLib)
   .dependsOn(testLib % "test->compile")
 
 lazy val testLib = project

@@ -16,7 +16,7 @@ class EnvSpecWithEnv extends AkkaUnitTest("EnvSpecWithEnvForHost", "akka.logleve
     "initialize the env like expected" in {
       config.getString("http.address") shouldBe "127.0.0.1"
       config.getString("http.port") shouldBe "9000"
-      config.getString("play.modules.akka.actor-system") shouldBe "somesys"
+      config.getString("play.akka.actor-system") shouldBe "somesys"
     }
   }
 }

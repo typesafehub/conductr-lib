@@ -23,7 +23,7 @@ object Env extends com.typesafe.conductr.bundlelib.scala.Env {
     val httpAddress = sys.env.get(s"${webName}_BIND_IP").toList.map("http.address" -> _)
     val httpPort = sys.env.get(s"${webName}_BIND_PORT").toList.map("http.port" -> _)
 
-    val playActorSystem = sys.env.get("BUNDLE_SYSTEM").toList.map("play.modules.akka.actor-system" -> _)
+    val playActorSystem = sys.env.get("BUNDLE_SYSTEM").toList.map("play.akka.actor-system" -> _)
 
     ConfigFactory.parseMap((httpAddress ++ httpPort ++ playActorSystem).toMap.asJava)
   }
