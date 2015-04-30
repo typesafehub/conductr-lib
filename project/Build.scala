@@ -1,12 +1,6 @@
-/*
- * Copyright © 2014-2015 Typesafe, Inc. All rights reserved. No information contained herein may be reproduced or
- * transmitted in any form or by any means without the express written permission of Typesafe, Inc.
- */
-
 import bintray.Plugin.bintrayPublishSettings
 import bintray.Keys._
 import com.typesafe.sbt.SbtScalariform._
-import de.heikoseeberger.sbtheader.SbtHeader.autoImport._
 import sbtrelease.ReleasePlugin._
 import sbt._
 import sbt.Keys._
@@ -22,8 +16,6 @@ object Build extends AutoPlugin {
 
   override def projectSettings =
     scalariformSettings ++
-    inConfig(Compile)(compileInputs.in(compile) <<= compileInputs.in(compile).dependsOn(createHeaders.in(compile))) ++
-    inConfig(Test)(compileInputs.in(compile) <<= compileInputs.in(compile).dependsOn(createHeaders.in(compile))) ++
     releaseSettings ++
     bintrayPublishSettings ++
     List(
@@ -39,41 +31,13 @@ object Build extends AutoPlugin {
         "-target:jvm-1.6",
         "-encoding", "UTF-8"
       ),
+      licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html")),
       // Scalariform settings
       ScalariformKeys.preferences := ScalariformKeys.preferences.value
         .setPreference(AlignSingleLineCaseStatements, true)
         .setPreference(AlignSingleLineCaseStatements.MaxArrowIndent, 100)
         .setPreference(DoubleIndentClassDeclaration, true)
         .setPreference(PreserveDanglingCloseParenthesis, true),
-      // Header settings
-      headers := Map(
-        "scala" -> (
-          HeaderPattern.cStyleBlockComment,
-          """|/*
-            | * Copyright © 2014-2015 Typesafe, Inc. All rights reserved.
-            | * No information contained herein may be reproduced or transmitted in any form
-            | * or by any means without the express written permission of Typesafe, Inc.
-            | */
-            |
-            |""".stripMargin
-          ),
-        "py" -> (
-          HeaderPattern.hashLineComment,
-          """|# Copyright © 2014-2015 Typesafe, Inc. All rights reserved.
-            |# No information contained herein may be reproduced or transmitted in any form
-            |# or by any means without the express written permission of Typesafe, Inc.
-            |
-            |""".stripMargin
-          ),
-        "conf" -> (
-          HeaderPattern.hashLineComment,
-          """|# Copyright © 2014-2015 Typesafe, Inc. All rights reserved.
-            |# No information contained herein may be reproduced or transmitted in any form
-            |# or by any means without the express written permission of Typesafe, Inc.
-            |
-            |""".stripMargin
-          )
-      ),
       // Bintray settings
       bintrayOrganization in bintray := Some("typesafe"),
       repository in bintray := "maven-releases",
