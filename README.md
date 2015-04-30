@@ -12,6 +12,12 @@ The libraries are structured as follows:
 * `"com.typesafe.conductr" %% "play23-conductr-bundle-lib" % "0.13.0"`
 * `"com.typesafe.conductr" %% "play24-conductr-bundle-lib" % "0.13.0"`
 
+Note that the above libraries require the following resolver when using sbt:
+
+```scala
+resolvers += bintrayRepo("typesafe", "maven-releases")
+```
+
 ## conductr-bundle-lib
 
 This library provides a base level of functionality mainly formed around constructing the requisite payloads for ConductR's RESTful services. The library is pure Java and has no dependencies other than the JDK.
