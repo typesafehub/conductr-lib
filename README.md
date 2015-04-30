@@ -2,13 +2,15 @@
 
 ## Introduction
 
-This project provides a number of libraries to facilitate ConductR's status service and its service lookup service. The libraries are intended to be delivered by the Typesafe Reactive Platform (Typesafe RP) and are structured as follows:
+This project provides a number of libraries to facilitate [ConductR](http://typesafe.com/products/conductr)'s status service and its service lookup service. Note that usage of the libraries in your code is entirely benign when used outside of the context of ConductR i.e. you will find that your applications and services will continue to function normally when used without ConductR. We have also designed the libraries to be a convenience to ConductR's REST and environment variable based APIs, and to have a very low impact on your code.
 
-* `"com.typesafe.conductr" %  "conductr-bundle-lib"        % "0.11.0"`
-* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"  % "0.11.0"`
-* `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib" % "0.11.0"`
-* `"com.typesafe.conductr" %% "play23-conductr-bundle-lib" % "0.11.0"`
-* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib" % "0.11.0"`
+The libraries are structured as follows:
+
+* `"com.typesafe.conductr" %  "conductr-bundle-lib"        % "0.13.0"`
+* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"  % "0.13.0"`
+* `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib" % "0.13.0"`
+* `"com.typesafe.conductr" %% "play23-conductr-bundle-lib" % "0.13.0"`
+* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib" % "0.13.0"`
 
 ## conductr-bundle-lib
 
@@ -286,7 +288,7 @@ ConnectionContext cc =
 LocationService.getInstance().lookupWithContext("/whatever", cc, cache)
 ```
 
-In order for an application or service to take advantage of setting important Play related properties, the following  is required in order to associate ConductR configuration with that of Play:
+In order for an application or service to take advantage of setting important Play related properties, the following is required in order to associate ConductR configuration with that of Play and Akka:
 
 #### Play 2.3
 
