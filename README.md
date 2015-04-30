@@ -1,5 +1,7 @@
 # Typesafe ConductR Bundle Library
 
+[![Build Status](https://api.travis-ci.org/typesafehub/conductr-bundle-lib.png?branch=master)](https://travis-ci.org/typesafehub/conductr-bundle-lib)
+
 ## Introduction
 
 This project provides a number of libraries to facilitate ConductR's status service and its service lookup service. The libraries are intended to be delivered by the Typesafe Reactive Platform (Typesafe RP) and are structured as follows:

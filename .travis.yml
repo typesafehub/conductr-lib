@@ -1,0 +1,10 @@
+language: scala
+scala:
+- 2.11.6
+script:
+- jdk_switcher use openjdk6
+- sbt conductRBundleLib/test:test scalaConductRBundleLib/test:test akka23ConductRBundleLib/test:test play23ConductRBundleLib/test:test
+- jdk_switcher use oraclejdk7
+- sbt conductRBundleLib/test:test scalaConductRBundleLib/test:test akka23ConductRBundleLib/test:test play23ConductRBundleLib/test:test
+- jdk_switcher use oraclejdk8
+- sbt test
