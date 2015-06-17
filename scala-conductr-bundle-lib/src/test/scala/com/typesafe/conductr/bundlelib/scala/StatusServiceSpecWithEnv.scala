@@ -5,9 +5,8 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorFlowMaterializer
 import akka.testkit.TestProbe
-import com.typesafe.conductr._
 import com.typesafe.conductr.AkkaUnitTest
-import java.net.{ InetSocketAddress, URL }
+import java.net.InetSocketAddress
 import com.typesafe.conductr.bundlelib.scala.ConnectionContext.Implicits
 
 import scala.concurrent.Await
@@ -37,7 +36,7 @@ class StatusServiceSpecWithEnv extends AkkaUnitTest("StatusServiceSpecWithEnv", 
           }
         }
 
-      val url = new URL(Env.conductRStatus.get)
+      val url = URL(Env.conductRStatus.get)
       val server = Http(system).bindAndHandle(handler, url.getHost, url.getPort)
 
       try {

@@ -9,19 +9,22 @@ import org.scalatest.junit.JUnitSuite;
 import scala.concurrent.Await;
 import scala.concurrent.duration.Duration;
 
+import java.net.URI;
+
 import static org.junit.Assert.assertEquals;
 
 public class LocationServiceTest extends JUnitSuite {
     @Test
-    public void return_None_when_running_in_development_mode() throws Exception {
+    public void return_the_fallback_when_running_in_development_mode() throws Exception {
         ActorSystem system = ActorSystem.create("MySystem");
 
-        ConnectionContext cc = ConnectionContext.create(system);
+        URI fallback = new URI("/fallback");
         LocationCache cache = new LocationCache();
+        ConnectionContext cc = ConnectionContext.create(system);
         Timeout timeout = new Timeout(Duration.create(5, "seconds"));
         assertEquals(
-            Await.result(LocationService.getInstance().lookupWithContext("/whatever", cc, cache), timeout.duration()),
-            Option.none()
+            Await.result(LocationService.getInstance().lookupWithContext("/whatever", fallback, cache, cc), timeout.duration()),
+            Option.some(fallback)
         );
     }
 }

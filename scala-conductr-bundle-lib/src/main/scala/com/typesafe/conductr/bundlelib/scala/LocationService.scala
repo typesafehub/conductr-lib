@@ -1,7 +1,8 @@
 package com.typesafe.conductr.bundlelib.scala
 
+import java.net.{ URI => JavaURI }
+
 import scala.concurrent.Future
-import scala.language.reflectiveCalls
 
 object LocationService extends LocationService(new ConnectionHandler)
 
@@ -9,13 +10,11 @@ class LocationService(handler: ConnectionHandler) extends AbstractLocationServic
 
   override protected type CC = ConnectionContext
 
-  override def lookup(serviceName: String)(implicit cc: CC): Future[Option[String]] = {
-    import cc.executionContext
-    handler.withConnectedRequest(createLookupPayload(serviceName))(handleLookup).map(toUri)
-  }
-
-  override def lookup(serviceName: String, cache: CacheLike)(implicit cc: CC): Future[Option[String]] =
-    cache.getOrElseUpdate(serviceName) {
-      handler.withConnectedRequest(createLookupPayload(serviceName))(handleLookup)
-    }
+  override def lookup(serviceName: String, fallback: JavaURI, cache: CacheLike)(implicit cc: CC): Future[Option[JavaURI]] =
+    if (Env.isRunByConductR)
+      cache.getOrElseUpdate(serviceName) {
+        handler.withConnectedRequest(createLookupPayload(serviceName))(handleLookup)
+      }
+    else
+      Future.successful(Some(fallback))
 }

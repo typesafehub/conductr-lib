@@ -20,6 +20,12 @@ Note that the above libraries require the following resolver when using sbt:
 resolvers += bintrayRepo("typesafe", "maven-releases")
 ```
 
+Also note that the examples here use the following import to conveniently build the JDK `URI` and `URL` types. 
+
+```scala
+import com.typesafe.conductr.bundlelib.scala.{URL, URI}
+```
+
 ## conductr-bundle-lib
 
 This library provides a base level of functionality mainly formed around constructing the requisite payloads for ConductR's RESTful services. The library is pure Java and has no dependencies other than the JDK.
@@ -83,8 +89,8 @@ Please read the section on `conductr-bundle-lib` for an introduction to these se
 The LocationService looks up service names and processes HTTP's `307` "temporary redirect" responses to return the location of the resolved service (or a `404` if one cannot be found). Many HTTP clients allow the following of redirects, particularly when either of the `HEAD` or `GET` methods are used (other methods may be considered insecure by default). Therefore if the service you are locating is an HTTP one then using a regular HTTP client should require no further work. Here is an example of using the [Dispatch](http://dispatch.databinder.net/Dispatch.html) library:
 
 ```scala
-val svc = LocationService.getLookupUrl("/someservice", "http://127.0.0.1:9000/someservice")
-val svcResp = Http.configure(_.setFollowRedirects(true))(url(svc).OK)
+val svc = LocationService.getLookupUrl("/someservice", URL("http://127.0.0.1:9000/someservice"))
+val svcResp = Http.configure(_.setFollowRedirects(true))(url(svc.toString).OK)
 ```
 
 The above declares an `svc` val which will either be the one that ConductR provides, or one to use for development running on your machine.
@@ -108,10 +114,10 @@ import com.typesafe.conductr.bundlelib.scala.ConnectionContext.Implicits.global
 
 val locationCache = LocationCache()
 
-val service = LocationService.lookup("/someservice", locationCache)
+val service = LocationService.lookup("/someservice", URI("tcp://localhost:1234"), locationCache)
 ```
 
-`service` is typed `Future[Option[String]]` meaning that an optional URI response will be returned at some time in the future. Supposing that this lookup is made during the initialisation of your program, the service you're looking for may not exist. However calling the same function later on may yield the service. This is because services can come and go.
+`service` is typed `Future[Option[URI]]` meaning that an optional URI response will be returned at some time in the future. Supposing that this lookup is made during the initialisation of your program, the service you're looking for may not exist. However calling the same function later on may yield the service. This is because services can come and go. Note that the fallback URI of `"tcp://localhost:1234"` will be returned if this function is called upon when started outside of ConductR.
 
 The service response constitutes a URI that describes its location.
 
@@ -121,12 +127,9 @@ Some bundle components cannot proceed with their initialisation unless the servi
 
 ```scala
 val resultUri = Await.result(
-  LocationService.lookup("/someservice"),
+  LocationService.lookup("/someservice", URI("http://127.0.0.1:9000"), locationCache),
   sometimeout)
-val serviceUri = resultUri.getOrElse {
-  if (Env.isRunByConductR) System.exit(70)
-  "http://127.0.0.1:9000"
-}
+val serviceUri = resultUri.getOrElse(System.exit(70))
 ```
 
 In the above, the program will exit if a service cannot be located at the time the program initializes; unless the program has not been started by ConductR in which case an alternate URI is provided.
@@ -178,34 +181,34 @@ As a reminder, some bundle components cannot proceed with their initialisation u
 
 
 ```scala
-class MyService extends Actor with ImplicitConnectionContext {
+class MyService(cache: CacheLike) extends Actor with ImplicitConnectionContext {
 
   import context.dispatcher
 
   override def preStart(): Unit =
-    LocationService.lookup("/someservice").pipeTo(self)
+    LocationService.lookup("/someservice", URI("http://127.0.0.1:9000"), cache).pipeTo(self)
 
   override def receive: Receive =
     initial
 
   private def initial: Receive = {
-    case Some(someService: String) =>
+    case Some(someService: URI) =>
       // We now have the service
 
       context.become(service(someService))
 
     case None =>
-      self ! (if (Env.isRunByConductR) PoisonPill else Some("http://127.0.0.1:9000"))
+      self ! PoisonPill
   }
 
-  private def service(someService: String): Receive = {
+  private def service(someService: URI): Receive = {
     // Regular actor receive handling goes here given that we have a service URI now.
     ...
   }
 }
 ```
 
-This type of actor is used to handle service processing and should only receive service oriented messages once its dependent service URI is known. This is an improvement on the blocking example provided before, as it will not block. However it still has the requirement that `someservice` must be running at the point of initialisation, and that it continues to run. Neither of these requirements may always be satisfied with a distributed system.
+This type of actor is used to handle service processing and should only receive service oriented messages once its dependent service URI is known. This is an improvement on the blocking example provided before, as it will not block. However it still has the requirement that `someservice` must be running at the point of initialization, and that it continues to run. Neither of these requirements may always be satisfied with a distributed system.
 
 ### Java
 
@@ -220,7 +223,7 @@ Similarly here is a service lookup:
 
 ```java
 ConnectionContext cc = ConnectionContext.create(system);
-LocationService.getInstance().lookupWithContext("/whatever", cc, cache)
+LocationService.getInstance().lookupWithContext("/whatever", URI("tcp://localhost:1234"), cache, cc)
 ```
 
 ### Akka Clustering

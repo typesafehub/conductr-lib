@@ -34,18 +34,18 @@ public class LocationService {
     }
 
     /**
-     * A convenience function for [[createLookupPayload]] where the payload url is created when this bundle component
-     * is running in the context of ConductR. If it is not then a fallbackUrl is returned.
+     * A convenience function where the payload url is created when this bundle component
+     * is running in the context of ConductR. If it is not then a fallback is returned.
      * @param serviceName The name of the service
-     * @param fallbackUrl The url to use when not running with ConductR
+     * @param fallback The url to use when not running with ConductR
      * @throws MalformedURLException
      */
-    public static String getLookupUrl(String serviceName, String fallbackUrl) throws MalformedURLException {
+    public static URL getLookupUrl(String serviceName, URL fallback) throws MalformedURLException {
         HttpPayload payload = createLookupPayload(serviceName);
         if (payload == null) {
-            return fallbackUrl;
+            return fallback;
         } else {
-            return payload.getUrl().toString();
+            return payload.getUrl();
         }
     }
 

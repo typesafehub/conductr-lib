@@ -1,5 +1,6 @@
 package com.typesafe.conductr.bundlelib.scala
 
+import java.net.{ URI => JavaURI }
 import java.util.{ TimerTask, Timer }
 
 import scala.collection.concurrent.TrieMap
@@ -12,8 +13,8 @@ import scala.util.Success
  * A structure that describes what we require from a cache.
  */
 trait CacheLike {
-  def getOrElseUpdate(serviceName: String)(op: => Future[Option[(String, Option[FiniteDuration])]]): Future[Option[String]]
-  def remove(serviceName: String): Option[Future[Option[String]]]
+  def getOrElseUpdate(serviceName: String)(op: => Future[Option[(JavaURI, Option[FiniteDuration])]]): Future[Option[JavaURI]]
+  def remove(serviceName: String): Option[Future[Option[JavaURI]]]
 }
 
 object LocationCache {
@@ -33,12 +34,12 @@ object LocationCache {
  */
 class LocationCache extends CacheLike {
 
-  private val cache = TrieMap.empty[String, Future[Option[String]]]
+  private val cache = TrieMap.empty[String, Future[Option[JavaURI]]]
 
   val reaperTimer = new Timer()
 
-  override def getOrElseUpdate(serviceName: String)(op: => Future[Option[(String, Option[FiniteDuration])]]): Future[Option[String]] = {
-    def dualOp: Future[Option[String]] = {
+  override def getOrElseUpdate(serviceName: String)(op: => Future[Option[(JavaURI, Option[FiniteDuration])]]): Future[Option[JavaURI]] = {
+    def dualOp: Future[Option[JavaURI]] = {
       val locationAndMaxAge = op
 
       import Implicits.global
@@ -61,6 +62,6 @@ class LocationCache extends CacheLike {
     cache.getOrElseUpdate(serviceName, dualOp)
   }
 
-  override def remove(serviceName: String): Option[Future[Option[String]]] =
+  override def remove(serviceName: String): Option[Future[Option[JavaURI]]] =
     cache.remove(serviceName)
 }
