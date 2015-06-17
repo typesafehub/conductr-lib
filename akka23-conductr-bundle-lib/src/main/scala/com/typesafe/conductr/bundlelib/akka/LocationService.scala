@@ -1,5 +1,7 @@
 package com.typesafe.conductr.bundlelib.akka
 
+import java.net.URI
+
 import com.typesafe.conductr.bundlelib.scala.{ CacheLike, AbstractLocationService }
 
 import akka.japi.{ Option => JOption }
@@ -20,19 +22,17 @@ object LocationService extends LocationService(new ConnectionHandler) {
 class LocationService(handler: ConnectionHandler) extends AbstractLocationService(handler) {
   override protected type CC = ConnectionContext
 
-  override def lookup(serviceName: String)(implicit cc: CC): Future[Option[String]] = {
-    import Implicits.global
-    handler.withConnectedRequest(createLookupPayload(serviceName))(handleLookup).map(toUri)
-  }
-
-  override def lookup(serviceName: String, cache: CacheLike)(implicit cc: CC): Future[Option[String]] =
-    cache.getOrElseUpdate(serviceName) {
-      handler.withConnectedRequest(createLookupPayload(serviceName))(handleLookup)
-    }
+  override def lookup(serviceName: String, fallback: URI, cache: CacheLike)(implicit cc: CC): Future[Option[URI]] =
+    if (Env.isRunByConductR)
+      cache.getOrElseUpdate(serviceName) {
+        handler.withConnectedRequest(createLookupPayload(serviceName))(handleLookup)
+      }
+    else
+      Future.successful(Some(fallback))
 
   /** JAVA API */
-  def lookupWithContext(serviceName: String, cc: CC, cache: CacheLike): Future[JOption[String]] = {
+  def lookupWithContext(serviceName: String, fallback: URI, cache: CacheLike, cc: CC): Future[JOption[URI]] = {
     import Implicits.global
-    lookup(serviceName, cache)(cc).map(JOption.fromScalaOption)
+    lookup(serviceName, fallback, cache)(cc).map(JOption.fromScalaOption)
   }
 }

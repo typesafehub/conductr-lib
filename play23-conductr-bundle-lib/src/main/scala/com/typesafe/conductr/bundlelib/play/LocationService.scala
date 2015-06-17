@@ -1,5 +1,7 @@
 package com.typesafe.conductr.bundlelib.play
 
+import java.net.URI
+
 import com.typesafe.conductr.bundlelib.scala.{ CacheLike, AbstractLocationService }
 import play.api.libs.concurrent.Execution.Implicits
 import play.libs.F
@@ -19,20 +21,18 @@ object LocationService extends LocationService(new ConnectionHandler) {
 class LocationService(handler: ConnectionHandler) extends AbstractLocationService(handler) {
   override protected type CC = ConnectionContext
 
-  override def lookup(serviceName: String)(implicit cc: CC): Future[Option[String]] = {
-    import Implicits.defaultContext
-    handler.withConnectedRequest(createLookupPayload(serviceName))(handleLookup).map(toUri)
-  }
-
-  override def lookup(serviceName: String, cache: CacheLike)(implicit cc: CC): Future[Option[String]] =
-    cache.getOrElseUpdate(serviceName) {
-      handler.withConnectedRequest(createLookupPayload(serviceName))(handleLookup)
-    }
+  override def lookup(serviceName: String, fallback: URI, cache: CacheLike)(implicit cc: CC): Future[Option[URI]] =
+    if (Env.isRunByConductR)
+      cache.getOrElseUpdate(serviceName) {
+        handler.withConnectedRequest(createLookupPayload(serviceName))(handleLookup)
+      }
+    else
+      Future.successful(Some(fallback))
 
   /** JAVA API */
-  def lookupWithContext(serviceName: String, cc: CC, cache: CacheLike): F.Promise[F.Option[String]] = {
+  def lookupWithContext(serviceName: String, fallback: URI, cache: CacheLike, cc: CC): F.Promise[F.Option[URI]] = {
     import Implicits.defaultContext
-    lookup(serviceName, cache)(cc).map(_.toF).toF
+    lookup(serviceName, fallback, cache)(cc).map(_.toF).toF
   }
 
 }

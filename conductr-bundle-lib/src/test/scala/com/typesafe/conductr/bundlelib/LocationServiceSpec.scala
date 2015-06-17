@@ -1,5 +1,7 @@
 package com.typesafe.conductr.bundlelib
 
+import java.net.URL
+
 import com.typesafe.conductr.UnitTest
 
 class LocationServiceSpec extends UnitTest {
@@ -10,7 +12,8 @@ class LocationServiceSpec extends UnitTest {
     }
 
     "return the fallback when running in development mode" in {
-      LocationService.getLookupUrl("/whatever", "http://127.0.0.1/whatever") shouldBe "http://127.0.0.1/whatever"
+      val fallback = new URL("http://127.0.0.1/whatever")
+      LocationService.getLookupUrl("/whatever", fallback) shouldBe fallback
     }
   }
 }
