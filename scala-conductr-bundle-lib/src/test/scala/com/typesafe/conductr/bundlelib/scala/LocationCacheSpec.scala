@@ -15,7 +15,7 @@ class LocationCacheSpec extends AkkaUnitTest {
         cache.getOrElseUpdate(serviceName) {
           if (serviceName == "/someservice") {
             updates += 1
-            Future.successful(Some(URI("/somelocation") -> Some(100.millis)))
+            Future.successful(Some(URI("/somelocation") -> Some(200.millis)))
           } else
             throw new IllegalStateException(s"Some bad service: $serviceName")
         }
@@ -30,7 +30,7 @@ class LocationCacheSpec extends AkkaUnitTest {
       updates shouldBe 1
 
       // Let the cache expire
-      Thread.sleep(200)
+      Thread.sleep(500)
 
       val location3 = getFromCache("/someservice")
       Await.result(location3, timeout.duration) shouldBe Some(URI("/somelocation"))
