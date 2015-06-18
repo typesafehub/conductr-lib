@@ -296,7 +296,7 @@ ConnectionContext cc =
 
   ...
 
-LocationService.getInstance().lookupWithContext("/whatever", cc, cache)
+LocationService.getInstance().lookupWithContext("/whatever", new URI("tcp://localhost:1234"), cache, cc)
 ```
 
 In order for an application or service to take advantage of setting important Play related properties, the following is required in order to associate ConductR configuration with that of Play and Akka:
