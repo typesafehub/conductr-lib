@@ -8,11 +8,11 @@ This project provides a number of libraries to facilitate [ConductR](http://type
 
 The libraries are structured as follows:
 
-* `"com.typesafe.conductr" %  "conductr-bundle-lib"        % "1.0.0"`
-* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"  % "1.0.0"`
-* `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib" % "1.0.0"`
-* `"com.typesafe.conductr" %% "play23-conductr-bundle-lib" % "1.0.0"`
-* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib" % "1.0.0"`
+* `"com.typesafe.conductr" %  "conductr-bundle-lib"        % "1.0.1"`
+* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"  % "1.0.1"`
+* `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib" % "1.0.1"`
+* `"com.typesafe.conductr" %% "play23-conductr-bundle-lib" % "1.0.1"`
+* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib" % "1.0.1"`
 
 Note that the above libraries require the following resolver when using sbt:
 
