@@ -4,7 +4,7 @@ import akka.actor._
 import akka.http.scaladsl.client.RequestBuilding.{ Get, Post, Put, Patch, Delete, Options, Head }
 import akka.http.scaladsl.{ Http, HttpExt }
 import akka.http.scaladsl.model.headers.{ Host, `User-Agent` }
-import akka.stream.ActorFlowMaterializer
+import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Sink, Source }
 import com.typesafe.conductr.bundlelib.HttpPayload
 import com.typesafe.conductr.bundlelib.scala.{ AbstractConnectionHandler, AbstractConnectionContext }
@@ -14,19 +14,19 @@ import scala.concurrent.Future
 object ConnectionContext {
   def apply()(implicit context: ActorRefFactory): ConnectionContext = {
     val system = actorSystemOf(context)
-    apply(Http(system), ActorFlowMaterializer.create(system))
+    apply(Http(system), ActorMaterializer.create(system))
   }
 
-  def apply(httpExt: HttpExt, actorFlowMaterializer: ActorFlowMaterializer): ConnectionContext =
-    new ConnectionContext(httpExt, actorFlowMaterializer)
+  def apply(httpExt: HttpExt, actorMaterializer: ActorMaterializer): ConnectionContext =
+    new ConnectionContext(httpExt, actorMaterializer)
 
   /** JAVA API */
   def create(context: ActorRefFactory): ConnectionContext =
     apply()(context)
 
   /** JAVA API */
-  def create(httpExt: HttpExt, actorFlowMaterializer: ActorFlowMaterializer): ConnectionContext =
-    apply(httpExt, actorFlowMaterializer)
+  def create(httpExt: HttpExt, actorMaterializer: ActorMaterializer): ConnectionContext =
+    apply(httpExt, actorMaterializer)
 
   private def actorSystemOf(context: ActorRefFactory): ActorSystem = {
     val system = context match {
@@ -42,13 +42,13 @@ object ConnectionContext {
 
 class ConnectionContext(
   val httpExt: HttpExt,
-  implicit val actorFlowMaterializer: ActorFlowMaterializer) extends AbstractConnectionContext
+  implicit val actorMaterializer: ActorMaterializer) extends AbstractConnectionContext
 
 /**
  * Mix this trait into your Actor if you need an implicit
  * ConnectionContext in scope.
  *
- * Subclass may override `httpExt` and `actorFlowMaterializer to define custom
+ * Subclass may override `httpExt` and `actorMaterializer` to define custom
  * values for the `ConnectionContext`.
  */
 trait ImplicitConnectionContext { this: Actor =>
@@ -56,10 +56,10 @@ trait ImplicitConnectionContext { this: Actor =>
   def httpExt: HttpExt =
     Http(context.system)
 
-  def actorFlowMaterializer: ActorFlowMaterializer =
-    ActorFlowMaterializer.create(context)
+  def actorMaterializer: ActorMaterializer =
+    ActorMaterializer.create(context)
 
-  final implicit val cc: ConnectionContext = ConnectionContext(httpExt, actorFlowMaterializer)
+  final implicit val cc: ConnectionContext = ConnectionContext(httpExt, actorMaterializer)
 }
 
 /**
@@ -101,7 +101,7 @@ private[bundlelib] class ConnectionHandler extends AbstractConnectionHandler {
               case (m, header) => m.updated(header.name(), Some(header.value()))
             })
         }
-      requestSource.runWith(Sink.head)(cc.actorFlowMaterializer)
+      requestSource.runWith(Sink.head)(cc.actorMaterializer)
     }
 
   }

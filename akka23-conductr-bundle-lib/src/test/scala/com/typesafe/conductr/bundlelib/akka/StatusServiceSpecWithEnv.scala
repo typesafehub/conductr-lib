@@ -21,7 +21,7 @@ class StatusServiceSpecWithEnv extends AkkaUnitTest("StatusServiceSpecWithEnv", 
       implicit val cc = ConnectionContext()
 
       import system.dispatcher
-      import cc.actorFlowMaterializer
+      import cc.actorMaterializer
 
       val handler =
         path("bundles" / Segment) { bundleId =>

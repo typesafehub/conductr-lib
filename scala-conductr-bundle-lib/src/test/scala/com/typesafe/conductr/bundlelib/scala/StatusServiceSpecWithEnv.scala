@@ -3,7 +3,7 @@ package com.typesafe.conductr.bundlelib.scala
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
-import akka.stream.ActorFlowMaterializer
+import akka.stream.ActorMaterializer
 import akka.testkit.TestProbe
 import com.typesafe.conductr.AkkaUnitTest
 import java.net.InetSocketAddress
@@ -20,7 +20,7 @@ class StatusServiceSpecWithEnv extends AkkaUnitTest("StatusServiceSpecWithEnv", 
     "be able to call the right URL to signal that it is up" in {
 
       import system.dispatcher
-      implicit val materializer = ActorFlowMaterializer()
+      implicit val materializer = ActorMaterializer()
 
       val probe = new TestProbe(system)
 

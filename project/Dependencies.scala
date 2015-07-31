@@ -1,12 +1,12 @@
 import sbt._
 
 object Version {
-  val akka23     = "2.3.11"
-  val akka23Http = "1.0-RC3"
+  val akka23     = "2.3.12"
+  val akka23Http = "1.0"
   val junit      = "4.12"
-  val play23     = "2.3.8"
-  val play24     = "2.4.0"
-  val scala      = "2.11.6"
+  val play23     = "2.3.9"
+  val play24     = "2.4.2"
+  val scala      = "2.11.7"
   val scalaTest  = "2.2.4"
 }
 
