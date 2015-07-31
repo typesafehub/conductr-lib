@@ -167,10 +167,10 @@ Other than the `import`s for the types, the only difference in terms of API are 
  implicit val cc = ConnectionContext()
 ```
 
-There is also a lower level method where the `HttpExt` and `ActorFlowMaterializer` are passed in:
+There is also a lower level method where the `HttpExt` and `ActorMaterializer` are passed in:
 
 ```scala
-implicit val cc = ConnectionContext(httpExt, actorFlowMaterializer)
+implicit val cc = ConnectionContext(httpExt, actorMaterializer)
 ```
 
 When in the context of an actor, a convenient `ImplicitConnectionContext` trait may be mixed in to establish the `ConnectionContext`. The next section illustrates this in its sample `MyService` actor.

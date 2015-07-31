@@ -7,7 +7,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.headers.{ CacheDirectives, Location, `Cache-Control` }
 import akka.http.scaladsl.model.{ HttpEntity, HttpResponse, StatusCodes }
 import akka.http.scaladsl.server.Directives._
-import akka.stream.ActorFlowMaterializer
+import akka.stream.ActorMaterializer
 import akka.testkit.TestProbe
 import com.typesafe.conductr.bundlelib.scala.{ URL, URI, CacheLike, LocationCache }
 import com.typesafe.conductr.AkkaUnitTest
@@ -65,7 +65,7 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
 
   def withServerWithKnownService(serviceUri: JavaURI, maxAge: Option[Int] = None)(thunk: => Unit): Unit = {
     import system.dispatcher
-    implicit val materializer = ActorFlowMaterializer.create(system)
+    implicit val materializer = ActorMaterializer.create(system)
 
     val probe = new TestProbe(system)
 

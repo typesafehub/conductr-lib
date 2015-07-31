@@ -5,7 +5,7 @@ import java.net.{ InetSocketAddress, URL }
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
-import akka.stream.ActorFlowMaterializer
+import akka.stream.ActorMaterializer
 import akka.testkit.TestProbe
 import com.typesafe.conductr.bundlelib.play.ConnectionContext.Implicits
 import com.typesafe.conductr.{ AkkaUnitTest, _ }
@@ -23,7 +23,7 @@ class StatusServiceSpecWithEnv extends AkkaUnitTest("StatusServiceSpecWithEnv", 
       import Implicits.defaultContext
 
       import system.dispatcher
-      implicit val materializer = ActorFlowMaterializer()
+      implicit val materializer = ActorMaterializer()
 
       val handler =
         path("bundles" / Segment) { bundleId =>
