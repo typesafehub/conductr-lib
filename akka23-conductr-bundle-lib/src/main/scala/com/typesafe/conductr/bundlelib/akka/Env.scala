@@ -26,14 +26,15 @@ object Env extends com.typesafe.conductr.bundlelib.scala.Env {
   def asConfig: Config = {
     val akkaRemoteEndpointName = sys.env.getOrElse("AKKA_REMOTE_ENDPOINT_NAME", "AKKA_REMOTE")
 
-    def presentSeedNode(protocol: String, bundleSystem: String, ip: String, port: String, n: Int): (String, String) =
-      s"akka.cluster.seed-nodes.$n" -> s"akka.$protocol://$bundleSystem@$ip:$port"
+    def presentSeedNode(protocol: String, bundleSystem: String, bundleSystemVersion: String, ip: String, port: String, n: Int): (String, String) =
+      s"akka.cluster.seed-nodes.$n" -> s"akka.$protocol://${bundleSystem}-${bundleSystemVersion}@$ip:$port"
 
     val akkaSeeds = {
       val akkaSeeds =
         for {
           bundleHostIp <- sys.env.get("BUNDLE_HOST_IP").toList
           bundleSystem <- sys.env.get("BUNDLE_SYSTEM")
+          bundleSystemVersion <- sys.env.get("BUNDLE_SYSTEM_VERSION")
           akkaRemoteProtocol <- sys.env.get(s"${akkaRemoteEndpointName}_PROTOCOL")
           akkaRemoteHostPort <- sys.env.get(s"${akkaRemoteEndpointName}_HOST_PORT")
           akkaRemoteOtherProtocolsConcat <- sys.env.get(s"${akkaRemoteEndpointName}_OTHER_PROTOCOLS")
@@ -45,10 +46,10 @@ object Env extends com.typesafe.conductr.bundlelib.scala.Env {
           val akkaRemoteOtherPorts = akkaRemoteOtherPortsConcat.split(MultiValDelim)
           val otherAkkaRemoteNodes = for {
             (((protocol, ip), port), n) <- akkaRemoteOtherProtocols.zip(akkaRemoteOtherIps).zip(akkaRemoteOtherPorts).zipWithIndex
-          } yield presentSeedNode(protocol, mkSystem(bundleSystem), ip, port, n)
+          } yield presentSeedNode(protocol, mkSystemId(bundleSystem), mkSystemId(bundleSystemVersion), ip, port, n)
           otherAkkaRemoteNodes.toList
         } else
-          List(presentSeedNode(akkaRemoteProtocol, mkSystem(bundleSystem), bundleHostIp, akkaRemoteHostPort, 0))
+          List(presentSeedNode(akkaRemoteProtocol, mkSystemId(bundleSystem), mkSystemId(bundleSystemVersion), bundleHostIp, akkaRemoteHostPort, 0))
       akkaSeeds.flatten
     }
     val hostname = sys.env.get("BUNDLE_HOST_IP").toList.map("akka.remote.netty.tcp.hostname" -> _)
@@ -60,7 +61,7 @@ object Env extends com.typesafe.conductr.bundlelib.scala.Env {
   /**
    * take a string representing a system name and form a valid actor system name from it.
    */
-  def mkSystem(system: String): String =
+  def mkSystemId(system: String): String =
     system.dropWhile(!_.isLetterOrDigit).collect {
       case c if c.isLetterOrDigit || c == '-' || c == '_' => c
       case c if c == '.'                                  => '_'
