@@ -18,7 +18,8 @@ def groupByFirst(tests: Seq[TestDefinition]) =
       case ("WithEnvForHost", t) =>
         new Group("WithEnvForHost", t, SubProcess(ForkOptions(envVars = Map(
           "BUNDLE_HOST_IP" -> "10.0.1.10",
-          "BUNDLE_SYSTEM" -> "some-system-1.0.0",
+          "BUNDLE_SYSTEM" -> "some-system",
+          "BUNDLE_SYSTEM_VERSION" -> "v1",
           "AKKA_REMOTE_PROTOCOL" -> "tcp",
           "AKKA_REMOTE_HOST_PORT" -> "10000",
           "AKKA_REMOTE_OTHER_PROTOCOLS" -> "",
@@ -27,7 +28,8 @@ def groupByFirst(tests: Seq[TestDefinition]) =
       case ("WithEnvForOneOther", t) =>
         new Group("WithEnvForOneOther", t, SubProcess(ForkOptions(envVars = Map(
           "BUNDLE_HOST_IP" -> "10.0.1.10",
-          "BUNDLE_SYSTEM" -> "some-system-1.0.0",
+          "BUNDLE_SYSTEM" -> "some-system",
+          "BUNDLE_SYSTEM_VERSION" -> "v1",
           "AKKA_REMOTE_PROTOCOL" -> "tcp",
           "AKKA_REMOTE_HOST_PORT" -> "10000",
           "AKKA_REMOTE_OTHER_PROTOCOLS" -> "udp",
@@ -36,7 +38,8 @@ def groupByFirst(tests: Seq[TestDefinition]) =
       case ("WithEnvForOthers", t) =>
         new Group("WithEnvForOthers", t, SubProcess(ForkOptions(envVars = Map(
           "BUNDLE_HOST_IP" -> "10.0.1.10",
-          "BUNDLE_SYSTEM" -> "some-system-1.0.0",
+          "BUNDLE_SYSTEM" -> "some-system",
+          "BUNDLE_SYSTEM_VERSION" -> "v1",
           "AKKA_REMOTE_PROTOCOL" -> "tcp",
           "AKKA_REMOTE_HOST_PORT" -> "10000",
           "AKKA_REMOTE_OTHER_PROTOCOLS" -> "udp:tcp",
