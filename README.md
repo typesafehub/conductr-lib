@@ -6,21 +6,21 @@
 
 This project provides a number of libraries to facilitate [ConductR](http://typesafe.com/products/conductr)'s status service and its service lookup service. Note that usage of the libraries in your code is entirely benign when used outside of the context of ConductR i.e. you will find that your applications and services will continue to function normally when used without ConductR. We have also designed the libraries to be a convenience to ConductR's REST and environment variable based APIs, and to have a very low impact on your code.
 
-If using ConductR 1.1 and above, the libraries are structured as follows:
-
-* `"com.typesafe.conductr" %  "conductr-bundle-lib"        % "1.1.0"`
-* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"  % "1.1.0"`
-* `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib" % "1.1.0"`
-* `"com.typesafe.conductr" %% "play23-conductr-bundle-lib" % "1.1.0"`
-* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib" % "1.1.0"`
-
-If using ConductR 1.0.*, the libraries are structured as follows:
+For the current production release of ConductR (1.0), the libraries are structured as follows:
 
 * `"com.typesafe.conductr" %  "conductr-bundle-lib"        % "1.0.1"`
 * `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"  % "1.0.1"`
 * `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib" % "1.0.1"`
 * `"com.typesafe.conductr" %% "play23-conductr-bundle-lib" % "1.0.1"`
 * `"com.typesafe.conductr" %% "play24-conductr-bundle-lib" % "1.0.1"`
+
+For ConductR 1.1 and above, the libraries will be:
+
+* `"com.typesafe.conductr" %  "conductr-bundle-lib"        % "1.1.0"`
+* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"  % "1.1.0"`
+* `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib" % "1.1.0"`
+* `"com.typesafe.conductr" %% "play23-conductr-bundle-lib" % "1.1.0"`
+* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib" % "1.1.0"`
 
 Note that the above libraries require the following resolver when using sbt:
 
