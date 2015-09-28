@@ -260,7 +260,7 @@ In the above, no declaration of `services` is required as akka remoting is an in
 
 Please select the Play 2.3 or 2.4 variant depending on whether you are using Play 2.3 or Play 2.4 respectively.
 
-This library provides a reactive API using [Play WS](https://www.playframework.com/documentation/2.3.x/ScalaWS) and should be used when you are using Play. The library depends on `scala-conductr-bundle-lib` and can be used for both Java and Scala.
+This library provides a reactive API using [Play WS](https://www.playframework.com/documentation/2.3.x/ScalaWS) and should be used when you are using Play. The library depends on `akka23-conductr-bundle-lib` and can be used for both Java and Scala.
 
 As with `conductr-bundle-lib` there are two services:
 
