@@ -21,7 +21,7 @@ abstract class AbstractLocationService(handler: AbstractConnectionHandler) {
   /**
    * Create the HttpPayload necessary to look up a service by name.
    *
-   * If the service is available and can bee looked up the response for the HTTP request should be
+   * If the service is available and can be looked up the response for the HTTP request should be
    * 307 (Temporary Redirect), and the resulting URI to the service is in the "Location" header of the response.
    * A Cache-Control header may also be returned indicating the maxAge that the location should be cached for.
    * If the service can not be looked up the response should be 404 (Not Found).
@@ -46,8 +46,7 @@ abstract class AbstractLocationService(handler: AbstractConnectionHandler) {
    * component's endpoint data structure i.e. within a bundle's bundle.conf. If the bundle component
    * has not been started by ConductR then the fallback will be used.
    *
-   * Returns some URI representing the service or None if the service is not found or if this
-   * program is not running in the context of ConductR.
+   * Returns some URI representing the service or None if the service is not found.
    */
   def lookup(serviceName: String, fallback: JavaURI, cache: CacheLike)(implicit cc: CC): Future[Option[JavaURI]]
 

@@ -1,4 +1,4 @@
-name := "test-lib"
+name := "scala-test-lib"
 
 libraryDependencies ++= List(
   Library.akka23Testkit,

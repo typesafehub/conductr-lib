@@ -10,7 +10,7 @@ import static com.typesafe.conductr.bundlelib.Env.*;
  */
 public class StatusService {
 
-    private StatusService() {
+    protected StatusService() {
     }
 
     /**

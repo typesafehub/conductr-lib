@@ -10,13 +10,13 @@ import static com.typesafe.conductr.bundlelib.Env.*;
  */
 public class LocationService {
 
-    private LocationService() {
+    protected LocationService() {
     }
 
     /**
      * Create the HttpPayload necessary to look up a service by name.
      *
-     * If the service is available and can bee looked up the response for the HTTP request should be
+     * If the service is available and can be looked up the response for the HTTP request should be
      * 307 (Temporary Redirect), and the resulting URI to the service is in the "Location" header of the response.
      * A Cache-Control header may also be returned indicating the maxAge that the location should be cached for.
      * If the service can not be looked up the response should be 404 (Not Found).
