@@ -4,7 +4,9 @@ import java.io.IOException
 import java.net.{ URL => JavaURL, URI => JavaURI }
 import java.util.concurrent.TimeUnit
 
-import com.typesafe.conductr.bundlelib.{ HttpPayload, LocationService => JavaLocationService }
+import com.typesafe.conductr.HttpPayload
+import com.typesafe.conductr.scala.{ AbstractConnectionHandler, AbstractConnectionContext }
+import com.typesafe.conductr.bundlelib.{ LocationService => JavaLocationService }
 
 import scala.concurrent._
 import scala.concurrent.duration._

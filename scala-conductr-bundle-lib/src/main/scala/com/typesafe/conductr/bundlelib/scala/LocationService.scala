@@ -2,6 +2,8 @@ package com.typesafe.conductr.bundlelib.scala
 
 import java.net.{ URI => JavaURI }
 
+import com.typesafe.conductr.scala.{ ConnectionContext, ConnectionHandler }
+
 import scala.concurrent.Future
 
 object LocationService extends LocationService(new ConnectionHandler)

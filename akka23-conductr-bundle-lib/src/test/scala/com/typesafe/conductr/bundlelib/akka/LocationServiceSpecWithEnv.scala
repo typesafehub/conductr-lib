@@ -11,7 +11,7 @@ import akka.stream.ActorMaterializer
 import akka.testkit.TestProbe
 import com.typesafe.conductr.bundlelib.scala.{ URL, URI, CacheLike, LocationCache }
 import com.typesafe.conductr.AkkaUnitTest
-
+import com.typesafe.conductr.akka._
 import scala.concurrent.Await
 import scala.util.{ Failure, Success }
 

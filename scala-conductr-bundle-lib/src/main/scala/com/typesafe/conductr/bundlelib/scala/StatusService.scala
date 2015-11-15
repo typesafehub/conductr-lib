@@ -1,5 +1,7 @@
 package com.typesafe.conductr.bundlelib.scala
 
+import com.typesafe.conductr.scala.{ ConnectionHandler, ConnectionContext }
+
 import scala.concurrent.Future
 
 object StatusService extends StatusService(new ConnectionHandler)

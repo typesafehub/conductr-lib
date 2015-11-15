@@ -4,7 +4,6 @@ name := "akka23-conductr-bundle-lib"
 
 libraryDependencies ++= List(
   Library.akka23Cluster,
-  Library.akka23Http,
   Library.akka23Testkit % "test",
   Library.scalaTest     % "test"
 )

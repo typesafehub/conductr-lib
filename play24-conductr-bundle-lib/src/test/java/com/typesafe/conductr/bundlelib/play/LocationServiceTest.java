@@ -2,6 +2,7 @@ package com.typesafe.conductr.bundlelib.play;
 
 import akka.util.Timeout;
 import com.typesafe.conductr.bundlelib.scala.LocationCache;
+import com.typesafe.conductr.play.ConnectionContext;
 import org.junit.Test;
 import org.scalatest.junit.JUnitSuite;
 import play.libs.F;

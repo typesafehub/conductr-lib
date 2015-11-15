@@ -1,7 +1,6 @@
-package com.typesafe.conductr.bundlelib.scala
+package com.typesafe.conductr.scala
 
-import com.typesafe.conductr.bundlelib.HttpPayload
-
+import com.typesafe.conductr.HttpPayload
 import scala.concurrent.Future
 
 /**
@@ -15,7 +14,7 @@ abstract class AbstractConnectionContext
  * Connection handlers provide the means to establish a connection, issue a request and then finalize
  * the connection
  */
-private[bundlelib] abstract class AbstractConnectionHandler {
+abstract class AbstractConnectionHandler {
 
   protected final val UserAgent = "TypesafeConductRBundleLib"
 

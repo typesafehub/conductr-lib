@@ -118,7 +118,7 @@ If the service you require is not HTTP based then you may use the `LocationServi
 // is needed as "service" is returned as a Future.
 // For convenience, we provide a global ConnectionContext
 // that may be imported.
-import com.typesafe.conductr.bundlelib.scala.ConnectionContext.Implicits.global
+import com.typesafe.conductr.scala.ConnectionContext.Implicits.global
 
 val locationCache = LocationCache()
 
@@ -274,7 +274,7 @@ and there is also another:
 Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle-lib` for an introduction to these services. The `Env` one is discussed in the section below. Other than the `import`s for the types, the only difference in terms of API are usage is how a `ConnectionContext` is established. A `ConnectionContext` for Play requires an `ExecutionContext` at a minimum. For convenience, we provide a default ConnectionContext using the default execution context. This may be imported e.g.:
 
 ```scala
-  import com.typesafe.conductr.bundlelib.play.ConnectionContext.Implicits.defaultContext
+  import com.typesafe.conductr.play.ConnectionContext.Implicits.defaultContext
 ```
 
 There is also a lower level method where the `ExecutionContext` is passed in:

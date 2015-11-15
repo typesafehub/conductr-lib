@@ -1,4 +1,4 @@
-package com.typesafe.conductr.bundlelib.akka
+package com.typesafe.conductr.akka
 
 import akka.actor._
 import akka.http.scaladsl.client.RequestBuilding.{ Get, Post, Put, Patch, Delete, Options, Head }
@@ -6,8 +6,8 @@ import akka.http.scaladsl.{ Http, HttpExt }
 import akka.http.scaladsl.model.headers.{ Host, `User-Agent` }
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Sink, Source }
-import com.typesafe.conductr.bundlelib.HttpPayload
-import com.typesafe.conductr.bundlelib.scala.{ AbstractConnectionHandler, AbstractConnectionContext }
+import com.typesafe.conductr.HttpPayload
+import com.typesafe.conductr.scala.{ AbstractConnectionContext, AbstractConnectionHandler }
 
 import scala.concurrent.Future
 
@@ -66,7 +66,7 @@ trait ImplicitConnectionContext { this: Actor =>
  * INTERNAL API
  * Handles the Akka-http requests and responses
  */
-private[bundlelib] class ConnectionHandler extends AbstractConnectionHandler {
+class ConnectionHandler extends AbstractConnectionHandler {
 
   override protected type CC = ConnectionContext
 

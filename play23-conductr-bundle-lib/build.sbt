@@ -3,7 +3,6 @@ import Tests._
 name := "play23-conductr-bundle-lib"
 
 libraryDependencies ++= List(
-  Library.play23Ws,
   Library.akka23Testkit % "test",
   Library.play23Test    % "test",
   Library.scalaTest     % "test"

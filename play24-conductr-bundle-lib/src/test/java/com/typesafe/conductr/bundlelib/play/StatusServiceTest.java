@@ -8,6 +8,7 @@ import play.libs.F;
 import play.libs.HttpExecution;
 import play.test.Helpers;
 import scala.concurrent.duration.Duration;
+import com.typesafe.conductr.play.ConnectionContext;
 
 import static org.junit.Assert.assertEquals;
 
