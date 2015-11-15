@@ -1,1 +1,1 @@
-name := "scala-common-conductr-lib"
+name := "scala-conductr-lib-common"

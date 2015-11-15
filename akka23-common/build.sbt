@@ -1,4 +1,4 @@
-name := "akka23-common-conductr-lib"
+name := "akka23-conductr-lib-common"
 
 libraryDependencies ++= List(
   Library.akka23Http

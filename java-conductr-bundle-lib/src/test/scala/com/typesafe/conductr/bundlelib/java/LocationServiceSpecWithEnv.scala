@@ -3,27 +3,42 @@ package com.typesafe.conductr.bundlelib.java
 import java.net.{ URI, URL, InetSocketAddress }
 import java.util.Optional
 
+import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.headers.{ CacheDirectives, Location, `Cache-Control` }
 import akka.http.scaladsl.model.{ HttpEntity, HttpResponse, StatusCodes, Uri }
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.testkit.TestProbe
-import com.typesafe.conductr.AkkaUnitTest
+import com.typesafe.conductr.{ IsolatingAkkaUnitTest }
 import com.typesafe.conductr.java.Await
 
 import scala.util.{ Failure, Success }
 
-class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEnv", "akka.loglevel = INFO") {
+class LocationServiceSpecWithEnv extends IsolatingAkkaUnitTest("LocationServiceSpecWithEnv", "akka.loglevel = INFO") {
+
+  def systemFixture(f: this.FixtureParam) = new {
+    implicit val system = f.system
+    implicit val timeout = f.timeout
+    implicit val mat = ActorMaterializer()
+    implicit val ec = scala.concurrent.ExecutionContext.Implicits.global
+  }
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
   "The LocationService functionality in the library" should {
-    "return the lookup url" in {
+
+    "return the lookup url" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
       LocationService.getLookupUrl("/whatever", new URL("http://127.0.0.1/whatever")) shouldBe new URL("http://127.0.0.1:20008/services/whatever")
     }
 
-    "be able to look up a named service" in {
+    "be able to look up a named service" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
       val serviceUri = new URI("http://service_interface:4711/known")
       withServerWithKnownService(serviceUri) {
         val cache = new LocationCache()
@@ -32,7 +47,10 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
       }
     }
 
-    "be able to look up a named service using a cache" in {
+    "be able to look up a named service using a cache" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
       val serviceUri = new URI("http://service_interface:4711/known")
       withServerWithKnownService(serviceUri) {
         val cache = new LocationCache()
@@ -41,7 +59,10 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
       }
     }
 
-    "be able to look up a named service and return maxAge" in {
+    "be able to look up a named service and return maxAge" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
       val serviceUri = new URI("http://service_interface:4711/known")
       withServerWithKnownService(serviceUri, Some(10)) {
         val cache = new LocationCache()
@@ -50,7 +71,10 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
       }
     }
 
-    "get back None for an unknown service" in {
+    "get back None for an unknown service" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
       val serviceUrl = new URI("http://service_interface:4711/known")
       withServerWithKnownService(serviceUrl) {
         val cache = new LocationCache()
@@ -60,8 +84,7 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
     }
   }
 
-  def withServerWithKnownService(serviceUri: java.net.URI, maxAge: Option[Int] = None)(thunk: => Unit): Unit = {
-    implicit val materializer = ActorMaterializer()
+  def withServerWithKnownService(serviceUri: java.net.URI, maxAge: Option[Int] = None)(thunk: => Unit)(implicit system: ActorSystem, mat: ActorMaterializer): Unit = {
 
     val probe = new TestProbe(system)
 

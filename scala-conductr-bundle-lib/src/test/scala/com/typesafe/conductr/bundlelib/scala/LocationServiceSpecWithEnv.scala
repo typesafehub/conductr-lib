@@ -1,12 +1,13 @@
 package com.typesafe.conductr.bundlelib.scala
 
+import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.headers.{ CacheDirectives, `Cache-Control`, Location }
 import akka.http.scaladsl.model.{ HttpEntity, Uri, HttpResponse, StatusCodes }
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.testkit.TestProbe
-import com.typesafe.conductr.AkkaUnitTest
+import com.typesafe.conductr.{ IsolatingAkkaUnitTest }
 import java.net.InetSocketAddress
 
 import com.typesafe.conductr.scala.ConnectionContext.Implicits
@@ -14,16 +15,27 @@ import com.typesafe.conductr.scala.ConnectionContext.Implicits
 import scala.concurrent.Await
 import scala.util.{ Failure, Success }
 
-class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEnv", "akka.loglevel = INFO") {
+class LocationServiceSpecWithEnv extends IsolatingAkkaUnitTest("LocationServiceSpecWithEnv", "akka.loglevel = INFO") {
 
-  import Implicits.global
+  def systemFixture(f: this.FixtureParam) = new {
+    implicit val system = f.system
+    implicit val timeout = f.timeout
+    implicit val mat = ActorMaterializer()
+    implicit val ec = Implicits.global
+  }
 
   "The LocationService functionality in the library" should {
-    "return the lookup url" in {
+    "return the lookup url" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
       LocationService.getLookupUrl("/whatever", URL("http://127.0.0.1/whatever")) shouldBe URL("http://127.0.0.1:50008/services/whatever")
     }
 
-    "be able to look up a named service" in {
+    "be able to look up a named service" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
       val serviceUri = URI("http://service_interface:4711/known")
       withServerWithKnownService(serviceUri) {
         val cache = LocationCache()
@@ -32,8 +44,11 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
       }
     }
 
-    "be able to look up a named service using a cache" in {
-      val serviceUri = URI("http://service_interface:4711/known")
+    "be able to look up a named service using a cache" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
+      val serviceUri = URI("http://service_interface:4712/known")
       withServerWithKnownService(serviceUri) {
         val cache = LocationCache()
         val service = LocationService.lookup("/known", URI(""), cache)
@@ -41,8 +56,11 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
       }
     }
 
-    "be able to look up a named service and return maxAge" in {
-      val serviceUri = URI("http://service_interface:4711/known")
+    "be able to look up a named service and return maxAge" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
+      val serviceUri = URI("http://service_interface:4713/known")
       withServerWithKnownService(serviceUri, Some(10)) {
         val cache = LocationCache()
         val service = LocationService.lookup("/known", URI(""), cache)
@@ -50,8 +68,11 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
       }
     }
 
-    "get back None for an unknown service" in {
-      val serviceUrl = URI("http://service_interface:4711/known")
+    "get back None for an unknown service" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
+      val serviceUrl = URI("http://service_interface:4714/known")
       withServerWithKnownService(serviceUrl) {
         val cache = LocationCache()
         val service = LocationService.lookup("/unknown", URI(""), cache)
@@ -60,9 +81,8 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
     }
   }
 
-  def withServerWithKnownService(serviceUri: java.net.URI, maxAge: Option[Int] = None)(thunk: => Unit): Unit = {
+  def withServerWithKnownService(serviceUri: java.net.URI, maxAge: Option[Int] = None)(thunk: => Unit)(implicit system: ActorSystem, mat: ActorMaterializer): Unit = {
     import system.dispatcher
-    implicit val materializer = ActorMaterializer()
 
     val probe = new TestProbe(system)
 

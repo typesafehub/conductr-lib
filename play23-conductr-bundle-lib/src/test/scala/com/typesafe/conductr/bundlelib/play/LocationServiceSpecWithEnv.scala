@@ -11,18 +11,26 @@ import akka.stream.ActorMaterializer
 import akka.testkit.TestProbe
 import com.typesafe.conductr.play.ConnectionContext.Implicits
 import com.typesafe.conductr.bundlelib.scala.{ URL, URI, LocationCache }
-import com.typesafe.conductr.AkkaUnitTest
+import com.typesafe.conductr.{ IsolatingAkkaUnitTest }
 
 import scala.concurrent.Await
 import scala.util.{ Failure, Success }
 
-class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEnv", "akka.loglevel = INFO") {
+class LocationServiceSpecWithEnv extends IsolatingAkkaUnitTest("LocationServiceSpecWithEnv", "akka.loglevel = INFO") {
 
-  import Implicits.defaultContext
+  def systemFixture(f: this.FixtureParam) = new {
+    implicit val system = f.system
+    implicit val mat = ActorMaterializer.create(system)
+    implicit val timeout = f.timeout
+    implicit val ec = Implicits.defaultContext
+  }
 
   "The LocationService functionality in the library" should {
 
-    "be able to look up a named service" in {
+    "be able to look up a named service" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
       val serviceUri = URI("http://service_interface:4711/known")
       withServerWithKnownService(serviceUri) {
         val cache = LocationCache()
@@ -32,9 +40,8 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
     }
   }
 
-  def withServerWithKnownService(serviceUri: JavaURI, maxAge: Option[Int] = None)(thunk: => Unit): Unit = {
+  def withServerWithKnownService(serviceUri: JavaURI, maxAge: Option[Int] = None)(thunk: => Unit)(implicit system: ActorSystem, mat: ActorMaterializer): Unit = {
     import system.dispatcher
-    implicit val materializer = ActorMaterializer.create(system)
 
     val probe = new TestProbe(system)
 

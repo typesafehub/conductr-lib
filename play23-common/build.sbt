@@ -1,4 +1,4 @@
-name := "play23-common-conductr-lib"
+name := "play23-conductr-lib-common"
 
 libraryDependencies ++= List(
   Library.play23Ws

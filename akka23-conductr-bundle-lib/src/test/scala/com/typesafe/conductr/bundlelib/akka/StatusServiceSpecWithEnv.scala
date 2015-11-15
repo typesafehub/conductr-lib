@@ -6,22 +6,27 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.testkit.TestProbe
-import com.typesafe.conductr.{ AkkaUnitTest, _ }
+import com.typesafe.conductr.IsolatingAkkaUnitTest
 import com.typesafe.conductr.akka._
 import _root_.scala.concurrent.Await
 import _root_.scala.util.{ Failure, Success }
 
-class StatusServiceSpecWithEnv extends AkkaUnitTest("StatusServiceSpecWithEnv", "akka.loglevel = INFO") {
+class StatusServiceSpecWithEnv extends IsolatingAkkaUnitTest("StatusServiceSpecWithEnv", "akka.loglevel = INFO") {
+
+  def systemFixture(f: this.FixtureParam) = new {
+    implicit val system = f.system
+    implicit val cc = ConnectionContext()
+    implicit val mat = cc.actorMaterializer
+    implicit val timeout = f.timeout
+  }
 
   "The StatusService functionality in the library" should {
-    "be able to call the right URL to signal that it is up" in {
+    "be able to call the right URL to signal that it is up" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+      import system.dispatcher
 
       val probe = new TestProbe(system)
-
-      implicit val cc = ConnectionContext()
-
-      import system.dispatcher
-      import cc.actorMaterializer
 
       val handler =
         path("bundles" / Segment) { bundleId =>

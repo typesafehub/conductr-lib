@@ -22,7 +22,7 @@ object Build extends AutoPlugin {
       // Core settings
       organization := "com.typesafe.conductr",
       scalaVersion := Version.scala,
-      crossScalaVersions := List(scalaVersion.value),
+      crossScalaVersions := List(scalaVersion.value, "2.10.4"),
       scalacOptions ++= List(
         "-unchecked",
         "-deprecation",

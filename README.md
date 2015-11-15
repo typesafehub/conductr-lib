@@ -1,6 +1,6 @@
 # Typesafe ConductR Bundle Library
 
-[![Build Status](https://api.travis-ci.org/typesafehub/conductr-bundle-lib.png?branch=master)](https://travis-ci.org/typesafehub/conductr-bundle-lib)
+[![Build Status](https://api.travis-ci.org/typesafehub/conductr-lib.png?branch=master)](https://travis-ci.org/typesafehub/conductr-lib)
 
 ## Introduction
 

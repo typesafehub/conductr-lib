@@ -1,6 +1,6 @@
 package com.typesafe.conductr
 
-import java.net.URL
+import _root_.java.net.URL
 
 class HttpPayloadSpec extends UnitTest {
   "An HttpPayload" should {

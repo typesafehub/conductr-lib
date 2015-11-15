@@ -7,9 +7,16 @@ lazy val root = project
     javaConductRBundleLib,
     scalaCommon,
     scalaConductRBundleLib,
+    scalaConductRClientLib,
+    akka23Common,
     akka23ConductRBundleLib,
+    akka23ConductRClientLib,
+    play23Common,
     play23ConductRBundleLib,
-    play24ConductRBundleLib)
+    play23ConductRClientLib,
+    play24Common,
+    play24ConductRBundleLib,
+    play24ConductRClientLib)
 
 
 // Base
@@ -113,5 +120,3 @@ lazy val javaTestLib = project
   .dependsOn(scalaTestLib)
 
 name := "root"
-
-publishArtifact := false
