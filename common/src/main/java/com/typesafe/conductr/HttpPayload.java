@@ -1,4 +1,4 @@
-package com.typesafe.conductr.bundlelib;
+package com.typesafe.conductr;
 
 import java.net.URL;
 
@@ -16,7 +16,7 @@ public class HttpPayload {
         "GET", "POST", "HEAD", "OPTIONS", "PUT", "DELETE", "TRACE"
     };
 
-    HttpPayload(URL url, String requestMethod, boolean followRedirects) {
+    public HttpPayload(URL url, String requestMethod, boolean followRedirects) {
         String rm = requestMethod.toUpperCase();
         boolean validMethod = false;
         for (String vm: requestMethods) {
@@ -32,11 +32,11 @@ public class HttpPayload {
         this.followRedirects = followRedirects;
     }
 
-    HttpPayload(URL url, String requestMethod) {
+    public HttpPayload(URL url, String requestMethod) {
         this(url, requestMethod, false);
     }
 
-    HttpPayload(URL url) {
+    public HttpPayload(URL url) {
         this(url, "GET", false);
     }
 

@@ -7,7 +7,7 @@ import akka.stream.ActorMaterializer
 import akka.testkit.TestProbe
 import com.typesafe.conductr.AkkaUnitTest
 import java.net.InetSocketAddress
-import com.typesafe.conductr.bundlelib.scala.ConnectionContext.Implicits
+import com.typesafe.conductr.scala.ConnectionContext.Implicits
 
 import scala.concurrent.Await
 import scala.util.{ Failure, Success }

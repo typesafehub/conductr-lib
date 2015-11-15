@@ -1,8 +1,8 @@
-package com.typesafe.conductr.bundlelib.play
+package com.typesafe.conductr.play
 
 import com.ning.http.client.AsyncHttpClientConfig
-import com.typesafe.conductr.bundlelib.HttpPayload
-import com.typesafe.conductr.bundlelib.scala.{ AbstractConnectionHandler, AbstractConnectionContext }
+import com.typesafe.conductr.HttpPayload
+import com.typesafe.conductr.scala.{ AbstractConnectionHandler, AbstractConnectionContext }
 import play.api.libs.ws.ning.{ NingWSClientConfig, NingWSClient, NingAsyncHttpClientConfigBuilder }
 import play.api.libs.ws.WSClient
 import play.api.libs.concurrent.Execution.{ Implicits => PlayImplicits }
@@ -48,7 +48,7 @@ class ConnectionContext(val wsClient: WSClient)(implicit val executionContext: E
  * INTERNAL API
  * Handles the Play.WS requests and responses
  */
-private[bundlelib] class ConnectionHandler extends AbstractConnectionHandler {
+class ConnectionHandler extends AbstractConnectionHandler {
 
   override protected type CC = ConnectionContext
 

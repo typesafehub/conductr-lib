@@ -1,10 +1,8 @@
-package com.typesafe.conductr.bundlelib.scala
+package com.typesafe.conductr.scala
 
 import java.io.IOException
 import java.net.HttpURLConnection
-
-import com.typesafe.conductr.bundlelib.HttpPayload
-
+import com.typesafe.conductr.HttpPayload
 import scala.concurrent._
 import scala.util.{ Failure, Success, Try }
 
@@ -32,7 +30,7 @@ class ConnectionContext()(implicit val executionContext: ExecutionContext) exten
  * INTERNAL API
  * Handles the JDK HttpURLConnection requests and responses
  */
-private[bundlelib] class ConnectionHandler extends AbstractConnectionHandler {
+class ConnectionHandler extends AbstractConnectionHandler {
 
   override protected type CC = ConnectionContext
 

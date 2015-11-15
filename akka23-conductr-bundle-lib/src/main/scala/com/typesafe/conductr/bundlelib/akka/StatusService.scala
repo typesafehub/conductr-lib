@@ -1,5 +1,6 @@
 package com.typesafe.conductr.bundlelib.akka
 
+import com.typesafe.conductr.akka._
 import com.typesafe.conductr.bundlelib.scala.AbstractStatusService
 
 import akka.japi.{ Option => JOption }

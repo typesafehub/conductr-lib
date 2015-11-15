@@ -1,7 +1,7 @@
 package com.typesafe.conductr.bundlelib.play
 
 import java.net.URI
-
+import com.typesafe.conductr.play.{ ConnectionHandler, ConnectionContext }
 import com.typesafe.conductr.bundlelib.scala.{ CacheLike, AbstractLocationService }
 import play.api.libs.concurrent.Execution.Implicits
 import play.libs.F

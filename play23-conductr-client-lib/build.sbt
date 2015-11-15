@@ -1,0 +1,1 @@
+name := "play23-conductr-client-lib"

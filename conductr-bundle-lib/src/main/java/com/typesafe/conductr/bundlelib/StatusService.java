@@ -2,6 +2,7 @@ package com.typesafe.conductr.bundlelib;
 
 import java.io.IOException;
 import java.net.URL;
+import com.typesafe.conductr.HttpPayload;
 import static com.typesafe.conductr.bundlelib.Env.*;
 
 /**

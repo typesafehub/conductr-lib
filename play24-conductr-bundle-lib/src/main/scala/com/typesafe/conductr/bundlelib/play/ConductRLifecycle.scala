@@ -1,6 +1,6 @@
 package com.typesafe.conductr.bundlelib.play
 
-import com.typesafe.conductr.bundlelib.play.ConnectionContext.Implicits
+import com.typesafe.conductr.play.ConnectionContext.Implicits
 import play.api.inject.{ Binding, Module }
 import play.api.{ Environment, Configuration, Logger }
 import javax.inject.Singleton

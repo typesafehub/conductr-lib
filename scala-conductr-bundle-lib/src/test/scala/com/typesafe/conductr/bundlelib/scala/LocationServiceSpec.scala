@@ -1,7 +1,7 @@
 package com.typesafe.conductr.bundlelib.scala
 
 import com.typesafe.conductr.AkkaUnitTest
-import com.typesafe.conductr.bundlelib.scala.ConnectionContext.Implicits
+import com.typesafe.conductr.scala.ConnectionContext.Implicits
 import scala.concurrent.Await
 
 class LocationServiceSpec extends AkkaUnitTest {
