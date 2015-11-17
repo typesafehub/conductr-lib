@@ -4,7 +4,7 @@ package com.typesafe.conductr.bundlelib;
  * ConductR environment vars.
  */
 public class Env {
-    private Env() {
+    protected Env() {
     }
 
     /**
