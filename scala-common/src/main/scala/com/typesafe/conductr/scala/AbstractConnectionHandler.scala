@@ -25,6 +25,5 @@ abstract class AbstractConnectionHandler {
    * then a Some() will convey the result, otherwise None indicates that this program is not running in the context
    * of ConductR.
    */
-  def withConnectedRequest[T](
-    payload: Option[HttpPayload])(thunk: (Int, Map[String, Option[String]]) => Option[T])(implicit cc: CC): Future[Option[T]]
+  def withConnectedRequest[T](payload: Option[HttpPayload])(handler: (Int, Map[String, Option[String]]) => Option[T])(implicit cc: CC): Future[Option[T]]
 }

@@ -10,17 +10,25 @@ import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.testkit.TestProbe
 import com.typesafe.conductr.bundlelib.scala.{ URL, URI, CacheLike, LocationCache }
-import com.typesafe.conductr.AkkaUnitTest
+import com.typesafe.conductr.{ IsolatingAkkaUnitTest }
 import com.typesafe.conductr.akka._
 import scala.concurrent.Await
 import scala.util.{ Failure, Success }
 
-class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEnv", "akka.loglevel = INFO") {
+class LocationServiceSpecWithEnv extends IsolatingAkkaUnitTest("LocationServiceSpecWithEnv", "akka.loglevel = INFO") {
+
+  def systemFixture(f: this.FixtureParam) = new {
+    implicit val system = f.system
+    implicit val cc = ConnectionContext()
+    implicit val mat = cc.actorMaterializer
+    implicit val timeout = f.timeout
+  }
 
   "The LocationService functionality in the library" should {
 
-    "be able to look up a named service" in {
-      implicit val cc = ConnectionContext()
+    "be able to look up a named service" in { f =>
+      val sys = systemFixture(f)
+      import sys._
 
       val serviceUri = URI("http://service_interface:4711/known")
       withServerWithKnownService(serviceUri) {
@@ -30,7 +38,10 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
       }
     }
 
-    "be able to look up a named service within an actor" in {
+    "be able to look up a named service within an actor" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
       import akka.pattern.pipe
 
       class MyService(observer: ActorRef, cache: CacheLike) extends Actor with ImplicitConnectionContext {
@@ -63,7 +74,7 @@ class LocationServiceSpecWithEnv extends AkkaUnitTest("LocationServiceSpecWithEn
     }
   }
 
-  def withServerWithKnownService(serviceUri: JavaURI, maxAge: Option[Int] = None)(thunk: => Unit): Unit = {
+  def withServerWithKnownService(serviceUri: JavaURI, maxAge: Option[Int] = None)(thunk: => Unit)(implicit system: ActorSystem): Unit = {
     import system.dispatcher
     implicit val materializer = ActorMaterializer.create(system)
 

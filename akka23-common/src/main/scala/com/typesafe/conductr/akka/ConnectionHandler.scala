@@ -1,15 +1,20 @@
 package com.typesafe.conductr.akka
 
 import akka.actor._
-import akka.http.scaladsl.client.RequestBuilding.{ Get, Post, Put, Patch, Delete, Options, Head }
+import akka.http.scaladsl.Http.OutgoingConnection
+import akka.http.scaladsl.client.RequestBuilding._
+import akka.http.scaladsl.marshalling.Marshal
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.http.scaladsl.{ Http, HttpExt }
 import akka.http.scaladsl.model.headers.{ Host, `User-Agent` }
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{ Sink, Source }
+import akka.stream.scaladsl.{ Flow, Sink, Source }
 import com.typesafe.conductr.HttpPayload
 import com.typesafe.conductr.scala.{ AbstractConnectionContext, AbstractConnectionHandler }
 
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.Try
 
 object ConnectionContext {
   def apply()(implicit context: ActorRefFactory): ConnectionContext = {
@@ -17,16 +22,16 @@ object ConnectionContext {
     apply(Http(system), ActorMaterializer.create(system))
   }
 
-  def apply(httpExt: HttpExt, actorMaterializer: ActorMaterializer): ConnectionContext =
-    new ConnectionContext(httpExt, actorMaterializer)
+  def apply(httpExt: HttpExt, actorMaterializer: ActorMaterializer)(implicit context: ActorRefFactory): ConnectionContext =
+    new ConnectionContext(httpExt, actorMaterializer, context)
 
   /** JAVA API */
   def create(context: ActorRefFactory): ConnectionContext =
     apply()(context)
 
   /** JAVA API */
-  def create(httpExt: HttpExt, actorMaterializer: ActorMaterializer): ConnectionContext =
-    apply(httpExt, actorMaterializer)
+  def create(httpExt: HttpExt, actorMaterializer: ActorMaterializer, context: ActorRefFactory): ConnectionContext =
+    apply(httpExt, actorMaterializer)(context)
 
   private def actorSystemOf(context: ActorRefFactory): ActorSystem = {
     val system = context match {
@@ -42,7 +47,8 @@ object ConnectionContext {
 
 class ConnectionContext(
   val httpExt: HttpExt,
-  implicit val actorMaterializer: ActorMaterializer) extends AbstractConnectionContext
+  implicit val actorMaterializer: ActorMaterializer,
+  implicit val context: ActorRefFactory) extends AbstractConnectionContext
 
 /**
  * Mix this trait into your Actor if you need an implicit
@@ -70,39 +76,78 @@ class ConnectionHandler extends AbstractConnectionHandler {
 
   override protected type CC = ConnectionContext
 
-  override def withConnectedRequest[T](
-    payload: Option[HttpPayload])(thunk: (Int, Map[String, Option[String]]) => Option[T])(implicit cc: CC): Future[Option[T]] = {
-
+  override def withConnectedRequest[T](payload: Option[HttpPayload])(handler: (Int, Map[String, Option[String]]) => Option[T])(implicit cc: CC): Future[Option[T]] = {
     payload.fold[Future[Option[T]]](Future.successful(None)) { p =>
-      val connection = cc.httpExt.outgoingConnection(p.getUrl.getHost, p.getUrl.getPort)
-      val url = p.getUrl
-      val urlStr = url.toString
+      val connection = createConnection(p)
+      val request = createRequest(p)
 
-      val requestMethod = p.getRequestMethod match {
-        case "GET"     => Get(urlStr)
-        case "POST"    => Post(urlStr)
-        case "PUT"     => Put(urlStr)
-        case "PATCH"   => Patch(urlStr)
-        case "DELETE"  => Delete(urlStr)
-        case "OPTIONS" => Options(urlStr)
-        case "HEAD"    => Head(urlStr)
-      }
-
-      val request = requestMethod
-        .addHeader(`User-Agent`(UserAgent))
-        .addHeader(Host(url.getHost))
-
-      val requestSource = Source.single(request)
+      Source.fromFuture(request)
         .via(connection)
         .map { response =>
-          thunk(
+          handler(
             response.status.intValue(),
             response.headers.foldLeft(Map.empty[String, Option[String]]) {
               case (m, header) => m.updated(header.name(), Some(header.value()))
             })
         }
-      requestSource.runWith(Sink.head)(cc.actorMaterializer)
+        .runWith(Sink.head)(cc.actorMaterializer)
+    }
+  }
+
+  // TODO: Refactor this so that the body is part of `HttpPayload`. As a body type use [[org.reactivestreams.Publisher<T>]].
+  def withConnectedRequest[T](payload: HttpPayload, body: Option[Future[RequestEntity]] = None)(handler: (Int, Map[String, Option[String]], ResponseEntity) => Future[T])(implicit cc: CC): Future[T] = {
+    val connection = createConnection(payload)
+    val request = createRequest(payload, body)
+
+    Source.fromFuture(request)
+      .via(connection)
+      .mapAsync(1) { response =>
+        handler(
+          response.status.intValue(),
+          response.headers.foldLeft(Map.empty[String, Option[String]]) {
+            case (m, header) => m.updated(header.name(), Some(header.value()))
+          },
+          response.entity)
+      }
+      .runWith(Sink.head)(cc.actorMaterializer)
+  }
+
+  //  def withConnectedStream[T](payload: HttpPayload)(handler: HttpResponse => Future[Source[T, Unit]])(implicit cc: CC): Future[Source[T, Unit]] = {
+  //    import cc.actorMaterializer
+  //    import cc.actorMaterializer.executionContext
+  //
+  //    val connection = createConnection(payload)
+  //    val request = createRequest(payload, None)
+  //
+  //    Source.fromFuture(request)
+  //      .via(connection)
+  //      .mapAsync(1)(unmarshalling)
+  //      .runWith(Sink.head)(cc.actorMaterializer)
+  //  }
+
+  private def createConnection(payload: HttpPayload)(implicit cc: CC) =
+    cc.httpExt.outgoingConnection(payload.getUrl.getHost, payload.getUrl.getPort)
+
+  private def createRequest(payload: HttpPayload, body: Option[Future[RequestEntity]] = None)(implicit cc: CC): Future[HttpRequest] = {
+    val url = payload.getUrl
+
+    val requestBuilder = payload.getRequestMethod match {
+      case "GET"     => Get
+      case "POST"    => Post
+      case "PUT"     => Put
+      case "PATCH"   => Patch
+      case "DELETE"  => Delete
+      case "OPTIONS" => Options
+      case "HEAD"    => Head
     }
 
+    import cc.actorMaterializer.executionContext
+    val requestF = body
+      .fold(Future.successful(requestBuilder(url.toString))) { _.map(b => requestBuilder(url.toString, b)) }
+
+    requestF.map { request =>
+      request.addHeader(`User-Agent`(UserAgent))
+      request.addHeader(Host(url.getHost, url.getPort))
+    }
   }
 }
