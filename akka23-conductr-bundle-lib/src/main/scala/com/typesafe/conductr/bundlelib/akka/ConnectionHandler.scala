@@ -90,7 +90,6 @@ private[bundlelib] class ConnectionHandler extends AbstractConnectionHandler {
 
       val request = requestMethod
         .addHeader(`User-Agent`(UserAgent))
-        .addHeader(Host(url.getHost))
 
       val requestSource = Source.single(request)
         .via(connection)
