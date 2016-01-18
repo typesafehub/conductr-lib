@@ -8,11 +8,11 @@ This project provides a number of libraries to facilitate [ConductR](http://type
 
 For the current production release of ConductR (1.0), the libraries are structured as follows:
 
-* `"com.typesafe.conductr" %  "conductr-bundle-lib"        % "1.0.1"`
-* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"  % "1.0.1"`
-* `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib" % "1.0.1"`
-* `"com.typesafe.conductr" %% "play23-conductr-bundle-lib" % "1.0.1"`
-* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib" % "1.0.1"`
+* `"com.typesafe.conductr" %  "conductr-bundle-lib"        % "1.0.2"`
+* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"  % "1.0.2"`
+* `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib" % "1.0.2"`
+* `"com.typesafe.conductr" %% "play23-conductr-bundle-lib" % "1.0.2"`
+* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib" % "1.0.2"`
 
 For ConductR 1.1 and above, the libraries will be:
 
