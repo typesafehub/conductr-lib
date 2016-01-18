@@ -14,7 +14,7 @@ For the current production release of ConductR (1.0), the libraries use Akka str
 * `"com.typesafe.conductr" %% "play23-conductr-bundle-lib" % "1.0.2"`
 * `"com.typesafe.conductr" %% "play24-conductr-bundle-lib" % "1.0.2"`
 
-For ConductR 1.1 and above, the libraries use Akka streams/http 2.0 and are:
+For ConductR 1.1 and above, the libraries use Akka streams/http 2.0 and will be:
 
 * `"com.typesafe.conductr" %  "conductr-bundle-lib"        % "1.1.0"`
 * `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"  % "1.1.0"`
