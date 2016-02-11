@@ -2,17 +2,17 @@ import sbt._
 import sbt.Resolver.bintrayRepo
 
 object Version {
-  val akka23           = "2.3.12"
-  val akka23Http       = "2.0.1"
-  val akkaStream       = "2.0.1"
-  val akkaContribExtra = "2.0.1"
-  val akkaSse          = "1.4.2"
+  val akka23           = "2.3.14"
+  val akka23Http       = "2.0.3"
+  val akkaStream       = "2.0.3"
+  val akkaContribExtra = "2.0.2"
+  val akkaSse          = "1.5.0"
   val java8Compat      = "0.7.0"
   val junit            = "4.12"
   val play23           = "2.3.9"
   val play24           = "2.4.2"
   val scala            = "2.11.7"
-  val scalaTest        = "2.2.4"
+  val scalaTest        = "2.2.6"
 }
 
 object Library {
