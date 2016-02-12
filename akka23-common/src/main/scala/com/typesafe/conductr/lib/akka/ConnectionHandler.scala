@@ -1,4 +1,4 @@
-package com.typesafe.conductr.akka
+package com.typesafe.conductr.lib.akka
 
 import akka.actor._
 import akka.http.scaladsl.Http.OutgoingConnection
@@ -10,8 +10,8 @@ import akka.http.scaladsl.{ Http, HttpExt }
 import akka.http.scaladsl.model.headers.{ Host, `User-Agent` }
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Flow, Sink, Source }
-import com.typesafe.conductr.HttpPayload
-import com.typesafe.conductr.scala.{ AbstractConnectionContext, AbstractConnectionHandler }
+import com.typesafe.conductr.lib.HttpPayload
+import com.typesafe.conductr.lib.scala.{ AbstractConnectionContext, AbstractConnectionHandler }
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Try

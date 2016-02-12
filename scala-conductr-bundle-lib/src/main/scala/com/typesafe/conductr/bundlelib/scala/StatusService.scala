@@ -1,6 +1,6 @@
 package com.typesafe.conductr.bundlelib.scala
 
-import com.typesafe.conductr.scala.{ ConnectionHandler, ConnectionContext }
+import com.typesafe.conductr.lib.scala.{ ConnectionHandler, ConnectionContext }
 
 import scala.concurrent.Future
 

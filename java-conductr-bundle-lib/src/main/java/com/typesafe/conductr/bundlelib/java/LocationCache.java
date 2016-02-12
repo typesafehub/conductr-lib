@@ -1,6 +1,6 @@
 package com.typesafe.conductr.bundlelib.java;
 
-import com.typesafe.conductr.java.Tuple;
+import com.typesafe.conductr.lib.java.Tuple;
 
 import java.net.URI;
 import java.time.Duration;

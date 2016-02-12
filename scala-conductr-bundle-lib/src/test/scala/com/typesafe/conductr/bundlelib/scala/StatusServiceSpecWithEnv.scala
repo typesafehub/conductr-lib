@@ -5,9 +5,9 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.testkit.TestProbe
-import com.typesafe.conductr.{ IsolatingAkkaUnitTest }
+import com.typesafe.conductr.lib.IsolatingAkkaUnitTest
 import java.net.InetSocketAddress
-import com.typesafe.conductr.scala.ConnectionContext.Implicits
+import com.typesafe.conductr.lib.scala.ConnectionContext.Implicits
 
 import scala.concurrent.Await
 import scala.util.{ Failure, Success }

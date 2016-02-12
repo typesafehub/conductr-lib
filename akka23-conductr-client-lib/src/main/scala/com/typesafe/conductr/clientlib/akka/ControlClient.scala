@@ -2,16 +2,16 @@ package com.typesafe.conductr.clientlib.akka
 
 import java.io._
 import java.net.{ URI, URL }
-import java.util.zip.{ ZipFile, ZipInputStream }
+import java.util.zip.ZipInputStream
 
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model.HttpEntity.IndefiniteLength
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.{ PredefinedFromEntityUnmarshallers, Unmarshal }
-import akka.stream.scaladsl.{ Sink, Source, StreamConverters }
+import akka.stream.scaladsl.{ Source, StreamConverters }
 import akka.util.ByteString
-import com.typesafe.conductr.HttpPayload
-import com.typesafe.conductr.akka.{ ConnectionContext, ConnectionHandler }
+import com.typesafe.conductr.lib.HttpPayload
+import com.typesafe.conductr.lib.akka.{ ConnectionContext, ConnectionHandler }
 import com.typesafe.conductr.clientlib.akka.models._
 import com.typesafe.conductr.clientlib.scala.models._
 import com.typesafe.conductr.clientlib.scala.AbstractControlClient

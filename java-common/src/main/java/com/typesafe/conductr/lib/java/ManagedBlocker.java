@@ -1,4 +1,4 @@
-package com.typesafe.conductr.java;
+package com.typesafe.conductr.lib.java;
 
 import java.io.UncheckedIOException;
 import java.util.concurrent.ForkJoinPool;

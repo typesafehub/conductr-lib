@@ -7,9 +7,9 @@ import java.util.concurrent.CompletionStage;
 import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
 
-import com.typesafe.conductr.java.ConnectionHandler;
-import com.typesafe.conductr.HttpPayload;
-import com.typesafe.conductr.java.Unit;
+import com.typesafe.conductr.lib.java.ConnectionHandler;
+import com.typesafe.conductr.lib.HttpPayload;
+import com.typesafe.conductr.lib.java.Unit;
 
 /**
  * StatusService used to communicate the bundle status to the Typesafe ConductR Status Server.

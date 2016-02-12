@@ -1,8 +1,8 @@
-package com.typesafe.conductr.scala
+package com.typesafe.conductr.lib.scala
 
 import java.io.IOException
 import java.net.HttpURLConnection
-import com.typesafe.conductr.HttpPayload
+import com.typesafe.conductr.lib.HttpPayload
 import scala.concurrent._
 import scala.util.{ Failure, Success, Try }
 

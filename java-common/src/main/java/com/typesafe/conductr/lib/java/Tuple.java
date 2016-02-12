@@ -1,4 +1,4 @@
-package com.typesafe.conductr.java;
+package com.typesafe.conductr.lib.java;
 
 /**
  * Play's Tuple class given Java 8's lack of it.

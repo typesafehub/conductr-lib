@@ -2,7 +2,7 @@ package com.typesafe.conductr.bundlelib;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import com.typesafe.conductr.HttpPayload;
+import com.typesafe.conductr.lib.HttpPayload;
 import static com.typesafe.conductr.bundlelib.Env.*;
 
 /**

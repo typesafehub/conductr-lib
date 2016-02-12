@@ -7,8 +7,8 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.testkit.TestProbe
-import com.typesafe.conductr.play.ConnectionContext.Implicits
-import com.typesafe.conductr.{ IsolatingAkkaUnitTest }
+import com.typesafe.conductr.lib.play.ConnectionContext.Implicits
+import com.typesafe.conductr.lib.IsolatingAkkaUnitTest
 
 import _root_.scala.concurrent.Await
 import _root_.scala.util.{ Failure, Success }

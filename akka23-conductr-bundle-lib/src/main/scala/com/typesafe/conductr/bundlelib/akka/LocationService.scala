@@ -2,7 +2,7 @@ package com.typesafe.conductr.bundlelib.akka
 
 import java.net.URI
 
-import com.typesafe.conductr.akka._
+import com.typesafe.conductr.lib.akka._
 import com.typesafe.conductr.bundlelib.scala.{ CacheLike, AbstractLocationService }
 
 import akka.japi.{ Option => JOption }

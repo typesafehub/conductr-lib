@@ -8,9 +8,9 @@ import akka.http.scaladsl.marshalling._
 import akka.http.scaladsl.model.MediaTypes
 import akka.http.scaladsl.unmarshalling._
 import akka.stream.ActorMaterializer
-import com.typesafe.conductr.clientlib.akka.models.{ EventStreamFailure }
+import com.typesafe.conductr.clientlib.akka.models.EventStreamFailure
 import com.typesafe.conductr.clientlib.scala.models._
-import com.typesafe.conductr.scala.ConductrTypeOps
+import com.typesafe.conductr.lib.scala.ConductrTypeOps
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
 import play.api.libs.json.Reads._

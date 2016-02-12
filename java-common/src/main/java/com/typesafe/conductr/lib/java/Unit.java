@@ -1,4 +1,4 @@
-package com.typesafe.conductr.java;
+package com.typesafe.conductr.lib.java;
 
 /**
  * As per Scala's Unit, think of it as a Void that has a value.

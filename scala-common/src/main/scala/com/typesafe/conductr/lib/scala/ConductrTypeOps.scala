@@ -1,4 +1,4 @@
-package com.typesafe.conductr.scala
+package com.typesafe.conductr.lib.scala
 
 object ConductrTypeOps {
 

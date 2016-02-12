@@ -1,6 +1,6 @@
 package com.typesafe.conductr.bundlelib
 
-import com.typesafe.conductr.UnitTest
+import com.typesafe.conductr.lib.UnitTest
 
 class StatusServiceSpec extends UnitTest {
 

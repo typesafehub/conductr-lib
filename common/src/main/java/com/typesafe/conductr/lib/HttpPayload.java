@@ -1,4 +1,4 @@
-package com.typesafe.conductr;
+package com.typesafe.conductr.lib;
 
 import java.net.URL;
 

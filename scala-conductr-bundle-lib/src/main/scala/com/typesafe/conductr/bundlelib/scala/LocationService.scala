@@ -2,7 +2,7 @@ package com.typesafe.conductr.bundlelib.scala
 
 import java.net.{ URI => JavaURI }
 
-import com.typesafe.conductr.scala.{ ConnectionContext, ConnectionHandler }
+import com.typesafe.conductr.lib.scala.{ ConnectionContext, ConnectionHandler }
 
 import scala.concurrent.Future
 

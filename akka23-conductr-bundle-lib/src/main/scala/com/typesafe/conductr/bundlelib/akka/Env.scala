@@ -27,7 +27,7 @@ object Env extends com.typesafe.conductr.bundlelib.scala.Env {
     val akkaRemoteEndpointName = sys.env.getOrElse("AKKA_REMOTE_ENDPOINT_NAME", "AKKA_REMOTE")
 
     def presentSeedNode(protocol: String, bundleSystem: String, bundleSystemVersion: String, ip: String, port: String, n: Int): (String, String) =
-      s"akka.cluster.seed-nodes.$n" -> s"akka.$protocol://${bundleSystem}-${bundleSystemVersion}@$ip:$port"
+      s"akka.cluster.seed-nodes.$n" -> s"akka.$protocol://$bundleSystem-$bundleSystemVersion@$ip:$port"
 
     val akkaSeeds = {
       val akkaSeeds =

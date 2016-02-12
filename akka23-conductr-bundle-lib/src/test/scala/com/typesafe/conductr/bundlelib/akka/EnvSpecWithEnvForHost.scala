@@ -1,6 +1,6 @@
 package com.typesafe.conductr.bundlelib.akka
 
-import com.typesafe.conductr.AkkaUnitTest
+import com.typesafe.conductr.lib.AkkaUnitTest
 
 class EnvSpecWithEnvForHost extends AkkaUnitTest("EnvSpecWithEnvForHost", "akka.loglevel = INFO") {
 

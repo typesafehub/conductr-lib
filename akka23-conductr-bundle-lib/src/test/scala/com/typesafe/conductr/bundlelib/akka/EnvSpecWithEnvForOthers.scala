@@ -1,6 +1,6 @@
 package com.typesafe.conductr.bundlelib.akka
 
-import com.typesafe.conductr.AkkaUnitTest
+import com.typesafe.conductr.lib.AkkaUnitTest
 import com.typesafe.config.ConfigException.Missing
 
 class EnvSpecWithEnvForOthers extends AkkaUnitTest("EnvSpecWithEnvForOthers", "akka.loglevel = INFO") {

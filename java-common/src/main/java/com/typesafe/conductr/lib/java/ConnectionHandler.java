@@ -1,6 +1,6 @@
-package com.typesafe.conductr.java;
+package com.typesafe.conductr.lib.java;
 
-import com.typesafe.conductr.HttpPayload;
+import com.typesafe.conductr.lib.HttpPayload;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -13,7 +13,7 @@ import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import static com.typesafe.conductr.java.ManagedBlocker.*;
+import static com.typesafe.conductr.lib.java.ManagedBlocker.*;
 
 /**
  * Connection handlers provide the means to establish a connection, issue a request and then finalize

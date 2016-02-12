@@ -2,8 +2,8 @@ package com.typesafe.conductr.bundlelib.java
 
 import java.util.Optional
 
-import com.typesafe.conductr.AkkaUnitTest
-import com.typesafe.conductr.java._
+import com.typesafe.conductr.lib.AkkaUnitTest
+import com.typesafe.conductr.lib.java._
 
 class StatusServiceSpec extends AkkaUnitTest("StatusServiceSpec", "akka.loglevel = INFO") {
 
