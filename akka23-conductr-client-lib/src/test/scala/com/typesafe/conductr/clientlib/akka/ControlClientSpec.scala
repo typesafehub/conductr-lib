@@ -10,8 +10,8 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 import akka.stream.actor.ActorPublisher
 import akka.stream.scaladsl.{ Flow, Keep, Sink, Source }
-import com.typesafe.conductr.{ IsolatingAkkaUnitTest }
-import com.typesafe.conductr.akka.ConnectionContext
+import com.typesafe.conductr.lib.IsolatingAkkaUnitTest
+import com.typesafe.conductr.lib.akka.ConnectionContext
 import com.typesafe.conductr.clientlib.akka.models.{ EventStreamFailure, EventStreamSuccess }
 import com.typesafe.conductr.clientlib.scala.models._
 

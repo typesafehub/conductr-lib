@@ -1,7 +1,7 @@
 package com.typesafe.conductr.bundlelib.play
 
 import com.typesafe.conductr.bundlelib.scala.AbstractStatusService
-import com.typesafe.conductr.play.{ ConnectionHandler, ConnectionContext }
+import com.typesafe.conductr.lib.play.{ ConnectionHandler, ConnectionContext }
 import play.api.libs.concurrent.Execution.Implicits
 import play.libs.F
 

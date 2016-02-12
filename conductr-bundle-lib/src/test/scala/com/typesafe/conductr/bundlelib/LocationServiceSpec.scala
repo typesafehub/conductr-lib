@@ -2,7 +2,7 @@ package com.typesafe.conductr.bundlelib
 
 import java.net.URL
 
-import com.typesafe.conductr.UnitTest
+import com.typesafe.conductr.lib.UnitTest
 
 class LocationServiceSpec extends UnitTest {
 

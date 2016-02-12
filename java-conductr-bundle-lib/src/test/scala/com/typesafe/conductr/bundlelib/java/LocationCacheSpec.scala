@@ -5,11 +5,11 @@ import java.time.{ Duration => JavaDuration }
 import java.util.Optional
 import java.util.concurrent.{ CompletableFuture, CompletionStage }
 
-import com.typesafe.conductr.AkkaUnitTest
+import com.typesafe.conductr.lib.AkkaUnitTest
 
 import scala.compat.java8.FunctionConverters._
 
-import com.typesafe.conductr.java._
+import com.typesafe.conductr.lib.java._
 
 class LocationCacheSpec extends AkkaUnitTest {
 

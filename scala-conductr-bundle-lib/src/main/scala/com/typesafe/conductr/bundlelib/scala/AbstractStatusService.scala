@@ -2,8 +2,8 @@ package com.typesafe.conductr.bundlelib.scala
 
 import java.io.IOException
 
-import com.typesafe.conductr.HttpPayload
-import com.typesafe.conductr.scala.{ AbstractConnectionHandler, AbstractConnectionContext }
+import com.typesafe.conductr.lib.HttpPayload
+import com.typesafe.conductr.lib.scala.{ AbstractConnectionHandler, AbstractConnectionContext }
 import com.typesafe.conductr.bundlelib.{ StatusService => JavaStatusService }
 
 import scala.concurrent.Future

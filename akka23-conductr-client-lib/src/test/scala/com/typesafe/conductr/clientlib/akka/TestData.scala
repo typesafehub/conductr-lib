@@ -1,9 +1,9 @@
 package com.typesafe.conductr.clientlib.akka
 
 import java.net.{ URL, URI }
-import java.util.{ UUID }
+import java.util.UUID
 import com.typesafe.conductr.clientlib.scala.models._
-import com.typesafe.conductr.scala.ConductrTypeOps
+import com.typesafe.conductr.lib.scala.ConductrTypeOps
 import java.util.Date
 import scala.collection.immutable.SortedSet
 

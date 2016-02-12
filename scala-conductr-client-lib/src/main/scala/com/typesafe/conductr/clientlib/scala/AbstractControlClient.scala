@@ -1,9 +1,9 @@
 package com.typesafe.conductr.clientlib.scala
 
 import java.net.{ URLEncoder, URI, URL }
-import com.typesafe.conductr.HttpPayload
+import com.typesafe.conductr.lib.HttpPayload
 import com.typesafe.conductr.clientlib.scala.models._
-import com.typesafe.conductr.scala.AbstractConnectionContext
+import com.typesafe.conductr.lib.scala.AbstractConnectionContext
 
 import scala.concurrent.Future
 

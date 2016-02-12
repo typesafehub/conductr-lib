@@ -1,6 +1,6 @@
-package com.typesafe.conductr.scala
+package com.typesafe.conductr.lib.scala
 
-import com.typesafe.conductr.HttpPayload
+import com.typesafe.conductr.lib.HttpPayload
 import scala.concurrent.Future
 
 /**

@@ -1,6 +1,6 @@
 package com.typesafe.conductr.bundlelib.scala
 
-import com.typesafe.conductr.AkkaUnitTest
+import com.typesafe.conductr.lib.AkkaUnitTest
 
 import scala.concurrent.duration._
 import scala.concurrent.{ Await, Future }

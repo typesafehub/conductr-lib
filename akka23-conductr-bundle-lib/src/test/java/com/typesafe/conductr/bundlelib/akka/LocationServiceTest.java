@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.scalatest.junit.JUnitSuite;
 import scala.concurrent.Await;
 import scala.concurrent.duration.Duration;
-import com.typesafe.conductr.akka.ConnectionContext;
+import com.typesafe.conductr.lib.akka.ConnectionContext;
 
 import java.net.URI;
 

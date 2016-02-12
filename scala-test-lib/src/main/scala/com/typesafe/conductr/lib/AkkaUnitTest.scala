@@ -1,4 +1,4 @@
-package com.typesafe.conductr
+package com.typesafe.conductr.lib
 
 import akka.actor.ActorSystem
 import akka.testkit.TestKitExtension

@@ -3,8 +3,8 @@ package com.typesafe.conductr.bundlelib.java
 import java.net.{ URL, URI }
 import java.util.Optional
 
-import com.typesafe.conductr.AkkaUnitTest
-import com.typesafe.conductr.java.Await
+import com.typesafe.conductr.lib.AkkaUnitTest
+import com.typesafe.conductr.lib.java.Await
 
 class LocationServiceSpec extends AkkaUnitTest {
 

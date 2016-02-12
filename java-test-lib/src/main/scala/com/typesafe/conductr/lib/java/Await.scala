@@ -1,4 +1,4 @@
-package com.typesafe.conductr.java
+package com.typesafe.conductr.lib.java
 
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.CompletionStage

@@ -13,9 +13,9 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.typesafe.conductr.HttpPayload;
-import com.typesafe.conductr.java.ConnectionHandler;
-import com.typesafe.conductr.java.Tuple;
+import com.typesafe.conductr.lib.HttpPayload;
+import com.typesafe.conductr.lib.java.ConnectionHandler;
+import com.typesafe.conductr.lib.java.Tuple;
 
 /**
  * A Location Service is used to look up services using the Typesafe ConductR Service Locator.
