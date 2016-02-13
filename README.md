@@ -16,11 +16,12 @@ For the current production release of ConductR (1.0), the libraries use Akka str
 
 For ConductR 1.1 and above, the libraries use Akka streams/http 2.0 and will be:
 
-* `"com.typesafe.conductr" %  "conductr-bundle-lib"        % "1.1.0"`
-* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"  % "1.1.0"`
-* `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib" % "1.1.0"`
-* `"com.typesafe.conductr" %% "play23-conductr-bundle-lib" % "1.1.0"`
-* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib" % "1.1.0"`
+* `"com.typesafe.conductr" %  "conductr-bundle-lib"        % "1.2.0"`
+* `"com.typesafe.conductr" %% "java-conductr-bundle-lib"   % "1.2.0"`
+* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"  % "1.2.0"`
+* `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib" % "1.2.0"`
+* `"com.typesafe.conductr" %% "play23-conductr-bundle-lib" % "1.2.0"`
+* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib" % "1.2.0"`
 
 Note that the above libraries require the following resolver when using sbt:
 
@@ -107,7 +108,7 @@ When using HTTP clients, consider having the client cache responses. ConductR wi
 
 #### Non HTTP service lookups
 
-If the service you require is not HTTP based then you may use the `LocationService.lookup` function. The following code illustrates how a service may be located in place of creating and dispatching your own payload. The sample also shows how to use a cache provided specifically for these lookups:
+If the service you require is not HTTP based then you may use the `LocationService.lookup` function. The following code illustrates how a service may be located in place of creating and dispatching your own payload. The sample also shows how to use a cache provided specifically for these lookups (note use com.typesafe.lib.scala for 1.2 of this library onwards):
 
 ```scala
 // This will require an implicit ConnectionContext to
@@ -118,7 +119,7 @@ If the service you require is not HTTP based then you may use the `LocationServi
 // is needed as "service" is returned as a Future.
 // For convenience, we provide a global ConnectionContext
 // that may be imported.
-import com.typesafe.conductr.scala.ConnectionContext.Implicits.global
+import com.typesafe.conductr.bundlelib.scala.ConnectionContext.Implicits.global
 
 val locationCache = LocationCache()
 
@@ -271,10 +272,10 @@ and there is also another:
 
 * `com.typesafe.conductr.bundlelib.play.Env`
 
-Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle-lib` for an introduction to these services. The `Env` one is discussed in the section below. Other than the `import`s for the types, the only difference in terms of API are usage is how a `ConnectionContext` is established. A `ConnectionContext` for Play requires an `ExecutionContext` at a minimum. For convenience, we provide a default ConnectionContext using the default execution context. This may be imported e.g.:
+Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle-lib` for an introduction to these services. The `Env` one is discussed in the section below. Other than the `import`s for the types, the only difference in terms of API are usage is how a `ConnectionContext` is established. A `ConnectionContext` for Play requires an `ExecutionContext` at a minimum. For convenience, we provide a default ConnectionContext using the default execution context. This may be imported e.g. (note use com.typesafe.lib.play for 1.2 of this library onwards):
 
 ```scala
-  import com.typesafe.conductr.play.ConnectionContext.Implicits.defaultContext
+  import com.typesafe.conductr.bundlelib.play.ConnectionContext.Implicits.defaultContext
 ```
 
 There is also a lower level method where the `ExecutionContext` is passed in:
