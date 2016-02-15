@@ -10,12 +10,12 @@ import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.testkit.TestProbe
 import com.typesafe.conductr.bundlelib.scala.{ URL, URI, CacheLike, LocationCache }
-import com.typesafe.conductr.lib.IsolatingAkkaUnitTest
+import com.typesafe.conductr.lib.AkkaUnitTestWithFixture
 import com.typesafe.conductr.lib.akka._
 import scala.concurrent.Await
 import scala.util.{ Failure, Success }
 
-class LocationServiceSpecWithEnv extends IsolatingAkkaUnitTest("LocationServiceSpecWithEnv", "akka.loglevel = INFO") {
+class LocationServiceSpecWithEnv extends AkkaUnitTestWithFixture("LocationServiceSpecWithEnv") {
 
   def systemFixture(f: this.FixtureParam) = new {
     implicit val system = f.system

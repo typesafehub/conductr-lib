@@ -5,7 +5,7 @@ import java.util.Optional
 import com.typesafe.conductr.lib.AkkaUnitTest
 import com.typesafe.conductr.lib.java._
 
-class StatusServiceSpec extends AkkaUnitTest("StatusServiceSpec", "akka.loglevel = INFO") {
+class StatusServiceSpec extends AkkaUnitTest("StatusServiceSpec") {
 
   "The StatusService functionality in the library" should {
     "return None when running in development mode" in {

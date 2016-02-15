@@ -16,7 +16,7 @@ import com.typesafe.conductr.lib._
 import _root_.scala.concurrent.Await
 import _root_.scala.util.{ Failure, Success }
 
-class LocationServiceSpecWithEnv extends IsolatingAkkaUnitTest("LocationServiceSpecWithEnv", "akka.loglevel = INFO") {
+class LocationServiceSpecWithEnv extends AkkaUnitTestWithFixture("LocationServiceSpecWithEnv") {
 
   def systemFixture(f: this.FixtureParam) = new {
     implicit val system = f.system
