@@ -20,8 +20,10 @@ For ConductR 1.1 and above, the libraries use Akka streams/http 2.0 and will be:
 * `"com.typesafe.conductr" %% "java-conductr-bundle-lib"   % "1.2.0"`
 * `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"  % "1.2.0"`
 * `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib" % "1.2.0"`
+* `"com.typesafe.conductr" %% "akka24-conductr-bundle-lib" % "1.2.0"`
 * `"com.typesafe.conductr" %% "play23-conductr-bundle-lib" % "1.2.0"`
 * `"com.typesafe.conductr" %% "play24-conductr-bundle-lib" % "1.2.0"`
+* `"com.typesafe.conductr" %% "play25-conductr-bundle-lib" % "1.2.0"`
 
 Note that the above libraries require the following resolver when using sbt:
 
@@ -155,7 +157,7 @@ In general, the return value of `signalStartedOrExit` is not used and your progr
 
 In case you are interested, the function returns a `Future[Option[Unit]]` where a future `Some(())` indicates that ConductR has successfully acknowledged the startup signal. A future of `None` indicates that the bundle has not been started by ConductR.
 
-## akka23-conductr-bundle-lib
+## akka[23|24]-conductr-bundle-lib
 
 This library provides a reactive API using [Akka Http](http://akka.io/docs/) and should be used when you are using Akka. The library depends on `scala-conductr-bundle-lib` and can be used for both Java and Scala.
 
@@ -257,7 +259,7 @@ BundleKeys.endpoints := Map("akka-remote" -> Endpoint("tcp"))
 
 In the above, no declaration of `services` is required as akka remoting is an internal, cluster-wide TCP service.
 
-## play[23|24]-conductr-bundle-lib
+## play[23|24|25]-conductr-bundle-lib
 
 Please select the Play 2.3 or 2.4 variant depending on whether you are using Play 2.3 or Play 2.4 respectively.
 
@@ -324,7 +326,7 @@ object Global extends GlobalSettings {
 }
 ```
 
-#### Play 2.4
+#### Play 2.4 / 2.5
 
 Your `application.conf` should contain the following:
 

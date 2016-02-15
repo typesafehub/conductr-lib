@@ -1,0 +1,1 @@
+name := "akka24-conductr-client-lib"

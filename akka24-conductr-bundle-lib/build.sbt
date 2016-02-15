@@ -1,18 +1,11 @@
 import Tests._
 
-name := "akka23-conductr-client-lib"
+name := "akka24-conductr-bundle-lib"
 
 libraryDependencies ++= List(
-  Library.akkaSse23,
-  Library.akkaContribExtra,
-  Library.play23Json,
-  Library.akka23HttpTestkit % "test",
-  Library.akka23Testkit     % "test",
-  Library.scalaTest         % "test"
-)
-
-resolvers ++= List(
-  Resolvers.typesafeBintrayReleases
+  Library.akka24Cluster,
+  Library.akka24Testkit % "test",
+  Library.scalaTest     % "test"
 )
 
 fork in Test := true

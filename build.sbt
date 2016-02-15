@@ -11,12 +11,18 @@ lazy val root = project
     akka23Common,
     akka23ConductRBundleLib,
     akka23ConductRClientLib,
+    akka24Common,
+    akka24ConductRBundleLib,
+    akka24ConductRClientLib,
     play23Common,
     play23ConductRBundleLib,
     play23ConductRClientLib,
     play24Common,
     play24ConductRBundleLib,
-    play24ConductRClientLib)
+    play24ConductRClientLib,
+    play25Common,
+    play25ConductRBundleLib,
+    play25ConductRClientLib)
 
 
 // Base
@@ -74,6 +80,22 @@ lazy val akka23ConductRClientLib = project
   .dependsOn(akka23Common)
   .dependsOn(scalaTestLib % "test->compile")
 
+// Akka 2.4
+lazy val akka24Common = project
+  .in(file("akka24-common"))
+  .dependsOn(scalaCommon)
+
+lazy val akka24ConductRBundleLib = project
+  .in(file("akka24-conductr-bundle-lib"))
+  .dependsOn(scalaConductRBundleLib)
+  .dependsOn(akka24Common)
+  .dependsOn(scalaTestLib % "test->compile")
+
+lazy val akka24ConductRClientLib = project
+  .in(file("akka24-conductr-client-lib"))
+  .dependsOn(scalaConductRClientLib)
+  .dependsOn(akka24Common)
+  .dependsOn(scalaTestLib % "test->compile")  
 
 // Play 2.3
 lazy val play23Common = project
@@ -110,6 +132,22 @@ lazy val play24ConductRClientLib = project
   .dependsOn(play24Common)
   .dependsOn(scalaTestLib % "test->compile")
 
+// Play 2.5
+lazy val play25Common = project
+  .in(file("play25-common"))
+  .dependsOn(scalaCommon)
+
+lazy val play25ConductRBundleLib = project
+  .in(file("play25-conductr-bundle-lib"))
+  .dependsOn(akka24ConductRBundleLib)
+  .dependsOn(play25Common)
+  .dependsOn(scalaTestLib % "test->compile")
+
+lazy val play25ConductRClientLib = project
+  .in(file("play25-conductr-client-lib"))
+  .dependsOn(scalaConductRClientLib)
+  .dependsOn(play25Common)
+  .dependsOn(scalaTestLib % "test->compile")  
 
 // Test libraries
 lazy val scalaTestLib = project
