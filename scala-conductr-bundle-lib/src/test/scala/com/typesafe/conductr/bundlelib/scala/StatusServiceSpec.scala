@@ -4,7 +4,7 @@ import com.typesafe.conductr.lib.AkkaUnitTest
 import com.typesafe.conductr.lib.scala.ConnectionContext.Implicits
 import scala.concurrent.Await
 
-class StatusServiceSpec extends AkkaUnitTest("StatusServiceSpec", "akka.loglevel = INFO") {
+class StatusServiceSpec extends AkkaUnitTest("StatusServiceSpec") {
 
   import Implicits.global
 

@@ -5,12 +5,11 @@ import java.net.URL
 import akka.actor.ActorDSL._
 import akka.actor.ActorSystem
 import akka.http.scaladsl.server.Directives
-import akka.contrib.http.{ Directives => ContribDirectives }
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 import akka.stream.actor.ActorPublisher
 import akka.stream.scaladsl.{ Flow, Keep, Sink, Source }
-import com.typesafe.conductr.lib.IsolatingAkkaUnitTest
+import com.typesafe.conductr.lib.AkkaUnitTestWithFixture
 import com.typesafe.conductr.lib.akka.ConnectionContext
 import com.typesafe.conductr.clientlib.akka.models.{ EventStreamFailure, EventStreamSuccess }
 import com.typesafe.conductr.clientlib.scala.models._
@@ -19,13 +18,12 @@ import de.heikoseeberger.akkasse.{ EventStreamMarshalling, ServerSentEvent }
 import scala.concurrent.duration._
 import scala.concurrent.{ Future, Await }
 import akka.http.scaladsl.model._
-import scala.util.{ Random, Failure, Success }
+import scala.util.{ Failure, Success }
 
-class ControlClientSpec extends IsolatingAkkaUnitTest("ControlClientSpec", "akka.loglevel = INFO") {
+class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") {
 
   import TestData._
   import Directives._
-  import ContribDirectives._
   import JsonMarshalling._
   import EventStreamMarshalling._
 
@@ -37,7 +35,7 @@ class ControlClientSpec extends IsolatingAkkaUnitTest("ControlClientSpec", "akka
     implicit val mat = cc.actorMaterializer
     implicit val ec = cc.actorMaterializer.executionContext
     implicit val timeout = f.timeout
-    implicit val HostUrl = new URL(s"http://127.0.0.1:${Random.nextInt(9999) + 1000}")
+    implicit val HostUrl = new URL(s"http://127.0.0.1:5555")
   }
 
   "ControlClient" should {

@@ -8,12 +8,12 @@ import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.testkit.TestProbe
 import com.typesafe.conductr.lib.play.ConnectionContext.Implicits
-import com.typesafe.conductr.lib.IsolatingAkkaUnitTest
+import com.typesafe.conductr.lib.AkkaUnitTestWithFixture
 
 import _root_.scala.concurrent.Await
 import _root_.scala.util.{ Failure, Success }
 
-class StatusServiceSpecWithEnv extends IsolatingAkkaUnitTest("StatusServiceSpecWithEnv", "akka.loglevel = INFO") {
+class StatusServiceSpecWithEnv extends AkkaUnitTestWithFixture("StatusServiceSpecWithEnv") {
 
   def systemFixture(f: this.FixtureParam) = new {
     implicit val system = f.system

@@ -2,7 +2,7 @@ package com.typesafe.conductr.bundlelib.play
 
 import com.typesafe.conductr.lib.AkkaUnitTest
 
-class EnvSpecWithEnv extends AkkaUnitTest("EnvSpecWithEnvForHost", "akka.loglevel = INFO") {
+class EnvSpecWithEnv extends AkkaUnitTest("EnvSpecWithEnvForHost") {
 
   val config = Env.asConfig
 

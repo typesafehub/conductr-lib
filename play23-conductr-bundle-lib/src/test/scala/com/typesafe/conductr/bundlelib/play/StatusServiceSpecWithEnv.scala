@@ -13,7 +13,7 @@ import com.typesafe.conductr.lib._
 import _root_.scala.concurrent.Await
 import _root_.scala.util.{ Failure, Success }
 
-class StatusServiceSpecWithEnv extends IsolatingAkkaUnitTest("StatusServiceSpecWithEnv", "akka.loglevel = INFO") {
+class StatusServiceSpecWithEnv extends AkkaUnitTestWithFixture("StatusServiceSpecWithEnv") {
 
   def systemFixture(f: this.FixtureParam) = new {
     implicit val system = f.system

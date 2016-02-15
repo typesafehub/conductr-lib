@@ -1,11 +1,15 @@
 package com.typesafe.conductr.lib
 
-import akka.actor.ActorSystem
-import akka.testkit.TestKitExtension
+import akka.actor.{ ActorRef, ActorSystem }
+import akka.testkit.{ TestActor, TestKitExtension, TestProbe }
+import akka.testkit.TestActor.AutoPilot
 import akka.util.Timeout
 import com.typesafe.config.{ Config, ConfigFactory }
 import org.scalatest._
-import scala.util.Random
+import java.util.concurrent.{ CountDownLatch, TimeUnit }
+import akka.http.scaladsl.testkit.RouteTestTimeout
+import scala.concurrent.duration._
+import scala.concurrent.Await
 
 object AkkaUnitTest {
 
@@ -13,6 +17,8 @@ object AkkaUnitTest {
     val extra =
       ConfigFactory.parseString("""|akka {
                                    |  actor.debug.fsm = off
+                                   |
+                                   |  loggers = ["akka.event.Logging$DefaultLogger"]
                                    |
                                    |  loglevel = debug
                                    |
@@ -32,6 +38,11 @@ object AkkaUnitTest {
                                    |  jvm-exit-on-fatal-error = off
                                    |
                                    |  test.timefactor = 1
+                                   |
+                                   |  diagnostics {
+                                   |    recorder.enabled = off
+                                   |    checker.enabled  = off
+                                   |  }
                                    |}
                                    |""".stripMargin)
     ConfigFactory.defaultOverrides().withFallback(extra).withFallback(ConfigFactory.load())
@@ -48,13 +59,17 @@ trait AkkaUnitTestLike {
   private val config: Config =
     AkkaUnitTest.config
 
-  protected def startSystem(cfg: Config): ActorSystem = {
-    val randomNr = Random.nextInt(999)
-    ActorSystem(s"$name-spec-$randomNr", cfg.withFallback(config))
-  }
+  protected def config(testData: Option[TestData]): Config =
+    AkkaUnitTest.config
+
+  protected def startSystem(testData: Option[TestData]): ActorSystem =
+    ActorSystem(s"$name-spec", config(testData))
 
   protected def testTimeout(system: ActorSystem): Timeout =
     TestKitExtension(system).DefaultTimeout
+
+  protected implicit def routeTestTimeout: RouteTestTimeout =
+    RouteTestTimeout(2 seconds)
 
   protected def shutdownSystem(system: ActorSystem): Unit = {
     system.shutdown()
@@ -63,15 +78,21 @@ trait AkkaUnitTestLike {
 }
 
 /**
- * Akka unit tests for Typesafe ConductR.
+ * Akka unit tests for Typesafe ConductR. The actor system along with
+ * its configuration is established just once. Correspondingly the
+ * actor system is terminated at the end of all of the tests.
+ *
+ * Note then that the startSystem and config methods (for example)
+ * are passed no test data - there is no test data representing the
+ * suite as a whole.
  */
-abstract class AkkaUnitTest(override val name: String = "default", configString: String = "")
+abstract class AkkaUnitTest(override val name: String = "default")
     extends UnitTestLike
     with AkkaUnitTestLike
     with BeforeAndAfterAll {
 
   protected implicit val system =
-    startSystem(ConfigFactory.parseString(configString))
+    startSystem(None)
 
   protected implicit val timeout: Timeout = {
     val ext = TestKitExtension(system)
@@ -85,23 +106,19 @@ abstract class AkkaUnitTest(override val name: String = "default", configString:
 /**
  * An isolating test for Akka provides a new Akka system for each test run.
  */
-abstract class IsolatingAkkaUnitTest(override val name: String = "default", configString: String = "")
+abstract class AkkaUnitTestWithFixture(override val name: String = "default")
     extends fixture.WordSpec
     with Matchers
-    with AkkaUnitTestLike
-    with Retries {
+    with AkkaUnitTestLike {
 
   case class FixtureParam(system: ActorSystem, timeout: Timeout)
 
   override protected def withFixture(test: OneArgTest): Outcome = {
-    val system = startSystem(ConfigFactory.parseString(configString))
+    val system = startSystem(Some(test))
     try {
       val timeout = testTimeout(system)
 
-      if (isRetryable(test))
-        withRetry(withFixture(test.toNoArgTest(FixtureParam(system, timeout))))
-      else
-        withFixture(test.toNoArgTest(FixtureParam(system, timeout)))
+      super.withFixture(test.toNoArgTest(FixtureParam(system, timeout)))
     } finally
       shutdownSystem(system)
   }
