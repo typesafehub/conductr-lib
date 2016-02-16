@@ -1,4 +1,4 @@
-package com.typesafe.conductr.bundlelib.play
+package com.typesafe.conductr.bundlelib.play.api
 
 import java.net.{ InetSocketAddress, URL }
 
@@ -7,10 +7,8 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.testkit.TestProbe
-import com.typesafe.conductr.lib.play.ConnectionContext
-import play.api.libs.concurrent.Execution.{ Implicits => PlayImplicits }
-import com.typesafe.conductr.lib.{ AkkaUnitTestWithFixture }
-import play.api.test.FakeApplication
+import com.typesafe.conductr.lib.AkkaUnitTestWithFixture
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers._
 
 import scala.concurrent.Await
@@ -28,7 +26,6 @@ class StatusServiceSpecWithEnv extends AkkaUnitTestWithFixture("StatusServiceSpe
     "be able to call the right URL to signal that it is up" in { f =>
       val sys = systemFixture(f)
       import sys._
-      import system.dispatcher
 
       val probe = new TestProbe(system)
 
@@ -47,6 +44,8 @@ class StatusServiceSpecWithEnv extends AkkaUnitTestWithFixture("StatusServiceSpe
       val url = new URL(Env.conductRStatus.get)
       val server = Http(system).bindAndHandle(handler, url.getHost, url.getPort)
 
+      import system.dispatcher
+
       try {
         server.onComplete {
           case Success(binding) => probe.ref ! binding.localAddress
@@ -57,9 +56,12 @@ class StatusServiceSpecWithEnv extends AkkaUnitTestWithFixture("StatusServiceSpe
         address.getHostString should be(url.getHost)
         address.getPort should be(url.getPort)
 
-        running(FakeApplication()) {
-          implicit val cc = ConnectionContext(PlayImplicits.defaultContext)
-          Await.result(StatusService.signalStarted(), timeout.duration).isDefined shouldBe true
+        val app = new GuiceApplicationBuilder()
+          .bindings(new BundlelibModule)
+          .build()
+        running(app) {
+          val statusService = app.injector.instanceOf(classOf[StatusService])
+          Await.result(statusService.signalStarted(), timeout.duration).isDefined shouldBe true
         }
 
         val receivedId = probe.expectMsgType[String]

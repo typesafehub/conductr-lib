@@ -3,8 +3,8 @@ package com.typesafe.conductr.bundlelib.play
 import java.net.URI
 import com.typesafe.conductr.lib.play.{ ConnectionHandler, ConnectionContext }
 import com.typesafe.conductr.bundlelib.scala.{ CacheLike, AbstractLocationService }
-import play.api.libs.concurrent.Execution.Implicits
-import play.libs.F
+import _root_.play.api.libs.concurrent.Execution.Implicits
+import _root_.play.libs.F
 
 import scala.concurrent.Future
 import scala.language.reflectiveCalls

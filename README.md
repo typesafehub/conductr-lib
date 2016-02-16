@@ -259,7 +259,65 @@ BundleKeys.endpoints := Map("akka-remote" -> Endpoint("tcp"))
 
 In the above, no declaration of `services` is required as akka remoting is an internal, cluster-wide TCP service.
 
-## play[23|24|25]-conductr-bundle-lib
+## play25-conductr-bundle-lib
+
+> If you are using Play 2.5 then this section is for you. Otherwise jump below to the "play[23|24]-conductr-bundle-lib" section.
+
+This library provides a reactive API using [Play WS](https://www.playframework.com/documentation/2.5.x/ScalaWS) and should be used when you are using Play. The library depends on `akka24-conductr-bundle-lib` and can be used for both Java and Scala. As per Play's conventions, `play.api` is used for the Scala API and just `play` is used for Java.
+
+As with `conductr-bundle-lib` there are two services:
+
+* `com.typesafe.conductr.bundlelib.play.LocationService` (Java) or `com.typesafe.conductr.bundlelib.play.api.LocationService` (Scala)
+* `com.typesafe.conductr.bundlelib.play.StatusService` (Java) or `com.typesafe.conductr.bundlelib.play.api.StatusService` (Scala)
+
+and there is also another:
+
+* `com.typesafe.conductr.bundlelib.play.Env` (Java) or `com.typesafe.conductr.bundlelib.play.api.Env` (Scala)
+
+Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle-lib` for an introduction to these services. The `Env` one is discussed in the section below. The major difference between the APIs for Play 2.5 and the other variants is that components are expected to be injected. For example, to use the `ServiceLocator` in your controller (Scala):
+
+```scala
+class MyGreatController @Inject() (serviceLocator: ServiceLocator, locationCache: CacheLike) extends Controller {
+  ...
+  locationService.lookup("/known", URI(""), locationCache)
+  ...
+}
+```
+
+The following components are available for injection:
+
+* CacheLike
+* ConnectionContext
+* ServiceLocator
+* StatusService
+
+Note that your `application.conf` should contain the following (for Scala):
+
+```
+play.application.loader = "com.typesafe.conductr.bundlelib.play.lib.ConductRApplicationLoader"
+
+play.modules {
+  enabled += "com.typesafe.conductr.bundlelib.play.api.BundlelibModule"
+  enabled += "com.typesafe.conductr.bundlelib.play.api.ConductRLifecycleModule"
+}
+```
+
+For Java, just change the `play.api` to `play` in the above.
+
+Note that if you are using your own application loader then you should ensure that the Akka and Play ConductR-related properties are loaded. Here's a complete implementation (for Scala):
+
+```scala
+class MyCustomApplicationLoader extends ApplicationLoader {
+  def load(context: ApplicationLoader.Context): Application = {
+    val conductRConfig = Configuration(AkkaEnv.asConfig) ++ Configuration(PlayEnv.asConfig)
+    val newConfig = context.initialConfiguration ++ conductRConfig
+    val newContext = context.copy(initialConfiguration = newConfig)
+    (new GuiceApplicationLoader).load(newContext)
+  }
+}
+```
+
+## play[23|24]-conductr-bundle-lib
 
 Please select the Play 2.3 or 2.4 variant depending on whether you are using Play 2.3 or Play 2.4 respectively.
 
@@ -312,21 +370,8 @@ LocationService.getInstance().lookupWithContext("/whatever", new URI("tcp://loca
 
 In order for an application or service to take advantage of setting important Play related properties, the following is required in order to associate ConductR configuration with that of Play and Akka:
 
-#### Play 2.3
 
-```scala
-import play.api._
-import com.typesafe.conductr.bundlelib.play.Env
-
-object Global extends GlobalSettings {
-  val totalConfiguration = super.configuration ++ Configuration(Env.asConfig)
-
-  override def configuration: Configuration =
-    totalConfiguration
-}
-```
-
-#### Play 2.4 / 2.5
+#### Play 2.4
 
 Your `application.conf` should contain the following:
 
@@ -346,5 +391,19 @@ class MyCustomApplicationLoader extends ApplicationLoader {
     val newContext = context.copy(initialConfiguration = newConfig)
     (new GuiceApplicationLoader).load(newContext)
   }
+}
+```
+
+#### Play 2.3
+
+```scala
+import play.api._
+import com.typesafe.conductr.bundlelib.play.Env
+
+object Global extends GlobalSettings {
+  val totalConfiguration = super.configuration ++ Configuration(Env.asConfig)
+
+  override def configuration: Configuration =
+    totalConfiguration
 }
 ```

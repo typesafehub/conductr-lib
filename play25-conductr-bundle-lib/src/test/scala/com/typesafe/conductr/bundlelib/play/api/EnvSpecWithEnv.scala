@@ -1,4 +1,4 @@
-package com.typesafe.conductr.bundlelib.play
+package com.typesafe.conductr.bundlelib.play.api
 
 import com.typesafe.conductr.lib.AkkaUnitTest
 

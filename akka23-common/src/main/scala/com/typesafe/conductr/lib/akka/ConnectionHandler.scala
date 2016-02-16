@@ -1,20 +1,16 @@
 package com.typesafe.conductr.lib.akka
 
 import akka.actor._
-import akka.http.scaladsl.Http.OutgoingConnection
 import akka.http.scaladsl.client.RequestBuilding._
-import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.http.scaladsl.{ Http, HttpExt }
 import akka.http.scaladsl.model.headers.{ Host, `User-Agent` }
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{ Flow, Sink, Source }
+import akka.stream.scaladsl.{ Sink, Source }
 import com.typesafe.conductr.lib.HttpPayload
 import com.typesafe.conductr.lib.scala.{ AbstractConnectionContext, AbstractConnectionHandler }
 
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.Try
+import scala.concurrent.Future
 
 object ConnectionContext {
   def apply()(implicit context: ActorRefFactory): ConnectionContext = {

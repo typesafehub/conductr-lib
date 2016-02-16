@@ -1,16 +1,16 @@
-package com.typesafe.conductr.bundlelib.play
+package com.typesafe.conductr.bundlelib.play.api
 
 import com.typesafe.conductr.bundlelib.akka.{ Env => AkkaEnv }
-import com.typesafe.conductr.bundlelib.play.{ Env => PlayEnv }
+import com.typesafe.conductr.bundlelib.play.api.{ Env => PlayEnv }
 import play.api.inject.guice.GuiceApplicationLoader
-import play.api.{ Configuration, Application, ApplicationLoader }
+import play.api.{ Application, ApplicationLoader, Configuration }
 
 /**
  * Including this class into a Play project will automatically set Play's
  * configuration up from ConductR environment variables. Add the following
  * to your application.conf in order to include it:
  *
- *    play.application.loader = "com.typesafe.conductr.bundlelib.play.ConductRApplicationLoader"
+ *    play.application.loader = "com.typesafe.conductr.bundlelib.play.api.ConductRApplicationLoader"
  */
 class ConductRApplicationLoader extends ApplicationLoader {
   def load(context: ApplicationLoader.Context): Application = {
