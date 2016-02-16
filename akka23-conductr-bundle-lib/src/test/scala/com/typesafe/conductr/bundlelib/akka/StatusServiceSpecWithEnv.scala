@@ -4,10 +4,10 @@ import java.net.{ InetSocketAddress, URL }
 
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Directives._
+import _root_.akka.http.scaladsl.server.Directives._
 import akka.testkit.TestProbe
 import com.typesafe.conductr.lib.AkkaUnitTestWithFixture
-import com.typesafe.conductr.lib.akka._
+import com.typesafe.conductr.lib.akka.ConnectionContext
 import _root_.scala.concurrent.Await
 import _root_.scala.util.{ Failure, Success }
 

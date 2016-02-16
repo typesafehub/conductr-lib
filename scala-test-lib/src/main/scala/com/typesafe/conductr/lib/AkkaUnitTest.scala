@@ -1,15 +1,13 @@
 package com.typesafe.conductr.lib
 
-import akka.actor.{ ActorRef, ActorSystem }
-import akka.testkit.{ TestActor, TestKitExtension, TestProbe }
-import akka.testkit.TestActor.AutoPilot
-import akka.util.Timeout
+import _root_.akka.actor.ActorSystem
+import _root_.akka.testkit.TestKitExtension
+import _root_.akka.util.Timeout
+import _root_.akka.http.scaladsl.testkit.RouteTestTimeout
 import com.typesafe.config.{ Config, ConfigFactory }
 import org.scalatest._
-import java.util.concurrent.{ CountDownLatch, TimeUnit }
-import akka.http.scaladsl.testkit.RouteTestTimeout
-import scala.concurrent.duration._
-import scala.concurrent.Await
+import _root_.scala.concurrent.Await
+import _root_.scala.concurrent.duration._
 
 object AkkaUnitTest {
 
@@ -69,7 +67,7 @@ trait AkkaUnitTestLike {
     TestKitExtension(system).DefaultTimeout
 
   protected implicit def routeTestTimeout: RouteTestTimeout =
-    RouteTestTimeout(2 seconds)
+    RouteTestTimeout(2.seconds)
 
   protected def shutdownSystem(system: ActorSystem): Unit = {
     system.shutdown()

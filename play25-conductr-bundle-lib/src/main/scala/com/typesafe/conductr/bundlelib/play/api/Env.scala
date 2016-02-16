@@ -1,8 +1,8 @@
-package com.typesafe.conductr.bundlelib.play
+package com.typesafe.conductr.bundlelib.play.api
 
+import com.typesafe.config.{ Config, ConfigFactory }
 import com.typesafe.conductr.bundlelib.akka.{ Env => AkkaEnv }
 
-import com.typesafe.config.{ ConfigFactory, Config }
 import scala.collection.JavaConverters._
 
 /**

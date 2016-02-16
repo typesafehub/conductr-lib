@@ -1,10 +1,10 @@
-package com.typesafe.conductr.bundlelib.play
+package com.typesafe.conductr.bundlelib.play.api
 
-import java.net.{ URI => JavaURI, InetSocketAddress }
+import java.net.{ InetSocketAddress, URI => JavaURI }
 
-import _root_.play.api.libs.concurrent.Execution.Implicits
-import _root_.play.api.test.FakeApplication
-import _root_.play.api.test.Helpers._
+import com.typesafe.conductr.lib.AkkaUnitTestWithFixture
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.test.Helpers._
 import akka.actor._
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.headers.{ CacheDirectives, Location, `Cache-Control` }
@@ -12,13 +12,10 @@ import akka.http.scaladsl.model.{ HttpEntity, HttpResponse, StatusCodes }
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.testkit.TestProbe
-import com.typesafe.conductr.lib.play.ConnectionContext
-import play.api.libs.concurrent.Execution.{ Implicits => PlayImplicits }
-import com.typesafe.conductr.bundlelib.scala.{ URL, URI, LocationCache }
-import com.typesafe.conductr.lib._
+import com.typesafe.conductr.bundlelib.scala.{ CacheLike, LocationCache, URI, URL }
 
-import _root_.scala.concurrent.Await
-import _root_.scala.util.{ Failure, Success }
+import scala.concurrent.Await
+import scala.util.{ Failure, Success }
 
 class LocationServiceSpecWithEnv extends AkkaUnitTestWithFixture("LocationServiceSpecWithEnv") {
 
@@ -35,11 +32,14 @@ class LocationServiceSpecWithEnv extends AkkaUnitTestWithFixture("LocationServic
       import sys._
 
       val serviceUri = URI("http://service_interface:4711/known")
+      val app = new GuiceApplicationBuilder()
+        .bindings(new BundlelibModule)
+        .build()
       withServerWithKnownService(serviceUri) {
-        running(FakeApplication()) {
-          implicit val cc = ConnectionContext(PlayImplicits.defaultContext)
-          val cache = LocationCache()
-          val service = LocationService.lookup("/known", URI(""), cache)
+        running(app) {
+          val cache = app.injector.instanceOf[CacheLike]
+          val locationService = app.injector.instanceOf[LocationService]
+          val service = locationService.lookup("/known", URI(""), cache)
           Await.result(service, timeout.duration) shouldBe Some(serviceUri)
         }
       }

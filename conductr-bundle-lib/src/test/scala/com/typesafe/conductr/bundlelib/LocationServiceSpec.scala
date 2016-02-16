@@ -1,6 +1,6 @@
 package com.typesafe.conductr.bundlelib
 
-import java.net.URL
+import _root_.java.net.URL
 
 import com.typesafe.conductr.lib.UnitTest
 

@@ -135,19 +135,22 @@ lazy val play24ConductRClientLib = project
 // Play 2.5
 lazy val play25Common = project
   .in(file("play25-common"))
+  .dependsOn(javaCommon)
   .dependsOn(scalaCommon)
 
 lazy val play25ConductRBundleLib = project
   .in(file("play25-conductr-bundle-lib"))
   .dependsOn(akka24ConductRBundleLib)
   .dependsOn(play25Common)
+  .dependsOn(javaTestLib % "test->compile")
   .dependsOn(scalaTestLib % "test->compile")
 
 lazy val play25ConductRClientLib = project
   .in(file("play25-conductr-client-lib"))
   .dependsOn(scalaConductRClientLib)
   .dependsOn(play25Common)
-  .dependsOn(scalaTestLib % "test->compile")  
+  .dependsOn(javaTestLib % "test->compile")
+  .dependsOn(scalaTestLib % "test->compile")
 
 // Test libraries
 lazy val scalaTestLib = project

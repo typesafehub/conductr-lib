@@ -1,16 +1,16 @@
-package com.typesafe.conductr.bundlelib.play
+package com.typesafe.conductr.bundlelib.play.api
+
+import javax.inject.{ Inject, Singleton }
 
 import play.api.inject.{ Binding, Module }
-import play.api.{ Environment, Configuration, Logger }
-import javax.inject.{ Singleton }
-import com.typesafe.conductr.lib.play.ConnectionContext
+import play.api.{ Configuration, Environment, Logger }
 
 /**
  * Takes care of managing ConductR lifecycle events. In order to enable
  * ConductR lifecycle events for your application, add the following to
  * your application.conf:
  *
- *   play.modules.enabled += "com.typesafe.conductr.bundlelib.play.ConductRLifecycleModule"
+ *   play.modules.enabled += "com.typesafe.conductr.bundlelib.play.api.ConductRLifecycleModule"
  */
 class ConductRLifecycleModule extends Module {
 
@@ -24,10 +24,8 @@ class ConductRLifecycleModule extends Module {
  * Responsible for signalling ConductR that the application has started.
  */
 @Singleton
-class ConductRLifecycle {
+class ConductRLifecycle @Inject() (statusService: StatusService) {
 
-  import ConnectionContext.Implicits.defaultContext
-
-  StatusService.signalStartedOrExit()
+  statusService.signalStartedOrExit()
   Logger.info("Signalled start to ConductR")
 }
