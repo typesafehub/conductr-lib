@@ -274,10 +274,10 @@ and there is also another:
 
 * `com.typesafe.conductr.bundlelib.play.Env` (Java) or `com.typesafe.conductr.bundlelib.play.api.Env` (Scala)
 
-Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle-lib` for an introduction to these services. The `Env` one is discussed in the section below. The major difference between the APIs for Play 2.5 and the other variants is that components are expected to be injected. For example, to use the `ServiceLocator` in your controller (Scala):
+Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle-lib` for an introduction to these services. The `Env` one is discussed in the section below. The major difference between the APIs for Play 2.5 and the other variants is that components are expected to be injected. For example, to use the `LocationService` in your controller (Scala):
 
 ```scala
-class MyGreatController @Inject() (serviceLocator: ServiceLocator, locationCache: CacheLike) extends Controller {
+class MyGreatController @Inject() (locationService: LocationService, locationCache: CacheLike) extends Controller {
   ...
   locationService.lookup("/known", URI(""), locationCache)
   ...
@@ -288,7 +288,7 @@ The following components are available for injection:
 
 * CacheLike
 * ConnectionContext
-* ServiceLocator
+* LocationService
 * StatusService
 
 Note that your `application.conf` should contain the following (for Scala):
