@@ -27,7 +27,7 @@ class LocationServiceSpecWithEnv extends AkkaUnitTestWithFixture("LocationServic
 
   "The LocationService functionality in the library" should {
 
-    "be able to look up a named service" in { f =>
+    "be able to look up a named service with a leading slash" in { f =>
       val sys = systemFixture(f)
       import sys._
 
@@ -40,6 +40,24 @@ class LocationServiceSpecWithEnv extends AkkaUnitTestWithFixture("LocationServic
           val cache = app.injector.instanceOf[CacheLike]
           val locationService = app.injector.instanceOf[LocationService]
           val service = locationService.lookup("/known", URI(""), cache)
+          Await.result(service, timeout.duration) shouldBe Some(serviceUri)
+        }
+      }
+    }
+
+    "be able to look up a named service without a leading slash" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
+      val serviceUri = URI("http://service_interface:4711/known")
+      val app = new GuiceApplicationBuilder()
+        .bindings(new BundlelibModule)
+        .build()
+      withServerWithKnownService(serviceUri) {
+        running(app) {
+          val cache = app.injector.instanceOf[CacheLike]
+          val locationService = app.injector.instanceOf[LocationService]
+          val service = locationService.lookup("known", URI(""), cache)
           Await.result(service, timeout.duration) shouldBe Some(serviceUri)
         }
       }

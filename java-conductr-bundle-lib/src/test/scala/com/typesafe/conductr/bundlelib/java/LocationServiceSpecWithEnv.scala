@@ -28,11 +28,18 @@ class LocationServiceSpecWithEnv extends AkkaUnitTestWithFixture("LocationServic
 
   "The LocationService functionality in the library" should {
 
-    "return the lookup url" in { f =>
+    "return the lookup url with a leading slash" in { f =>
       val sys = systemFixture(f)
       import sys._
 
       LocationService.getLookupUrl("/whatever", new URL("http://127.0.0.1/whatever")) shouldBe new URL("http://127.0.0.1:20008/services/whatever")
+    }
+
+    "return the lookup url without a leading slash" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
+      LocationService.getLookupUrl("whatever", new URL("http://127.0.0.1/whatever")) shouldBe new URL("http://127.0.0.1:20008/services/whatever")
     }
 
     "be able to look up a named service" in { f =>
