@@ -51,7 +51,8 @@ public class LocationService {
     }
 
     static HttpPayload createLookupPayload(String serviceLocator, String serviceName) throws MalformedURLException {
-        URL locatorUrl = new URL(serviceLocator + serviceName);
+        String serviceNameWithLeadingSlash = serviceName.startsWith("/") ? serviceName : "/" + serviceName;
+        URL locatorUrl = new URL(serviceLocator + serviceNameWithLeadingSlash);
         return new HttpPayload(locatorUrl);
     }
 }
