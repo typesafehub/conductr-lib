@@ -22,7 +22,8 @@ lazy val root = project
     play24ConductRClientLib,
     play25Common,
     play25ConductRBundleLib,
-    play25ConductRClientLib)
+    play25ConductRClientLib,
+    lagom10ConductRBundleLib)
 
 
 // Base
@@ -151,6 +152,14 @@ lazy val play25ConductRClientLib = project
   .dependsOn(play25Common)
   .dependsOn(javaTestLib % "test->compile")
   .dependsOn(scalaTestLib % "test->compile")
+
+// Lagom 1.0
+lazy val lagom10ConductRBundleLib = project
+  .in(file("lagom10-conductr-bundle-lib"))
+  .dependsOn(play25ConductRBundleLib)
+  .dependsOn(javaTestLib % "test->compile")
+  .dependsOn(scalaTestLib % "test->compile")
+
 
 // Test libraries
 lazy val scalaTestLib = project

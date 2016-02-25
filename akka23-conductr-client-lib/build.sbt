@@ -11,9 +11,7 @@ libraryDependencies ++= List(
   Library.scalaTest         % "test"
 )
 
-resolvers ++= List(
-  Resolvers.typesafeBintrayReleases
-)
+resolvers += Resolvers.typesafeBintrayReleases
 
 fork in Test := true
 

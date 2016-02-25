@@ -2,8 +2,8 @@ package com.typesafe.conductr.bundlelib.play.api
 
 import com.typesafe.conductr.bundlelib.akka.{ Env => AkkaEnv }
 import com.typesafe.conductr.bundlelib.play.api.{ Env => PlayEnv }
-import play.api.inject.guice.GuiceApplicationLoader
-import play.api.{ Application, ApplicationLoader, Configuration }
+import play.api.inject.guice.{ GuiceApplicationBuilder, GuiceApplicationLoader }
+import play.api.{ Application, ApplicationLoader, Configuration, Environment, Mode }
 
 /**
  * Including this class into a Play project will automatically set Play's
@@ -17,6 +17,7 @@ class ConductRApplicationLoader extends ApplicationLoader {
     val conductRConfig = Configuration(AkkaEnv.asConfig) ++ Configuration(PlayEnv.asConfig)
     val newConfig = context.initialConfiguration ++ conductRConfig
     val newContext = context.copy(initialConfiguration = newConfig)
-    (new GuiceApplicationLoader).load(newContext)
+    val prodEnv = Environment.simple(mode = Mode.Prod)
+    (new GuiceApplicationLoader(new GuiceApplicationBuilder(environment = prodEnv))).load(newContext)
   }
 }
