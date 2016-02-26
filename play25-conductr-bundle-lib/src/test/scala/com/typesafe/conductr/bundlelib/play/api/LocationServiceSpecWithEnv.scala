@@ -34,6 +34,7 @@ class LocationServiceSpecWithEnv extends AkkaUnitTestWithFixture("LocationServic
       val serviceUri = URI("http://service_interface:4711/known")
       val app = new GuiceApplicationBuilder()
         .bindings(new BundlelibModule)
+        .disable(classOf[ConductRLifecycleModule])
         .build()
       withServerWithKnownService(serviceUri) {
         running(app) {
@@ -52,6 +53,7 @@ class LocationServiceSpecWithEnv extends AkkaUnitTestWithFixture("LocationServic
       val serviceUri = URI("http://service_interface:4711/known")
       val app = new GuiceApplicationBuilder()
         .bindings(new BundlelibModule)
+        .disable(classOf[ConductRLifecycleModule])
         .build()
       withServerWithKnownService(serviceUri) {
         running(app) {
