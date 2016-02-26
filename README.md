@@ -6,15 +6,7 @@
 
 This project provides a number of libraries to facilitate [ConductR](http://typesafe.com/products/conductr)'s status service and its service lookup service. Note that usage of the libraries in your code is entirely benign when used outside of the context of ConductR i.e. you will find that your applications and services will continue to function normally when used without ConductR. We have also designed the libraries to be a convenience to ConductR's REST and environment variable based APIs, and to have a very low impact on your code.
 
-For the current production release of ConductR (1.0), the libraries use Akka streams/http 1.0 and are structured as follows:
-
-* `"com.typesafe.conductr" %  "conductr-bundle-lib"        % "1.0.2"`
-* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"  % "1.0.2"`
-* `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib" % "1.0.2"`
-* `"com.typesafe.conductr" %% "play23-conductr-bundle-lib" % "1.0.2"`
-* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib" % "1.0.2"`
-
-For ConductR 1.1 and above, the libraries use Akka streams/http 2.0 and will be:
+Add one of the following libraries to your project.
 
 * `"com.typesafe.conductr" %  "conductr-bundle-lib"        % "1.2.0"`
 * `"com.typesafe.conductr" %% "java-conductr-bundle-lib"   % "1.2.0"`
@@ -25,7 +17,7 @@ For ConductR 1.1 and above, the libraries use Akka streams/http 2.0 and will be:
 * `"com.typesafe.conductr" %% "play24-conductr-bundle-lib" % "1.2.0"`
 * `"com.typesafe.conductr" %% "play25-conductr-bundle-lib" % "1.2.0"`
 
-Note that the above libraries require the following resolver when using sbt:
+Note that these libraries doesn't work with ConductR 1.0.x. If you want to use these libraries upgrade your ConductR cluster accordingly. 
 
 ```scala
 resolvers += bintrayRepo("typesafe", "maven-releases")
@@ -51,7 +43,7 @@ Two services are covered by this library:
 ConductR's location service is able to respond with a URI declaring where a given service (as named by a bundle component's endpoint) resides. The http payload can be constructed as follows:
 
 ```java
-HttpPayload payload = LocationService.createLookupPayload("/someservice")
+HttpPayload payload = LocationService.createLookupPayload("someservice")
 ```
 
 The `HttpPayload` object may then be queried for elements that will help you make an http request. These methods are:
@@ -100,7 +92,7 @@ Please read the section on `conductr-bundle-lib` for an introduction to these se
 The LocationService looks up service names and processes HTTP's `307` "temporary redirect" responses to return the location of the resolved service (or a `404` if one cannot be found). Many HTTP clients allow the following of redirects, particularly when either of the `HEAD` or `GET` methods are used (other methods may be considered insecure by default). Therefore if the service you are locating is an HTTP one then using a regular HTTP client should require no further work. Here is an example of using the [Dispatch](http://dispatch.databinder.net/Dispatch.html) library:
 
 ```scala
-val svc = LocationService.getLookupUrl("/someservice", URL("http://127.0.0.1:9000/someservice"))
+val svc = LocationService.getLookupUrl("someservice", URL("http://127.0.0.1:9000/someservice"))
 val svcResp = Http.configure(_.setFollowRedirects(true))(url(svc.toString).OK)
 ```
 
@@ -125,7 +117,7 @@ import com.typesafe.conductr.bundlelib.scala.ConnectionContext.Implicits.global
 
 val locationCache = LocationCache()
 
-val service = LocationService.lookup("/someservice", URI("tcp://localhost:1234"), locationCache)
+val service = LocationService.lookup("someservice", URI("tcp://localhost:1234"), locationCache)
 ```
 
 `service` is typed `Future[Option[URI]]` meaning that an optional URI response will be returned at some time in the future. Supposing that this lookup is made during the initialisation of your program, the service you're looking for may not exist. However calling the same function later on may yield the service. This is because services can come and go. Note that the fallback URI of `"tcp://localhost:1234"` will be returned if this function is called upon when started outside of ConductR.
@@ -138,7 +130,7 @@ Some bundle components cannot proceed with their initialisation unless the servi
 
 ```scala
 val resultUri = Await.result(
-  LocationService.lookup("/someservice", URI("http://127.0.0.1:9000"), locationCache),
+  LocationService.lookup("someservice", URI("http://127.0.0.1:9000"), locationCache),
   sometimeout)
 val serviceUri = resultUri.getOrElse(System.exit(70))
 ```
@@ -197,7 +189,7 @@ class MyService(cache: CacheLike) extends Actor with ImplicitConnectionContext {
   import context.dispatcher
 
   override def preStart(): Unit =
-    LocationService.lookup("/someservice", URI("http://127.0.0.1:9000"), cache).pipeTo(self)
+    LocationService.lookup("someservice", URI("http://127.0.0.1:9000"), cache).pipeTo(self)
 
   override def receive: Receive =
     initial
@@ -234,7 +226,7 @@ Similarly here is a service lookup:
 
 ```java
 ConnectionContext cc = ConnectionContext.create(system);
-LocationService.getInstance().lookupWithContext("/whatever", URI("tcp://localhost:1234"), cache, cc)
+LocationService.getInstance().lookupWithContext("whatever", URI("tcp://localhost:1234"), cache, cc)
 ```
 
 ### Akka Clustering
@@ -279,7 +271,7 @@ Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle
 ```scala
 class MyGreatController @Inject() (locationService: LocationService, locationCache: CacheLike) extends Controller {
   ...
-  locationService.lookup("/known", URI(""), locationCache)
+  locationService.lookup("known", URI(""), locationCache)
   ...
 }
 ```
@@ -365,7 +357,7 @@ ConnectionContext cc =
 
   ...
 
-LocationService.getInstance().lookupWithContext("/whatever", new URI("tcp://localhost:1234"), cache, cc)
+LocationService.getInstance().lookupWithContext("whatever", new URI("tcp://localhost:1234"), cache, cc)
 ```
 
 In order for an application or service to take advantage of setting important Play related properties, the following is required in order to associate ConductR configuration with that of Play and Akka:
