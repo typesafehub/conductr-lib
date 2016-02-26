@@ -58,6 +58,7 @@ class StatusServiceSpecWithEnv extends AkkaUnitTestWithFixture("StatusServiceSpe
 
         val app = new GuiceApplicationBuilder()
           .bindings(new BundlelibModule)
+          .disable(classOf[ConductRLifecycleModule])
           .build()
         running(app) {
           val statusService = app.injector.instanceOf(classOf[StatusService])

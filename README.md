@@ -287,11 +287,6 @@ Note that your `application.conf` should contain the following (for Scala):
 
 ```
 play.application.loader = "com.typesafe.conductr.bundlelib.play.lib.ConductRApplicationLoader"
-
-play.modules {
-  enabled += "com.typesafe.conductr.bundlelib.play.api.BundlelibModule"
-  enabled += "com.typesafe.conductr.bundlelib.play.api.ConductRLifecycleModule"
-}
 ```
 
 For Java, just change the `play.api` to `play` in the above.
@@ -369,8 +364,6 @@ Your `application.conf` should contain the following:
 
 ```
 play.application.loader = "com.typesafe.conductr.bundlelib.play.ConductRApplicationLoader"
-
-play.modules.enabled += "com.typesafe.conductr.bundlelib.play.ConductRLifecycleModule"
 ```
 
 Note that if you are using your own application loader then you should ensure that the Akka and Play ConductR-related properties are loaded. Here's a complete implementation:
