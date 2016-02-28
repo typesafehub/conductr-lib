@@ -9,10 +9,7 @@ libraryDependencies ++= List(
   Library.scalaTest     % "test"
 )
 
-resolvers ++= List(
-  Resolvers.playTypesafeReleases,
-  Resolvers.sonatypeOssSnapshot
-)  
+resolvers += Resolvers.playTypesafeReleases
 
 fork in Test := true
 

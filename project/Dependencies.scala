@@ -12,8 +12,8 @@ object Version {
   val java8Compat      = "0.7.0"
   val junit            = "4.12"
   val play23           = "2.3.10"
-  val play24           = "2.4.4"
-  val play25           = "2.5.0-RC1"
+  val play24           = "2.4.6"
+  val play25           = "2.5.0-RC2"
   val scala            = "2.11.7"
   val scalaTest        = "2.2.6"
 }
@@ -50,6 +50,4 @@ object Resolvers {
   val hseeberger                 = bintrayRepo("hseeberger", "maven")
   val typesafeBintrayReleases    = bintrayRepo("typesafe", "maven-releases")
   val playTypesafeReleases       = "play-typesafe-releases" at "http://repo.typesafe.com/typesafe/maven-releases"
-  // FIXME remove this when we don't use Play 2.5 snapshot
-  val sonatypeOssSnapshot        = "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 }
