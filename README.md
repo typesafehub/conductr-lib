@@ -283,14 +283,6 @@ The following components are available for injection:
 * LocationService
 * StatusService
 
-Note that your `application.conf` should contain the following (for Scala):
-
-```
-play.application.loader = "com.typesafe.conductr.bundlelib.play.lib.ConductRApplicationLoader"
-```
-
-For Java, just change the `play.api` to `play` in the above.
-
 Note that if you are using your own application loader then you should ensure that the Akka and Play ConductR-related properties are loaded. Here's a complete implementation (for Scala):
 
 ```scala
@@ -359,12 +351,6 @@ In order for an application or service to take advantage of setting important Pl
 
 
 #### Play 2.4
-
-Your `application.conf` should contain the following:
-
-```
-play.application.loader = "com.typesafe.conductr.bundlelib.play.ConductRApplicationLoader"
-```
 
 Note that if you are using your own application loader then you should ensure that the Akka and Play ConductR-related properties are loaded. Here's a complete implementation:
 
