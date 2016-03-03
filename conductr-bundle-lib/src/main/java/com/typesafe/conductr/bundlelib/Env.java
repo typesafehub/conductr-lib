@@ -13,6 +13,11 @@ public class Env {
     public static final String BUNDLE_ID = System.getenv("BUNDLE_ID");
 
     /**
+     * The bundle name of the current bundle
+     */
+    public static final String BUNDLE_NAME = System.getenv("BUNDLE_NAME");
+
+    /**
      * The URL associated with reporting status back to ConductR
      */
     public static final String CONDUCTR_STATUS = System.getenv("CONDUCTR_STATUS");

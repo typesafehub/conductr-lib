@@ -15,6 +15,12 @@ class Env {
     Option(JavaEnv.BUNDLE_ID)
 
   /**
+   * The bundle name of the current bundle
+   */
+  val bundleName: Option[String] =
+    Option(JavaEnv.BUNDLE_NAME)
+
+  /**
    * The URL associated with reporting status back to ConductR
    */
   val conductRStatus: Option[String] =

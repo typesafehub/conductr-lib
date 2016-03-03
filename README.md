@@ -291,7 +291,8 @@ class MyCustomApplicationLoader extends ApplicationLoader {
     val conductRConfig = Configuration(AkkaEnv.asConfig) ++ Configuration(PlayEnv.asConfig)
     val newConfig = context.initialConfiguration ++ conductRConfig
     val newContext = context.copy(initialConfiguration = newConfig)
-    (new GuiceApplicationLoader).load(newContext)
+    val prodEnv = Environment.simple(mode = Mode.Prod)
+    (new GuiceApplicationLoader(new GuiceApplicationBuilder(environment = prodEnv))).load(newContext)
   }
 }
 ```
@@ -360,7 +361,8 @@ class MyCustomApplicationLoader extends ApplicationLoader {
     val conductRConfig = Configuration(AkkaEnv.asConfig) ++ Configuration(PlayEnv.asConfig)
     val newConfig = context.initialConfiguration ++ conductRConfig
     val newContext = context.copy(initialConfiguration = newConfig)
-    (new GuiceApplicationLoader).load(newContext)
+    val prodEnv = Environment.simple(mode = Mode.Prod)
+    (new GuiceApplicationLoader(new GuiceApplicationBuilder(environment = prodEnv))).load(newContext)
   }
 }
 ```
@@ -376,5 +378,25 @@ object Global extends GlobalSettings {
 
   override def configuration: Configuration =
     totalConfiguration
+}
+```
+
+## lagom10-conductr-bundle-lib
+
+> If you are using Lagom 1.0.x then this section is for you.
+
+[sbt-lagom-bundle](https://github.com/typesafehub/sbt-lagom-bundle) is automatically adding this library to your Lagom project. You don't need set any additional setting.
+
+Note that if you are using your own application loader then you should ensure that the Akka, Play and Lagom ConductR-related properties are loaded. Here's a complete implementation (in Scala):
+
+```java
+class MyCustomApplicationLoader extends ApplicationLoader {
+  def load(context: ApplicationLoader.Context): Application = {
+    val conductRConfig = Configuration(AkkaEnv.asConfig) ++ Configuration(PlayEnv.asConfig) ++ Configuration(LagomEnv.asConfig)
+    val newConfig = context.initialConfiguration ++ conductRConfig
+    val newContext = context.copy(initialConfiguration = newConfig)
+    val prodEnv = Environment.simple(mode = Mode.Prod)
+    (new GuiceApplicationLoader(new GuiceApplicationBuilder(environment = prodEnv))).load(newContext)
+  }
 }
 ```
