@@ -3,8 +3,8 @@ import Tests._
 name := "akka23-conductr-client-lib"
 
 libraryDependencies ++= List(
-  Library.akkaSse23,
-  Library.akkaContribExtra,
+  Library.akka23Sse,
+  Library.akka23ContribExtra,
   Library.play23Json,
   Library.akka23HttpTestkit % "test",
   Library.akka23Testkit     % "test",
@@ -52,8 +52,8 @@ def groupByFirst(tests: Seq[TestDefinition]) =
       case ("WithEnv", t) =>
         new Group("WithEnv", t, SubProcess(ForkOptions(envVars = Map(
           "BUNDLE_ID" -> "0BADF00DDEADBEEF",
-          "CONDUCTR_STATUS" -> "http://127.0.0.1:60007",
-          "SERVICE_LOCATOR" -> "http://127.0.0.1:60008/services"))))
+          "CONDUCTR_STATUS" -> "http://127.0.0.1:61007",
+          "SERVICE_LOCATOR" -> "http://127.0.0.1:61008/services"))))
       case (x, t) =>
         new Group("WithoutEnv", t, SubProcess(ForkOptions()))
     }.toSeq
