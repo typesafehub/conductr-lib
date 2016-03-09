@@ -22,7 +22,8 @@ lazy val root = project
     play24ConductRClientLib,
     play25Common,
     play25ConductRBundleLib,
-    play25ConductRClientLib) // FIXME: Include lagom10ConductRBundleLib when we have a Lagom dependency - and also include it in the travis.yml tests
+    play25ConductRClientLib,
+    lagom10ConductRBundleLib)
 
 
 // Base

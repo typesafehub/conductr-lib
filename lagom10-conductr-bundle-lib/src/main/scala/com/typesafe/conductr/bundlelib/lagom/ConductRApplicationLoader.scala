@@ -19,6 +19,6 @@ class ConductRApplicationLoader extends ApplicationLoader {
     val newConfig = context.initialConfiguration ++ conductRConfig
     val newContext = context.copy(initialConfiguration = newConfig)
     val prodEnv = Environment.simple(mode = Mode.Prod)
-    (new GuiceApplicationLoader(new GuiceApplicationBuilder(environment = prodEnv))).load(newContext)
+    new GuiceApplicationLoader(new GuiceApplicationBuilder(environment = prodEnv)).load(newContext)
   }
 }

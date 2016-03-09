@@ -15,7 +15,7 @@ object Version {
   val play23             = "2.3.10"
   val play24             = "2.4.6"
   val play25             = "2.5.0"
-  val lagom10            = "0.1.0-SNAPSHOT"
+  val lagom10            = "1.0.0-M1"
   val scala              = "2.11.7"
   val scalaTest          = "2.2.6"
 }
@@ -33,6 +33,7 @@ object Library {
   val akka24Testkit      = "com.typesafe.akka"      %% "akka-testkit"                   % Version.akka24
   val akka24Sse          = "de.heikoseeberger"      %% "akka-sse"                       % Version.akka24Sse
   val akka24ContribExtra = "com.typesafe.akka"      %% "akka-contrib-extra"             % Version.akka24ContribExtra
+  val lagom10Api         = "com.lightbend.lagom"    %% "lagom-javadsl-api"              % Version.lagom10
   val java8Compat        = "org.scala-lang.modules" % "scala-java8-compat_2.11"         % Version.java8Compat
   val junit              = "junit"                  %  "junit"                          % Version.junit
   val play23Test         = "com.typesafe.play"      %% "play-test"                      % Version.play23
@@ -44,7 +45,6 @@ object Library {
   val play25Test         = "com.typesafe.play"      %% "play-test"                      % Version.play25
   val play25Json         = "com.typesafe.play"      %% "play-json"                      % Version.play25
   val play25Ws           = "com.typesafe.play"      %% "play-ws"                        % Version.play25
-  val lagom10Api         = "com.newco.lagom"        %% "lagom-javadsl-api"              % Version.lagom10
   val scalaTest          = "org.scalatest"          %% "scalatest"                      % Version.scalaTest
 }
 
