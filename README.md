@@ -8,14 +8,15 @@ This project provides a number of libraries to facilitate [ConductR](http://type
 
 Add one of the following libraries to your project.
 
-* `"com.typesafe.conductr" %  "conductr-bundle-lib"        % "1.3.0"`
-* `"com.typesafe.conductr" %% "java-conductr-bundle-lib"   % "1.3.0"`
-* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"  % "1.3.0"`
-* `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib" % "1.3.0"`
-* `"com.typesafe.conductr" %% "akka24-conductr-bundle-lib" % "1.3.0"`
-* `"com.typesafe.conductr" %% "play23-conductr-bundle-lib" % "1.3.0"`
-* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib" % "1.3.0"`
-* `"com.typesafe.conductr" %% "play25-conductr-bundle-lib" % "1.3.0"`
+* `"com.typesafe.conductr" %  "conductr-bundle-lib"         % "1.4.0"`
+* `"com.typesafe.conductr" %  "java-conductr-bundle-lib"    % "1.4.0"`
+* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"   % "1.4.0"`
+* `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib"  % "1.4.0"`
+* `"com.typesafe.conductr" %% "akka24-conductr-bundle-lib"  % "1.4.0"`
+* `"com.typesafe.conductr" %% "play23-conductr-bundle-lib"  % "1.4.0"`
+* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib"  % "1.4.0"`
+* `"com.typesafe.conductr" %% "play25-conductr-bundle-lib"  % "1.4.0"`
+* `"com.typesafe.conductr" %% "lagom10-conductr-bundle-lib" % "1.4.0"`
 
 Note that these libraries doesn't work with ConductR 1.0.x. If you want to use these libraries upgrade your ConductR cluster accordingly. 
 
