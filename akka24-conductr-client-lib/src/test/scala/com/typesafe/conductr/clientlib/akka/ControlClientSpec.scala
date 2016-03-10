@@ -9,6 +9,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 import akka.stream.actor.ActorPublisher
 import akka.stream.scaladsl.{ Flow, Keep, Sink, Source }
+import akka.util.Timeout
 import com.typesafe.conductr.lib.AkkaUnitTestWithFixture
 import com.typesafe.conductr.lib.akka.ConnectionContext
 import com.typesafe.conductr.clientlib.akka.models.{ EventStreamFailure, EventStreamSuccess }
@@ -564,11 +565,12 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") {
     }
   }
 
-  def withServer(route: => Route)(testHandler: => Unit)(implicit system: ActorSystem, cc: ConnectionContext, HostUrl: URL): Unit = {
+  def withServer(route: => Route)(testHandler: => Unit)(implicit system: ActorSystem, cc: ConnectionContext, HostUrl: URL, timeout: Timeout): Unit = {
     import system.dispatcher
     import cc.actorMaterializer
 
     val server = Http(system).bindAndHandle(route, HostUrl.getHost, HostUrl.getPort)
+    Await.ready(server, timeout.duration)
 
     try {
       testHandler
