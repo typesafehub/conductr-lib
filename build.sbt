@@ -25,7 +25,7 @@ lazy val root = project
     play25ConductRClientLib,
     lagom10ConductRBundleLib)
 
-// During testing run each project sequentially.
+// When executing tests the projects are running sequentially.
 // If the tests of each project run sequentially or in parallel
 // is defined in the `build.sbt` of the individual project itself
 concurrentRestrictions in Global += Tags.limit(Tags.Test, 1)    
