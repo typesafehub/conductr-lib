@@ -16,7 +16,6 @@ object Build extends AutoPlugin {
 
   override def projectSettings =
     scalariformSettings ++
-    releaseSettings ++
     bintrayPublishSettings ++
     List(
       // Core settings
@@ -40,8 +39,6 @@ object Build extends AutoPlugin {
         .setPreference(PreserveDanglingCloseParenthesis, true),
       // Bintray settings
       bintrayOrganization in bintray := Some("typesafe"),
-      repository in bintray := "maven-releases",
-      // Release settings
-      ReleaseKeys.versionBump := sbtrelease.Version.Bump.Minor
+      repository in bintray := "maven-releases"
     )
 }
