@@ -5,4 +5,4 @@ script:
 - jdk_switcher use oraclejdk7
 - sbt conductRBundleLib/test:test scalaConductRBundleLib/test:test akka23ConductRBundleLib/test:test play23ConductRBundleLib/test:test scalaConductRClientLib/test:test akka23ConductRClientLib/test:test play23ConductRClientLib/test:test
 - jdk_switcher use oraclejdk8
-- sbt conductRBundleLib/test:test scalaConductRBundleLib/test:test akka23ConductRBundleLib/test:test akka24ConductRBundleLib/test:test play23ConductRBundleLib/test:test play24ConductRBundleLib/test:test play25ConductRBundleLib/test:test scalaConductRClientLib/test:test akka23ConductRClientLib/test:test akka24ConductRClientLib/test:test play23ConductRClientLib/test:test play24ConductRClientLib/test:test play25ConductRClientLib/test:test javaConductRBundleLib/test:test lagom10ConductRBundleLib/test:test
+- sbt test
