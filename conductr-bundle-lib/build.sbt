@@ -7,3 +7,5 @@ unmanagedSourceDirectories in Compile := List((javaSource in Compile).value)
 
 autoScalaLibrary := false
 crossPaths := false
+
+parallelExecution in Test := true
