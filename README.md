@@ -21,7 +21,7 @@ Add one of the following libraries to your project.
 You will also require a resolver:
 
 ```scala
-resolvers += bintrayRepo("typesafe", "maven-releases")
+resolvers += Resolver.bintrayRepo("typesafe", "maven-releases")
 ```
 
 Also note that the examples here use the following import to conveniently build the JDK `URI` and `URL` types. 
