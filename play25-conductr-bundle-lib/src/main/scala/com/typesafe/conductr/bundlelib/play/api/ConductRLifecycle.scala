@@ -26,6 +26,9 @@ class ConductRLifecycleModule extends Module {
 @Singleton
 class ConductRLifecycle @Inject() (statusService: StatusService) {
 
-  statusService.signalStartedOrExit()
-  Logger.info("Signalled start to ConductR")
+  statusService
+    .signalStartedOrExit()
+    .foreach { _ =>
+      if (Env.isRunByConductR) Logger.info("Signalled start to ConductR")
+    }(statusService.cc.executionContext)
 }

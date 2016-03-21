@@ -3,7 +3,7 @@ package com.typesafe.conductr.bundlelib.lagom
 import javax.inject.Singleton
 
 import com.lightbend.lagom.javadsl.api.ServiceLocator
-import play.api.{ Configuration, Environment, Mode }
+import play.api.{ Configuration, Environment }
 import play.api.inject.{ Binding, Module }
 
 /**
@@ -14,7 +14,7 @@ import play.api.inject.{ Binding, Module }
 class ServiceLocatorModule extends Module {
 
   override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] =
-    if (environment.mode == Mode.Prod)
+    if (Env.isRunByConductR)
       Seq(bind[ServiceLocator].to[ConductRServiceLocator].in[Singleton])
     else
       Seq.empty
