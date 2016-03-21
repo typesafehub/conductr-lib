@@ -28,6 +28,9 @@ class ConductRLifecycle {
 
   import Implicits.defaultContext
 
-  StatusService.signalStartedOrExit()
-  Logger.info("Signalled start to ConductR")
+  StatusService
+    .signalStartedOrExit()
+    .foreach { _ =>
+      if (Env.isRunByConductR) Logger.info("Signalled start to ConductR")
+    }(defaultContext.executionContext)
 }
