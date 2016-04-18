@@ -8,8 +8,6 @@ class EnvSpecWithEnv extends AkkaUnitTest("EnvSpecWithEnvForHost") {
 
   "The Env functionality in the library" should {
     "initialize the env like expected" in {
-      config.getString("http.address") shouldBe "127.0.0.1"
-      config.getString("http.port") shouldBe "9024"
       config.getString("play.akka.actor-system") shouldBe "somesys-v1"
     }
   }

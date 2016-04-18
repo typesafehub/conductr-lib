@@ -7,7 +7,7 @@ import play.api.inject.guice.{ GuiceApplicationBuilder, GuiceApplicationLoader }
 import play.api.{ Application, ApplicationLoader, Configuration, Environment, Mode }
 
 /**
- * Including this class into a Play project will automatically set Play's
+ * Including this class into a Lagom project will automatically set Lagom's
  * configuration up from ConductR environment variables. Add the following
  * to your application.conf in order to include it:
  *
