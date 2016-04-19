@@ -8,15 +8,15 @@ This project provides a number of libraries to facilitate [ConductR](http://type
 
 Add one of the following libraries to your project.
 
-* `"com.typesafe.conductr" %  "conductr-bundle-lib"         % "1.4.2"`
-* `"com.typesafe.conductr" %  "java-conductr-bundle-lib"    % "1.4.2"`
-* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"   % "1.4.2"`
-* `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib"  % "1.4.2"`
-* `"com.typesafe.conductr" %% "akka24-conductr-bundle-lib"  % "1.4.2"`
-* `"com.typesafe.conductr" %% "play23-conductr-bundle-lib"  % "1.4.2"`
-* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib"  % "1.4.2"`
-* `"com.typesafe.conductr" %% "play25-conductr-bundle-lib"  % "1.4.2"`
-* `"com.typesafe.conductr" %% "lagom10-conductr-bundle-lib" % "1.4.2"`
+* `"com.typesafe.conductr" %  "conductr-bundle-lib"         % "1.4.3"`
+* `"com.typesafe.conductr" %  "java-conductr-bundle-lib"    % "1.4.3"`
+* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"   % "1.4.3"`
+* `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib"  % "1.4.3"`
+* `"com.typesafe.conductr" %% "akka24-conductr-bundle-lib"  % "1.4.3"`
+* `"com.typesafe.conductr" %% "play23-conductr-bundle-lib"  % "1.4.3"`
+* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib"  % "1.4.3"`
+* `"com.typesafe.conductr" %% "play25-conductr-bundle-lib"  % "1.4.3"`
+* `"com.typesafe.conductr" %% "lagom10-conductr-bundle-lib" % "1.4.3"`
 
 You will also require a resolver:
 
