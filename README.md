@@ -30,6 +30,15 @@ Also note that the examples here use the following import to conveniently build 
 import com.typesafe.conductr.bundlelib.scala.{URL, URI}
 ```
 
+## Table of contents
+
+* [conductr-bundle-lib](#conductr-bundle-lib)
+* [scala-conductr-bundle-lib](#scala-conductr-bundle-lib)
+* [akka[23|24]-conductr-bundle-lib](#akka2324-conductr-bundle-lib)
+* [play[23|24]-conductr-bundle-lib](#play2324-conductr-bundle-lib)
+* [play25-conductr-bundle-lib](#play25-conductr-bundle-lib)
+* [lagom10-conductr-bundle-lib](#lagom10-conductr-bundle-lib)
+
 ## conductr-bundle-lib
 
 This library provides a base level of functionality mainly formed around constructing the requisite payloads for ConductR's RESTful services. The library is pure Java and has no dependencies other than the JDK.
@@ -256,6 +265,8 @@ In the above, no declaration of `services` is required as akka remoting is an in
 
 > If you are using Play 2.5 then this section is for you. Otherwise jump below to the "play[23|24]-conductr-bundle-lib" section.
 
+[sbt-conductr](https://github.com/typesafehub/sbt-conductr) is automatically adding this library to your Play project.
+
 This library provides a reactive API using [Play WS](https://www.playframework.com/documentation/2.5.x/ScalaWS) and should be used when you are using Play. The library depends on `akka24-conductr-bundle-lib` and can be used for both Java and Scala. As per Play's conventions, `play.api` is used for the Scala API and just `play` is used for Java.
 
 As with `conductr-bundle-lib` there are two services:
@@ -301,6 +312,8 @@ class MyCustomApplicationLoader extends ApplicationLoader {
 ## play[23|24]-conductr-bundle-lib
 
 Please select the Play 2.3 or 2.4 variant depending on whether you are using Play 2.3 or Play 2.4 respectively.
+
+[sbt-conductr](https://github.com/typesafehub/sbt-conductr) is automatically adding this library to your Play project.
 
 This library provides a reactive API using [Play WS](https://www.playframework.com/documentation/2.3.x/ScalaWS) and should be used when you are using Play. The library depends on `akka23-conductr-bundle-lib` and can be used for both Java and Scala.
 
@@ -386,7 +399,7 @@ object Global extends GlobalSettings {
 
 > If you are using Lagom 1.0.x then this section is for you.
 
-[sbt-lagom-bundle](https://github.com/typesafehub/sbt-lagom-bundle) is automatically adding this library to your Lagom project. You don't need set any additional setting for your Lagom services. However a Play application that uses Lagom should add this library as a dependency - that is all though.
+[sbt-conductr](https://github.com/typesafehub/sbt-conductr) is automatically adding this library to your Lagom project. You don't need set any additional setting for your Lagom services.
 
 Note that if you are using your own application loader then you should ensure that the Akka, Play and Lagom ConductR-related properties are loaded. Here's a complete implementation (in Scala):
 
