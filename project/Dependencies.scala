@@ -15,7 +15,7 @@ object Version {
   val play23             = "2.3.10"
   val play24             = "2.4.6"
   val play25             = "2.5.0"
-  val lagom10            = "1.0.0-M1"
+  val lagom10            = "1.0.0-M2"
   val scala              = "2.11.7"
   val scalaTest          = "2.2.6"
 }
