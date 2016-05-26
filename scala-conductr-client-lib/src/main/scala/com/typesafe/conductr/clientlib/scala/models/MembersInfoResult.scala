@@ -7,6 +7,7 @@ sealed trait MembersInfoResult
 final case class MembersInfoSuccess(
   selfNode: UniqueAddress,
   members: Seq[Member],
-  unreachable: Seq[UnreachableMember]) extends MembersInfoResult
+  unreachable: Seq[UnreachableMember]
+) extends MembersInfoResult
 
 final case class MembersInfoFailure(code: Int, error: String) extends HttpFailure with MembersInfoResult

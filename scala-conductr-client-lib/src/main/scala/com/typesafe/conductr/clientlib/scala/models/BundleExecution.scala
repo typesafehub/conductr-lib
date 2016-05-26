@@ -11,4 +11,5 @@ final case class BundleExecutionEndpoint(bindPort: Int, hostPort: Int)
 final case class BundleExecution(
   host: Host,
   endpoints: Map[String, BundleExecutionEndpoint],
-  isStarted: Boolean)
+  isStarted: Boolean
+)

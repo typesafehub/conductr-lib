@@ -151,7 +151,7 @@ class ControlClient(handler: ConnectionHandler, conductrAddress: URL, apiVersion
   /**
    * Returns a stream of all bundle events. Each event is represented by a [[ServerSentEvent]].
    * Each [[ServerSentEvent]] is transferred in a [[Source]] to easily access a stream of events.
- *
+   *
    * @param events The requested events the stream should return. A `Set.empty` is returning every event type.
    * @param cc implicit connection context
    * @return The stream as a [[Source]] wrapped inside a [[scala.concurrent.Future]]
@@ -206,7 +206,7 @@ class ControlClient(handler: ConnectionHandler, conductrAddress: URL, apiVersion
   /**
    * Returns a stream of all member events. Each event is represented by a [[de.heikoseeberger.akkasse.ServerSentEvent]].
    * Each [[de.heikoseeberger.akkasse.ServerSentEvent]] is transferred in a [[Source]] to easily access a stream of events.
- *
+   *
    * @param cc implicit connection context
    * @return The stream as a [[Source]] wrapped inside a [[scala.concurrent.Future]]
    */

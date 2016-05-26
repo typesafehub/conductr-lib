@@ -44,7 +44,8 @@ object ConnectionContext {
 class ConnectionContext(
   val httpExt: HttpExt,
   implicit val actorMaterializer: ActorMaterializer,
-  implicit val context: ActorRefFactory) extends AbstractConnectionContext
+  implicit val context: ActorRefFactory
+) extends AbstractConnectionContext
 
 /**
  * Mix this trait into your Actor if you need an implicit
@@ -84,7 +85,8 @@ class ConnectionHandler extends AbstractConnectionHandler {
             response.status.intValue(),
             response.headers.foldLeft(Map.empty[String, Option[String]]) {
               case (m, header) => m.updated(header.name(), Some(header.value()))
-            })
+            }
+          )
         }
         .runWith(Sink.head)(cc.actorMaterializer)
     }
@@ -103,7 +105,8 @@ class ConnectionHandler extends AbstractConnectionHandler {
           response.headers.foldLeft(Map.empty[String, Option[String]]) {
             case (m, header) => m.updated(header.name(), Some(header.value()))
           },
-          response.entity)
+          response.entity
+        )
       }
       .runWith(Sink.head)(cc.actorMaterializer)
   }

@@ -13,5 +13,6 @@ final case class BundleAttributes(
   roles: SortedSet[String],
   bundleName: String,
   systemVersion: String,
-  compatibilityVersion: String)
+  compatibilityVersion: String
+)
 

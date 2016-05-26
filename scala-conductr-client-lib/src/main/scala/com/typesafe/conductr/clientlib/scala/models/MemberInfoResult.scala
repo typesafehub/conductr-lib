@@ -16,7 +16,8 @@ sealed trait MemberInfoResult
 final case class MemberInfoSuccess(
   member: Member,
   isUnreachableFrom: Seq[UniqueAddress],
-  detectedUnreachable: Seq[URI]) extends MemberInfoResult
+  detectedUnreachable: Seq[URI]
+) extends MemberInfoResult
 
 /**
  * Represents a HTTP failure result for retrieving information of a ConductR cluster member
