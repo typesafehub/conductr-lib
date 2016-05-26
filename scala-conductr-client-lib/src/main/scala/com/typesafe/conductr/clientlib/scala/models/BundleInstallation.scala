@@ -11,4 +11,5 @@ import java.net.URI
 final case class BundleInstallation(
   uniqueAddress: UniqueAddress,
   bundleFile: URI,
-  configurationFile: Option[URI])
+  configurationFile: Option[URI]
+)

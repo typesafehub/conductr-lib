@@ -53,7 +53,8 @@ class ConnectionHandler extends AbstractConnectionHandler {
   override protected type CC = ConnectionContext
 
   override def withConnectedRequest[T](
-    payload: Option[HttpPayload])(handler: (Int, Map[String, Option[String]]) => Option[T])(implicit cc: CC): Future[Option[T]] = {
+    payload: Option[HttpPayload]
+  )(handler: (Int, Map[String, Option[String]]) => Option[T])(implicit cc: CC): Future[Option[T]] = {
 
     payload.fold[Future[Option[T]]](Future.successful(None)) { p =>
       val url = p.getUrl
@@ -70,7 +71,8 @@ class ConnectionHandler extends AbstractConnectionHandler {
           response.status.intValue(),
           response.allHeaders.foldLeft(Map.empty[String, Option[String]]) {
             case (m, (header, values)) => m.updated(header, values.lastOption)
-          })
+          }
+        )
       }
     }
   }

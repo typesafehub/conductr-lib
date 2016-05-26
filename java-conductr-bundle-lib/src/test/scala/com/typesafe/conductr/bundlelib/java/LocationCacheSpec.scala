@@ -26,8 +26,7 @@ class LocationCacheSpec extends AkkaUnitTest {
             ): CompletionStage[Optional[Tuple[URI, Optional[JavaDuration]]]]
           } else
             throw new IllegalStateException(s"Some bad service: $serviceName")
-        }.asJava
-        )
+        }.asJava)
 
       val location1 = getFromCache("/someservice")
       Await.result(location1, timeout.duration) shouldBe Optional.of(new URI("/somelocation"))

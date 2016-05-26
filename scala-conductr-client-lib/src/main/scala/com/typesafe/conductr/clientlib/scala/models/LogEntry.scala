@@ -13,7 +13,8 @@ sealed trait LogEntry
 final case class BundleEvent(
   timestamp: Date,
   event: String,
-  description: String) extends LogEntry
+  description: String
+) extends LogEntry
 
 /**
  * Represents logs to be sent to the clients.
@@ -21,4 +22,5 @@ final case class BundleEvent(
 final case class BundleLog(
   timestamp: Date,
   host: String,
-  message: String) extends LogEntry
+  message: String
+) extends LogEntry

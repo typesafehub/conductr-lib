@@ -4,14 +4,11 @@ name := "akka24-conductr-client-lib"
 
 libraryDependencies ++= List(
   Library.akka24Sse,
-  Library.akka24ContribExtra,
   Library.play24Json,
   Library.akka24HttpTestkit % "test",
   Library.akka24Testkit     % "test",
   Library.scalaTest         % "test"
 )
-
-resolvers += Resolvers.typesafeBintrayReleases
 
 fork in Test := true
 

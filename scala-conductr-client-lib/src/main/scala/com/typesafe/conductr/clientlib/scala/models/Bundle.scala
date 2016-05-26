@@ -12,4 +12,5 @@ final case class Bundle(
   bundleScale: Option[BundleScale],
   bundleExecutions: Iterable[BundleExecution],
   bundleInstallations: Iterable[BundleInstallation],
-  hasError: Boolean)
+  hasError: Boolean
+)

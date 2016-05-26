@@ -256,7 +256,8 @@ object TestData {
   val MemberUp = Member(
     node = MemberUpUniqueAddress,
     status = "Up",
-    roles = Set("frontend"))
+    roles = Set("frontend")
+  )
 
   val MemberDownAddress = new URI("akka.tcp://conductr@10.0.1.209:9004")
   val MemberDownUid = -1207279468
@@ -264,7 +265,8 @@ object TestData {
   val MemberDown = Member(
     node = MemberDownUniqueAddress,
     status = "Down",
-    roles = Set("backend"))
+    roles = Set("backend")
+  )
 
   val MemberInfo =
     MemberInfoSuccess(
@@ -301,7 +303,8 @@ object TestData {
     members = Seq(MemberUp, MemberDown),
     unreachable = Seq(UnreachableMember(
       node = MemberDownUniqueAddress,
-      observedBy = Seq(MemberUpUniqueAddress)))
+      observedBy = Seq(MemberUpUniqueAddress)
+    ))
   )
 
   val MembersInfoAsJson =

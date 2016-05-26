@@ -150,7 +150,8 @@ object JsonMarshalling {
     status: String,
     roles: Set[String],
     isUnreachableFrom: Seq[UniqueAddress],
-    detectedUnreachable: Seq[URI])
+    detectedUnreachable: Seq[URI]
+  )
 
   implicit val memberInfoSuccessFormat: Format[MemberInfoSuccess] = {
     val errorMsg = "Member information could not be converted to MemberInfoSuccess"
@@ -162,7 +163,9 @@ object JsonMarshalling {
               MemberInfoSuccess(
                 member = Member(member.node, member.status, member.roles),
                 isUnreachableFrom = member.isUnreachableFrom,
-                detectedUnreachable = member.detectedUnreachable))
+                detectedUnreachable = member.detectedUnreachable
+              )
+            )
           case JsError(errors) => JsError(s"$errorMsg: $errors")
         }
       case other => JsError(s"$errorMsg: $other")
@@ -174,7 +177,8 @@ object JsonMarshalling {
           status = o.member.status,
           roles = o.member.roles,
           isUnreachableFrom = o.isUnreachableFrom,
-          detectedUnreachable = o.detectedUnreachable)
+          detectedUnreachable = o.detectedUnreachable
+        )
         Json.toJson(memberResponse)
     }
     Format(reads, writes)

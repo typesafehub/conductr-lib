@@ -104,7 +104,8 @@ class LocationServiceSpecWithEnv extends AkkaUnitTestWithFixture("LocationServic
                   case Some(maxAgeSecs) =>
                     `Cache-Control`(
                       CacheDirectives.`private`(Location.name),
-                      CacheDirectives.`max-age`(maxAgeSecs)) :: Nil
+                      CacheDirectives.`max-age`(maxAgeSecs)
+                    ) :: Nil
                   case None =>
                     Nil
                 })

@@ -6,4 +6,5 @@ package com.typesafe.conductr.clientlib.scala.models
 final case class Member(
   node: UniqueAddress,
   status: String,
-  roles: Set[String])
+  roles: Set[String]
+)

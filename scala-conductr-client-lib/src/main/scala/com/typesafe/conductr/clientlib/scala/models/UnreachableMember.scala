@@ -4,4 +4,5 @@ import java.net.URI
 
 case class UnreachableMember(
   node: UniqueAddress,
-  observedBy: Seq[UniqueAddress])
+  observedBy: Seq[UniqueAddress]
+)

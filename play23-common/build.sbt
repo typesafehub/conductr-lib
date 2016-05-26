@@ -4,4 +4,4 @@ libraryDependencies ++= List(
   Library.play23Ws
 )
 
-resolvers += Resolvers.playTypesafeReleases
+resolvers += Resolvers.typesafeReleases // For netty-http-pipeline

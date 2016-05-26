@@ -8,23 +8,17 @@ This project provides a number of libraries to facilitate [ConductR](http://type
 
 Add one of the following libraries to your project.
 
-* `"com.typesafe.conductr" %  "conductr-bundle-lib"         % "1.4.3"`
-* `"com.typesafe.conductr" %  "java-conductr-bundle-lib"    % "1.4.3"`
-* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"   % "1.4.3"`
-* `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib"  % "1.4.3"`
-* `"com.typesafe.conductr" %% "akka24-conductr-bundle-lib"  % "1.4.3"`
-* `"com.typesafe.conductr" %% "play23-conductr-bundle-lib"  % "1.4.3"`
-* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib"  % "1.4.3"`
-* `"com.typesafe.conductr" %% "play25-conductr-bundle-lib"  % "1.4.3"`
-* `"com.typesafe.conductr" %% "lagom10-conductr-bundle-lib" % "1.4.3"`
+* `"com.typesafe.conductr" %  "conductr-bundle-lib"         % "1.4.4"`
+* `"com.typesafe.conductr" %  "java-conductr-bundle-lib"    % "1.4.4"`
+* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"   % "1.4.4"`
+* `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib"  % "1.4.4"`
+* `"com.typesafe.conductr" %% "akka24-conductr-bundle-lib"  % "1.4.4"`
+* `"com.typesafe.conductr" %% "play23-conductr-bundle-lib"  % "1.4.4"`
+* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib"  % "1.4.4"`
+* `"com.typesafe.conductr" %% "play25-conductr-bundle-lib"  % "1.4.4"`
+* `"com.typesafe.conductr" %% "lagom10-conductr-bundle-lib" % "1.4.4"`
 
-You will also require a resolver:
-
-```scala
-resolvers += Resolver.bintrayRepo("typesafe", "maven-releases")
-```
-
-Also note that the examples here use the following import to conveniently build the JDK `URI` and `URL` types. 
+Note that the examples here use the following import to conveniently build the JDK `URI` and `URL` types. 
 
 ```scala
 import com.typesafe.conductr.bundlelib.scala.{URL, URI}

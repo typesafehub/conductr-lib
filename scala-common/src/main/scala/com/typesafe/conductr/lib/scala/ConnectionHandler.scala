@@ -40,7 +40,8 @@ class ConnectionHandler extends AbstractConnectionHandler {
    * of ConductR.
    */
   override def withConnectedRequest[T](
-    payload: Option[HttpPayload])(handler: (Int, Map[String, Option[String]]) => Option[T])(implicit cc: CC): Future[Option[T]] = {
+    payload: Option[HttpPayload]
+  )(handler: (Int, Map[String, Option[String]]) => Option[T])(implicit cc: CC): Future[Option[T]] = {
 
     import cc.executionContext
     payload.fold[Future[Option[T]]](Future.successful(None)) { p =>
@@ -58,7 +59,8 @@ class ConnectionHandler extends AbstractConnectionHandler {
                   connection.getResponseCode,
                   connection.getHeaderFields.asScala.foldLeft(Map.empty[String, Option[String]]) {
                     case (m, (k, v)) => m.updated(k, v.asScala.lastOption)
-                  })
+                  }
+                )
 
               } finally {
                 connection.disconnect()
