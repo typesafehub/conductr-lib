@@ -51,6 +51,7 @@ lazy val javaConductRBundleLib = project
   .dependsOn(conductRBundleLib)
   .dependsOn(javaCommon)
   .dependsOn(javaTestLib % "test->compile")
+  .dependsOn(akka24TestLib % "test->compile")
 
 // Scala
 lazy val scalaCommon = project
@@ -174,7 +175,6 @@ lazy val akka24TestLib = project
 
 lazy val javaTestLib = project
   .in(file("java-test-lib"))
-  .dependsOn(akka24TestLib)
 
 
 name := "root"

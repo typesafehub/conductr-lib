@@ -9,8 +9,6 @@ libraryDependencies ++= List(
   Library.scalaTest     % "test"
 )
 
-resolvers += Resolvers.playTypesafeReleases
-
 fork in Test := true
 
 def groupByFirst(tests: Seq[TestDefinition]) =

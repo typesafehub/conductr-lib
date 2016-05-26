@@ -93,7 +93,7 @@ class LocationServiceSpecWithEnv extends AkkaUnitTestWithFixture("LocationServic
     val probe = new TestProbe(system)
 
     val handler =
-      path("services" / Rest) { serviceName =>
+      path("services" / Remaining) { serviceName =>
         get {
           complete {
             serviceName match {
