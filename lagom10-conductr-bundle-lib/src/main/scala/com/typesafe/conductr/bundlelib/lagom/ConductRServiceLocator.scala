@@ -4,12 +4,14 @@ import java.util.function.{ Function => JFunction }
 import javax.inject.Inject
 
 import com.typesafe.conductr.bundlelib.scala.CacheLike
-import com.lightbend.lagom.javadsl.api.ServiceLocator
+import com.lightbend.lagom.javadsl.api.{ Descriptor, ServiceLocator }
+
 import scala.concurrent.Future
 import com.typesafe.conductr.bundlelib.scala.URI
 import java.net.{ URI => JavaURI }
 import java.util.Optional
 import java.util.concurrent.CompletionStage
+
 import scala.language.reflectiveCalls
 import scala.compat.java8.FutureConverters._
 import scala.compat.java8.OptionConverters._
@@ -25,13 +27,13 @@ class ConductRServiceLocator @Inject() (locationService: LocationService, cache:
   private def locateAsScala(name: String): Future[Optional[JavaURI]] =
     locationService.lookup(name, URI(""), cache).map(_.asJava)
 
-  override def locate(name: String): CompletionStage[Optional[JavaURI]] =
+  override def locate(name: String, serviceCall: Descriptor.Call[_, _]): CompletionStage[Optional[JavaURI]] =
     locateAsScala(name).toJava
 
-  override def doWithService[T](name: String, block: JFunction[JavaURI, CompletionStage[T]]): CompletionStage[Optional[T]] =
+  override def doWithService[T](name: String, serviceCall: Descriptor.Call[_, _], block: JFunction[JavaURI, CompletionStage[T]]): CompletionStage[Optional[T]] =
     locateAsScala(name).flatMap(uriOpt => {
       if (uriOpt.isPresent)
-        block.apply(uriOpt.get()).toScala.map(Optional.of(_))
+        block.apply(uriOpt.get()).toScala.map(Optional.of[T])
       else
         Future.successful(Optional.empty[T])
     }).toJava
