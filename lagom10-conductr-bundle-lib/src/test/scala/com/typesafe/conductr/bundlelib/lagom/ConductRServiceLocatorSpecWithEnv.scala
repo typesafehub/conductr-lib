@@ -9,12 +9,14 @@ import akka.http.scaladsl.model.{ HttpEntity, HttpResponse, StatusCodes }
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.testkit.TestProbe
+import com.lightbend.lagom.javadsl.api.Descriptor
 import com.typesafe.conductr.bundlelib.play.api.{ Env => PlayEnv }
 import com.typesafe.conductr.bundlelib.play.api.{ BundlelibModule, ConductRLifecycleModule }
 import com.typesafe.conductr.bundlelib.scala.{ URI, URL }
 import com.typesafe.conductr.lib.AkkaUnitTestWithFixture
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers._
+
 import scala.compat.java8.FutureConverters._
 import scala.compat.java8.OptionConverters._
 import scala.concurrent.Await
@@ -43,7 +45,7 @@ class ConductRServiceLocatorSpecWithEnv extends AkkaUnitTestWithFixture("Conduct
       withServerWithKnownService(serviceUri) {
         running(app) {
           val serviceLocator = app.injector.instanceOf[ConductRServiceLocator]
-          val service = serviceLocator.locate("/known").toScala.map(_.asScala)
+          val service = serviceLocator.locate("/known", Descriptor.Call.NONE).toScala.map(_.asScala)
           Await.result(service, timeout.duration) shouldBe Some(serviceUri)
         }
       }
@@ -61,7 +63,7 @@ class ConductRServiceLocatorSpecWithEnv extends AkkaUnitTestWithFixture("Conduct
       withServerWithKnownService(serviceUri) {
         running(app) {
           val serviceLocator = app.injector.instanceOf[ConductRServiceLocator]
-          val service = serviceLocator.locate("known").toScala.map(_.asScala)
+          val service = serviceLocator.locate("known", Descriptor.Call.NONE).toScala.map(_.asScala)
           Await.result(service, timeout.duration) shouldBe Some(serviceUri)
         }
       }
