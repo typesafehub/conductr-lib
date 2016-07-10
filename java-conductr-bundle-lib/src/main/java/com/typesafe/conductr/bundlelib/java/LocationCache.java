@@ -18,33 +18,42 @@ import java.util.function.Supplier;
  */
 public class LocationCache implements CacheLike {
 
-    private final ConcurrentMap<String, CompletionStage<Optional<URI>>> cache = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, CompletionStage<Optional<Tuple<URI, Optional<Duration>>>>> cache = new ConcurrentHashMap<>();
 
     private final Timer reaperTimer = new Timer();
 
     @Override
     public CompletionStage<Optional<URI>> getOrElseUpdate(String serviceName, Supplier<CompletionStage<Optional<Tuple<URI, Optional<Duration>>>>> op) {
-        return cache.computeIfAbsent(serviceName, sn ->
-            op
-                .get()
-                .whenCompleteAsync((locationAndMaxAge, e) -> {
-                    try {
-                        Duration maxAge = locationAndMaxAge.get()._2.get();
-                        reaperTimer.schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                cache.remove(sn);
-                            }
-                        }, maxAge.toMillis());
-                    } catch (NoSuchElementException nse) {
-                        cache.remove(sn);
+        return cache
+                .computeIfAbsent(serviceName, sn -> op.get())
+                .whenCompleteAsync((result, error) -> {
+                    /*
+                      IMPORTANT: always check the presence of error before result.
+                      If error is present, and result is accessed (e.g. calling `isPresent()`), the whole future will
+                      fail with an exception.
+                     */
+                    if (error != null || !result.isPresent())
+                        cache.remove(serviceName);
+                    else if (result.isPresent()) {
+                        if (result.get()._2.isPresent())
+                            reaperTimer.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    cache.remove(serviceName);
+                                }
+                            }, result.get()._2.get().toMillis());
+                        else
+                            cache.remove(serviceName);
                     }
                 })
-                .thenApply(o -> o.map(o1 -> Optional.of(o1._1)).orElse(Optional.empty())));
+                .thenApply(r -> r.map(t -> t._1));
     }
 
     @Override
     public Optional<CompletionStage<Optional<URI>>> remove(String serviceName) {
-        return Optional.ofNullable(cache.remove(serviceName));
+        return Optional.ofNullable(
+                cache.remove(serviceName)
+                    .thenApply(r -> r.map(t -> t._1))
+        );
     }
 }
