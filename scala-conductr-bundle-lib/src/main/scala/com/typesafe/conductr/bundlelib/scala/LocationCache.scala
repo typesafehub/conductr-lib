@@ -34,30 +34,31 @@ object LocationCache {
  */
 class LocationCache extends CacheLike {
 
-  private val cache = TrieMap.empty[String, Future[Option[JavaURI]]]
+  private val cache = TrieMap.empty[String, Future[Option[(JavaURI, Option[FiniteDuration])]]]
 
   val reaperTimer = new Timer()
 
-  override def getOrElseUpdate(serviceName: String)(op: => Future[Option[(JavaURI, Option[FiniteDuration])]]): Future[Option[JavaURI]] =
-    cache.getOrElseUpdate(serviceName, {
-      import Implicits.global
-      op
-        .andThen {
-          case Success(Some((_, Some(maxAge)))) =>
-            reaperTimer.schedule(new TimerTask {
-              override def run(): Unit = {
-                cache.remove(serviceName)
-              }
-            }, maxAge.toMillis)
-          case _ =>
-            cache.remove(serviceName)
-        }
-        .map {
-          case Some((location, _)) => Some(location)
-          case None                => None
-        }
-    })
+  override def getOrElseUpdate(serviceName: String)(op: => Future[Option[(JavaURI, Option[FiniteDuration])]]): Future[Option[JavaURI]] = {
+    import Implicits.global
+    cache.getOrElseUpdate(serviceName, op)
+      .andThen {
+        case Success(Some((location, Some(maxAge)))) =>
+          reaperTimer.schedule(new TimerTask {
+            override def run(): Unit = {
+              cache.remove(serviceName)
+            }
+          }, maxAge.toMillis)
 
-  override def remove(serviceName: String): Option[Future[Option[JavaURI]]] =
+        case _ =>
+          cache.remove(serviceName)
+      }
+      .map(_.map(_._1))
+
+  }
+
+  override def remove(serviceName: String): Option[Future[Option[JavaURI]]] = {
+    import Implicits.global
     cache.remove(serviceName)
+      .map(_.map(_.map(_._1)))
+  }
 }
