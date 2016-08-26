@@ -23,7 +23,7 @@ lazy val root = project
     play25Common,
     play25ConductRBundleLib,
     play25ConductRClientLib,
-    lagom10ConductRBundleLib)
+    lagom1ConductRBundleLib)
 
 // When executing tests the projects are running sequentially.
 // If the tests of each project run sequentially or in parallel
@@ -158,9 +158,9 @@ lazy val play25ConductRClientLib = project
   .dependsOn(javaTestLib % "test->compile")
   .dependsOn(akka24TestLib % "test->compile")
 
-// Lagom 1.0
-lazy val lagom10ConductRBundleLib = project
-  .in(file("lagom10-conductr-bundle-lib"))
+// Lagom version 1
+lazy val lagom1ConductRBundleLib = project
+  .in(file("lagom1-conductr-bundle-lib"))
   .dependsOn(play25ConductRBundleLib)
   .dependsOn(javaTestLib % "test->compile")
   .dependsOn(akka24TestLib % "test->compile")

@@ -16,7 +16,7 @@ Add one of the following libraries to your project.
 * `"com.typesafe.conductr" %% "play23-conductr-bundle-lib"  % "1.4.7"`
 * `"com.typesafe.conductr" %% "play24-conductr-bundle-lib"  % "1.4.7"`
 * `"com.typesafe.conductr" %% "play25-conductr-bundle-lib"  % "1.4.7"`
-* `"com.typesafe.conductr" %% "lagom10-conductr-bundle-lib" % "1.4.7"`
+* `"com.typesafe.conductr" %% "lagom1-conductr-bundle-lib" % "1.4.7"`
 
 Note that the examples here use the following import to conveniently build the JDK `URI` and `URL` types. 
 
@@ -31,7 +31,7 @@ import com.typesafe.conductr.bundlelib.scala.{URL, URI}
 * [akka[23|24]-conductr-bundle-lib](#akka2324-conductr-bundle-lib)
 * [play[23|24]-conductr-bundle-lib](#play2324-conductr-bundle-lib)
 * [play25-conductr-bundle-lib](#play25-conductr-bundle-lib)
-* [lagom10-conductr-bundle-lib](#lagom10-conductr-bundle-lib)
+* [lagom1-conductr-bundle-lib](#lagom1-conductr-bundle-lib)
 
 ## conductr-bundle-lib
 
@@ -389,7 +389,7 @@ object Global extends GlobalSettings {
 }
 ```
 
-## lagom10-conductr-bundle-lib
+## lagom1-conductr-bundle-lib
 
 > If you are using Lagom 1.0.x then this section is for you.
 
