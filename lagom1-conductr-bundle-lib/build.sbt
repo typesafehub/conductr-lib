@@ -1,9 +1,9 @@
 import Tests._
 
-name := "lagom10-conductr-bundle-lib"
+name := "lagom1-conductr-bundle-lib"
 
 libraryDependencies ++= List(
-  Library.lagom10Api,
+  Library.lagom1Api,
   Library.akka24Testkit % "test",
   Library.play25Test    % "test",
   Library.scalaTest     % "test"
