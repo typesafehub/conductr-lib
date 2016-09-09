@@ -36,7 +36,7 @@ class LocationCache extends CacheLike {
 
   private val cache = TrieMap.empty[String, Future[Option[(JavaURI, Option[FiniteDuration])]]]
 
-  val reaperTimer = new Timer()
+  val reaperTimer = new Timer("LocationCache-Reaper", true /* daemon thread */ )
 
   override def getOrElseUpdate(serviceName: String)(op: => Future[Option[(JavaURI, Option[FiniteDuration])]]): Future[Option[JavaURI]] = {
     import Implicits.global

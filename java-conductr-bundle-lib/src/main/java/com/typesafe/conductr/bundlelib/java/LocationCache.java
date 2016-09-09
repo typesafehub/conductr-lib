@@ -20,7 +20,7 @@ public class LocationCache implements CacheLike {
 
     private final ConcurrentMap<String, CompletionStage<Optional<Tuple<URI, Optional<Duration>>>>> cache = new ConcurrentHashMap<>();
 
-    private final Timer reaperTimer = new Timer();
+    private final Timer reaperTimer = new Timer("LocationCache-Reaper", true /* daemon thread */);
 
     @Override
     public CompletionStage<Optional<URI>> getOrElseUpdate(String serviceName, Supplier<CompletionStage<Optional<Tuple<URI, Optional<Duration>>>>> op) {
