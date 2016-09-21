@@ -8,12 +8,15 @@ object Version {
   val akka23Sse          = "1.5.0"
   val akka24             = "2.4.7"
   val akka24Sse          = "1.8.1"
+  val akka23ContribExtra = "2.0.2"
+  val akka24ContribExtra = "3.3.0"
   val java8Compat        = "0.7.0"
   val junit              = "4.12"
   val play23             = "2.3.10"
   val play24             = "2.4.6"
   val play25             = "2.5.3"
   val lagom1             = "1.0.0-RC1"
+  val reactiveStreams    = "1.0.0"
   val scala              = "2.11.8"
   val scalaTest          = "2.2.6"
 }
@@ -29,8 +32,11 @@ object Library {
   val akka24HttpTestkit  = "com.typesafe.akka"      %% "akka-http-testkit"              % Version.akka24
   val akka24Testkit      = "com.typesafe.akka"      %% "akka-testkit"                   % Version.akka24
   val akka24Sse          = "de.heikoseeberger"      %% "akka-sse"                       % Version.akka24Sse
+  val akka23ContribExtra = "com.typesafe.akka"      %% "akka-contrib-extra"             % Version.akka23ContribExtra
+  val akka24ContribExtra = "com.typesafe.akka"      %% "akka-contrib-extra"             % Version.akka24ContribExtra
   val lagom1Api          = "com.lightbend.lagom"    %% "lagom-javadsl-api"              % Version.lagom1
   val java8Compat        = "org.scala-lang.modules" % "scala-java8-compat_2.11"         % Version.java8Compat
+  val reactiveStreams    = "org.reactivestreams"    % "reactive-streams"                % Version.reactiveStreams
   val junit              = "junit"                  %  "junit"                          % Version.junit
   val play23Test         = "com.typesafe.play"      %% "play-test"                      % Version.play23
   val play23Ws           = "com.typesafe.play"      %% "play-ws"                        % Version.play23

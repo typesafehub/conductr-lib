@@ -1,27 +1,49 @@
 package com.typesafe.conductr.clientlib.akka
 
+import java.io.File
 import java.net.URL
 
 import akka.actor.ActorDSL._
 import akka.actor.ActorSystem
+import akka.contrib.http.Directives._
+import akka.http.scaladsl.marshalling.Marshal
+import akka.http.scaladsl.model.HttpEntity.IndefiniteLength
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
+import akka.stream.ActorMaterializer
 import akka.stream.actor.ActorPublisher
-import akka.stream.scaladsl.{ Flow, Keep, Sink, Source }
-import akka.util.Timeout
+import akka.stream.scaladsl.{ FileIO, Flow, Keep, Sink, Source }
+import akka.testkit.TestProbe
+import akka.util.{ ByteString, Timeout }
 import com.typesafe.conductr.lib.AkkaUnitTestWithFixture
 import com.typesafe.conductr.lib.akka.ConnectionContext
 import com.typesafe.conductr.clientlib.akka.models.{ EventStreamFailure, EventStreamSuccess }
 import com.typesafe.conductr.clientlib.scala.models._
 
 import de.heikoseeberger.akkasse.{ EventStreamMarshalling, ServerSentEvent }
+import org.reactivestreams.Publisher
+import org.scalatest.Inside
 import scala.concurrent.duration._
 import scala.concurrent.{ Future, Await }
 import akka.http.scaladsl.model._
 import scala.util.{ Failure, Success }
 
-class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") {
+object ControlClientSpec {
+  def writeToFile(file: File, text: String)(implicit mat: ActorMaterializer, timeout: Timeout): Unit =
+    Await.result(
+      Source.single(ByteString.fromString(text)).runWith(FileIO.toFile(file)),
+      timeout.duration
+    )
+
+  def readFromByteArrayPublisher(pub: Publisher[Array[Byte]])(implicit mat: ActorMaterializer, timeout: Timeout): String =
+    Await.result(
+      Source.fromPublisher(pub).map(new String(_)).runFold("")(_ + _),
+      timeout.duration
+    )
+}
+
+class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") with Inside {
 
   import TestData._
   import Directives._
@@ -65,6 +87,176 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") {
 
       withServer(route) {
         Await.result(ControlClient(HostUrl).getBundlesInfo(), timeout.duration) shouldBe Seq(BundleFrontend, BundleBackend)
+      }
+    }
+
+    "get bundle and config" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
+      val bundleFile = File.createTempFile("bundle-1", ".zip")
+      ControlClientSpec.writeToFile(bundleFile, "bundle zip file")
+
+      val configFile = File.createTempFile("config-1", ".zip")
+      ControlClientSpec.writeToFile(configFile, "bundle configuration zip file")
+
+      val routeInputMonitor = TestProbe()
+
+      // format: OFF
+      val route =
+        pathPrefix(ApiVersion / "bundles" / Segment) { bundleId =>
+          get {
+            accept(MediaTypes.`multipart/form-data`) {
+              complete {
+                routeInputMonitor.ref ! bundleId
+                Marshal(
+                  Multipart.FormData(
+                    Multipart.FormData.BodyPart(
+                      "bundle",
+                      IndefiniteLength(MediaTypes.`application/octet-stream`, FileIO.fromFile(bundleFile)),
+                      Map("filename" -> bundleFile.getName)
+                    ),
+                    Multipart.FormData.BodyPart(
+                      "configuration",
+                      IndefiniteLength(MediaTypes.`application/octet-stream`, FileIO.fromFile(configFile)),
+                      Map("filename" -> configFile.getName)
+                    )
+                  )
+                ).to[HttpResponse]
+              }
+            }
+          }
+        }
+      // format: ON
+
+      withServer(route) {
+        val result = Await.result(ControlClient(HostUrl).getBundle("vis"), timeout.duration)
+        inside(result) {
+          case v: BundleGetSuccess =>
+            v.bundleId shouldBe "vis"
+
+            v.bundleFile.fileName shouldBe bundleFile.getName
+            ControlClientSpec.readFromByteArrayPublisher(v.bundleFile.data) shouldBe "bundle zip file"
+
+            v.configFile.get.fileName shouldBe configFile.getName
+            ControlClientSpec.readFromByteArrayPublisher(v.configFile.get.data) shouldBe "bundle configuration zip file"
+        }
+        routeInputMonitor.expectMsg("vis")
+      }
+    }
+
+    "get bundle only" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
+      val bundleFile = File.createTempFile("bundle-1", ".zip")
+      ControlClientSpec.writeToFile(bundleFile, "bundle zip file")
+
+      val routeInputMonitor = TestProbe()
+
+      // format: OFF
+      val route =
+        pathPrefix(ApiVersion / "bundles" / Segment) { bundleId =>
+          get {
+            accept(MediaTypes.`multipart/form-data`) {
+              complete {
+                routeInputMonitor.ref ! bundleId
+                Marshal(
+                  Multipart.FormData(
+                    Multipart.FormData.BodyPart(
+                      "bundle",
+                      IndefiniteLength(MediaTypes.`application/octet-stream`, FileIO.fromFile(bundleFile)),
+                      Map("filename" -> bundleFile.getName)
+                    )
+                  )
+                ).to[HttpResponse]
+              }
+            }
+          }
+        }
+      // format: ON
+
+      withServer(route) {
+        val result = Await.result(ControlClient(HostUrl).getBundle("vis"), timeout.duration)
+        inside(result) {
+          case v: BundleGetSuccess =>
+            v.bundleId shouldBe "vis"
+
+            v.bundleFile.fileName shouldBe bundleFile.getName
+            ControlClientSpec.readFromByteArrayPublisher(v.bundleFile.data) shouldBe "bundle zip file"
+
+            v.configFile shouldBe None
+        }
+        routeInputMonitor.expectMsg("vis")
+      }
+    }
+
+    "get bundle returning a failure result when encountering invalid response" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
+      val bundleFile = File.createTempFile("bundle-1", ".zip")
+      val configFile = File.createTempFile("config-1", ".zip")
+      val routeInputMonitor = TestProbe()
+
+      // format: OFF
+      val route =
+        pathPrefix(ApiVersion / "bundles" / Segment) { bundleId =>
+          get {
+            accept(MediaTypes.`multipart/form-data`) {
+              complete {
+                routeInputMonitor.ref ! bundleId
+                Marshal(
+                  Multipart.FormData(
+                    Multipart.FormData.BodyPart(
+                      "foo",
+                      IndefiniteLength(MediaTypes.`application/octet-stream`, FileIO.fromFile(bundleFile)),
+                      Map("filename" -> bundleFile.getName)
+                    ),
+                    Multipart.FormData.BodyPart(
+                      "bar",
+                      IndefiniteLength(MediaTypes.`application/octet-stream`, FileIO.fromFile(configFile)),
+                      Map("filename" -> configFile.getName)
+                    )
+                  )
+                ).to[HttpResponse]
+              }
+            }
+          }
+        }
+      // format: ON
+
+      withServer(route) {
+        intercept[InvalidBundleGetResponseBody] {
+          Await.result(ControlClient(HostUrl).getBundle("vis"), timeout.duration)
+        }
+        routeInputMonitor.expectMsg("vis")
+      }
+    }
+
+    "get bundle returning a failure result when encountering http error" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
+      val routeInputMonitor = TestProbe()
+
+      // format: OFF
+      val route =
+        pathPrefix(ApiVersion / "bundles" / Segment) { bundleId =>
+          get {
+            routeInputMonitor.ref ! bundleId
+            accept(MediaTypes.`multipart/form-data`) {
+              complete {
+                HttpResponse(status = StatusCodes.InternalServerError, entity = HttpEntity("test error"))
+              }
+            }
+          }
+        }
+      // format: ON
+
+      withServer(route) {
+        Await.result(ControlClient(HostUrl).getBundle("vis"), timeout.duration) shouldBe BundleGetFailure(500, "test error")
+        routeInputMonitor.expectMsg("vis")
       }
     }
 

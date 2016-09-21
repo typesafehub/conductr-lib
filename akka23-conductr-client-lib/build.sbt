@@ -7,6 +7,7 @@ libraryDependencies ++= List(
   Library.play23Json,
   Library.akka23HttpTestkit % "test",
   Library.akka23Testkit     % "test",
+  Library.akka23ContribExtra  % "test",
   Library.scalaTest         % "test"
 )
 
@@ -56,3 +57,5 @@ def groupByFirst(tests: Seq[TestDefinition]) =
     }.toSeq
 
 testGrouping in Test <<= (definedTests in Test).map(groupByFirst)
+
+resolvers += Resolvers.typesafeReleases // For akka-contrib-extra within test code

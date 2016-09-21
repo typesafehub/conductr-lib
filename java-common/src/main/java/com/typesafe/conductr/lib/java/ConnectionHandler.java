@@ -37,6 +37,7 @@ public class ConnectionHandler {
                     connection.setRequestMethod(p.getRequestMethod());
                     connection.setInstanceFollowRedirects(p.getFollowRedirects());
                     connection.setRequestProperty("User-Agent", USER_AGENT);
+                    p.getRequestHeaders().forEach(connection::setRequestProperty);
                     blocking(() -> {
                         try {
                             connection.connect();

@@ -22,6 +22,17 @@ abstract class AbstractControlClient(conductrAddress: URL) {
   def getBundlesInfo()(implicit cc: CC): Future[Seq[Bundle]]
 
   /**
+   * Retrieve bundle file and bundle configuration file given a particular bundle id.
+   * @param bundleId An existing bundle identifier, a shortened version of it (min 7 characters) or
+   *                 a non-ambiguous name given to the bundle during loading.
+   * @param cc implicit connection context
+   * @return The result as a Future[BundleGetResult]. BundleGetResult is a sealed trait and can be either:
+   *         - BundleGetSuccess if the get bundle request has been succeeded. This object contains the bundle id, bundle file, and optionally the config file.
+   *         - BundleGetFailure if the get bundle request has been failed. This object contains the HTTP status code and error message.
+   */
+  def getBundle(bundleId: BundleId)(implicit cc: CC): Future[BundleGetResult]
+
+  /**
    * Scale a loaded bundle to a number of instances.
    * @param bundleId An existing bundle identifier, a shortened version of it (min 7 characters) or
    *                 a non-ambiguous name given to the bundle during loading.
@@ -160,6 +171,7 @@ abstract class AbstractControlClient(conductrAddress: URL) {
     // format: OFF
     // Bundles
     val bundlesInfo                                   = createPayload("GET",    s"$Prefix/bundles")
+    def getBundle(bundleId: BundleId)                 = createPayload("GET",    s"$Prefix/bundles/$bundleId").addRequestHeader("Accept", "multipart/form-data")
     def loadBundle                                    = createPayload("POST",   s"$Prefix/bundles")
     def runBundle(bundleId: BundleId, scale: Int, affinity: Option[String]) =
       createPayload("PUT",    s"$Prefix/bundles/$bundleId?scale=$scale${affinity.fold("")("&affinity=" + _)}")

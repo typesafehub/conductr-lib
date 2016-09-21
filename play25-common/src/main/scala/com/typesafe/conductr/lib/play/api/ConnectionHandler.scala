@@ -6,6 +6,7 @@ import com.typesafe.conductr.lib.scala.{ AbstractConnectionContext, AbstractConn
 import _root_.play.api.libs.ws._
 
 import scala.concurrent.{ ExecutionContext, Future }
+import scala.collection.JavaConversions._
 
 /**
  * When performing Play.WS connections, this is the connection context to use.
@@ -29,8 +30,13 @@ class ConnectionHandler extends AbstractConnectionHandler {
       val url = p.getUrl
       val urlStr = url.toString
 
+      val requestHeaders = Seq(
+        "User-Agent" -> UserAgent,
+        "Host" -> url.getHost
+      ) ++ p.getRequestHeaders.toSeq
+
       val request = cc.wsClient.url(urlStr)
-        .withHeaders("User-Agent" -> UserAgent, "Host" -> url.getHost)
+        .withHeaders(requestHeaders: _*)
         .withMethod(p.getRequestMethod)
         .withFollowRedirects(follow = false)
       import cc.executionContext
