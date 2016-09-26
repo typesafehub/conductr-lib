@@ -4,13 +4,14 @@ import akka.actor._
 import akka.http.scaladsl.client.RequestBuilding._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.{ Http, HttpExt }
-import akka.http.scaladsl.model.headers.{ Host, `User-Agent` }
+import akka.http.scaladsl.model.headers.{ RawHeader, Host, `User-Agent` }
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Sink, Source }
 import com.typesafe.conductr.lib.HttpPayload
 import com.typesafe.conductr.lib.scala.{ AbstractConnectionContext, AbstractConnectionHandler }
 
 import scala.concurrent.Future
+import scala.collection.JavaConversions._
 
 object ConnectionContext {
   def apply()(implicit context: ActorRefFactory): ConnectionContext = {
@@ -111,19 +112,6 @@ class ConnectionHandler extends AbstractConnectionHandler {
       .runWith(Sink.head)(cc.actorMaterializer)
   }
 
-  //  def withConnectedStream[T](payload: HttpPayload)(handler: HttpResponse => Future[Source[T, Unit]])(implicit cc: CC): Future[Source[T, Unit]] = {
-  //    import cc.actorMaterializer
-  //    import cc.actorMaterializer.executionContext
-  //
-  //    val connection = createConnection(payload)
-  //    val request = createRequest(payload, None)
-  //
-  //    Source.fromFuture(request)
-  //      .via(connection)
-  //      .mapAsync(1)(unmarshalling)
-  //      .runWith(Sink.head)(cc.actorMaterializer)
-  //  }
-
   private def createConnection(payload: HttpPayload)(implicit cc: CC) =
     cc.httpExt.outgoingConnection(payload.getUrl.getHost, payload.getUrl.getPort)
 
@@ -147,6 +135,10 @@ class ConnectionHandler extends AbstractConnectionHandler {
     requestF.map { request =>
       request.addHeader(`User-Agent`(UserAgent))
       request.addHeader(Host(url.getHost, url.getPort))
+      payload.getRequestHeaders.foldLeft(request) { (request, entry) =>
+        val (header, headerValue) = entry
+        request.addHeader(RawHeader(header, headerValue))
+      }
     }
   }
 }

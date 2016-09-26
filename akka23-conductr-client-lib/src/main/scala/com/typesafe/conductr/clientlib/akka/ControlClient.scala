@@ -2,13 +2,15 @@ package com.typesafe.conductr.clientlib.akka
 
 import java.io._
 import java.net.{ URI, URL }
+import java.nio.file.{ Paths, Path }
 import java.util.zip.ZipInputStream
 
 import akka.http.scaladsl.marshalling.Marshal
-import akka.http.scaladsl.model.HttpEntity.IndefiniteLength
+import akka.http.scaladsl.model.HttpEntity.{ SizeLimit, IndefiniteLength }
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.{ PredefinedFromEntityUnmarshallers, Unmarshal }
-import akka.stream.scaladsl.{ Source, StreamConverters }
+import akka.stream.Attributes
+import akka.stream.scaladsl.{ Sink, FileIO, Source, StreamConverters }
 import akka.util.ByteString
 import com.typesafe.conductr.lib.HttpPayload
 import com.typesafe.conductr.lib.akka.{ ConnectionContext, ConnectionHandler }
@@ -16,6 +18,7 @@ import com.typesafe.conductr.clientlib.akka.models._
 import com.typesafe.conductr.clientlib.scala.models._
 import com.typesafe.conductr.clientlib.scala.AbstractControlClient
 import de.heikoseeberger.akkasse.{ EventStreamUnmarshalling, ServerSentEvent }
+import org.reactivestreams.Publisher
 import play.api.libs.json.{ Json, Reads }
 import scala.concurrent.{ Future, blocking }
 import com.typesafe.conductr.clientlib.scala.{ withCloseable, withZipInputStream }
@@ -38,6 +41,7 @@ object ControlClient {
 /**
  * Akka 2.3 flavor of the [[AbstractControlClient]].
  * Uses Akka HTTP and Akka streams to interact with ConductR.
+ *
  * @param handler The connection handler contains the logic how to interact with the ConductR HTTP server
  * @param conductrAddress contains the protocol://host:port of the ConductR control server
  * @param apiVersion The version of ConductR's REST API
@@ -62,6 +66,81 @@ class ControlClient(handler: ConnectionHandler, conductrAddress: URL, apiVersion
   override def getBundlesInfo()(implicit cc: ConnectionContext): Future[Seq[Bundle]] =
     handler.withConnectedRequest(Payload.bundlesInfo)(handleAsSeq[Bundle])
 
+  /**
+   * @see [[AbstractControlClient.getBundle()]]
+   * @param bundleId An existing bundle identifier, a shortened version of it (min 7 characters) or
+   *                 a non-ambiguous name given to the bundle during loading.
+   * @param cc implicit connection context
+   * @return The result as a Future[BundleGetResult]. BundleGetResult is a sealed trait and can be either:
+   *         - BundleGetSuccess if the get bundle request has been succeeded. This object contains the bundle id, bundle file, and optionally the config file.
+   *         - BundleGetFailure if the get bundle request has been failed. This object contains the HTTP status code and error message.
+   */
+  override def getBundle(bundleId: BundleId)(implicit cc: ConnectionContext): Future[BundleGetResult] =
+    handler.withConnectedRequest(Payload.getBundle(bundleId)) { (responseCode, responseHeader, responseEntity) =>
+      import cc.actorMaterializer
+      import cc.actorMaterializer.executionContext
+
+      def bundleGet: Future[BundleGetResult] = {
+        def toByteArrayPublisher(input: Source[ByteString, _]): Publisher[Array[Byte]] =
+          input.map(_.toArray).runWith(Sink.asPublisher(fanout = false))
+
+        def bundleFileFromResponse(bundleParts: Seq[(String, String, Multipart.FormData.BodyPart)]): BundleFile =
+          bundleParts match {
+            case Seq(entry) if entry._1 == "bundle" =>
+              val (_, fileName, bodyPart) = entry
+              BundleFile(fileName, toByteArrayPublisher(bodyPart.entity.dataBytes))
+
+            case _ =>
+              throw new InvalidBundleGetResponseBody("Unable to find bundle file in the response body")
+          }
+
+        def configFileFromResponse(configParts: Seq[(String, String, Multipart.FormData.BodyPart)]): Option[BundleConfigurationFile] =
+          configParts.find(_._1 == "configuration") match {
+            case Some((_, fileName, bodyPart)) =>
+              Some(BundleConfigurationFile(fileName, toByteArrayPublisher(bodyPart.entity.dataBytes)))
+
+            case _ =>
+              None
+          }
+
+        for {
+          formData <- Unmarshal(responseEntity.withSizeLimit(Long.MaxValue)).to[Multipart.FormData]
+
+          bundleAndOthers <- formData
+            .parts
+            .map { bodyPart =>
+              (
+                bodyPart.contentDispositionHeader.flatMap(_.params.get("name")),
+                bodyPart.contentDispositionHeader.flatMap(_.params.get("filename")),
+                bodyPart
+              )
+            }
+            .collect {
+              case (Some(partName), Some(fileName), bodyPart) =>
+                (partName, fileName, bodyPart)
+            }
+            .prefixAndTail(1)
+            .runWith(Sink.head)
+
+          (bundleParts, otherParts) = bundleAndOthers
+          bundleFile = bundleFileFromResponse(bundleParts)
+
+          configAndOthers <- otherParts.prefixAndTail(1).runWith(Sink.head)
+          (configParts, _) = configAndOthers
+          configFile = configFileFromResponse(configParts)
+        } yield {
+          BundleGetSuccess(bundleId, bundleFile, configFile)
+        }
+      }
+
+      def bundleGetFailure: Future[BundleGetFailure] = {
+        implicit val unmarshaller = PredefinedFromEntityUnmarshallers.stringUnmarshaller
+        Unmarshal(responseEntity).to[String]
+          .map(BundleGetFailure(responseCode, _))
+      }
+
+      ResponseHandler.withHttpFailure(responseCode)(bundleGet, bundleGetFailure)
+    }
   /**
    * @see [[AbstractControlClient.loadBundle()]]
    * @param bundle The file that is the bundle.
@@ -149,6 +228,7 @@ class ControlClient(handler: ConnectionHandler, conductrAddress: URL, apiVersion
   /**
    * Returns a stream of all bundle events. Each event is represented by a [[ServerSentEvent]].
    * Each [[ServerSentEvent]] is transferred in a [[Source]] to easily access a stream of events.
+   *
    * @param events The requested events the stream should return. A `Set.empty` is returning every event type.
    * @param cc implicit connection context
    * @return The stream as a [[Source]] wrapped inside a [[scala.concurrent.Future]]
@@ -203,6 +283,7 @@ class ControlClient(handler: ConnectionHandler, conductrAddress: URL, apiVersion
   /**
    * Returns a stream of all member events. Each event is represented by a [[de.heikoseeberger.akkasse.ServerSentEvent]].
    * Each [[de.heikoseeberger.akkasse.ServerSentEvent]] is transferred in a [[Source]] to easily access a stream of events.
+   *
    * @param cc implicit connection context
    * @return The stream as a [[Source]] wrapped inside a [[scala.concurrent.Future]]
    */
