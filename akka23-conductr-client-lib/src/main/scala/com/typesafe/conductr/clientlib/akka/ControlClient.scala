@@ -2,15 +2,14 @@ package com.typesafe.conductr.clientlib.akka
 
 import java.io._
 import java.net.{ URI, URL }
-import java.nio.file.{ Paths, Path }
+import java.nio.file.Paths
 import java.util.zip.ZipInputStream
 
 import akka.http.scaladsl.marshalling.Marshal
-import akka.http.scaladsl.model.HttpEntity.{ SizeLimit, IndefiniteLength }
+import akka.http.scaladsl.model.HttpEntity.IndefiniteLength
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.{ PredefinedFromEntityUnmarshallers, Unmarshal }
-import akka.stream.Attributes
-import akka.stream.scaladsl.{ Sink, FileIO, Source, StreamConverters }
+import akka.stream.scaladsl.{ Sink, FileIO, Source }
 import akka.util.ByteString
 import com.typesafe.conductr.lib.HttpPayload
 import com.typesafe.conductr.lib.akka.{ ConnectionContext, ConnectionHandler }
@@ -156,26 +155,61 @@ class ControlClient(handler: ConnectionHandler, conductrAddress: URL, apiVersion
    *         - BundleRequestFailure if the loading request has been failed. This object contains the HTTP status code and error message.
    */
   override def loadBundle(bundle: URI, config: Option[URI] = None)(implicit cc: ConnectionContext): Future[BundleRequestResult] = {
-    def createRequestBody: Future[RequestEntity] = {
-      import cc.actorMaterializer.executionContext
+    def filename(uri: URI): String =
+      Paths.get(uri.getPath).getFileName.toString
 
-      def fileBodyPart(name: String, filename: String, source: Source[ByteString, Future[Long]]): Multipart.FormData.BodyPart =
+    def filePublisher(uri: URI): Publisher[Array[Byte]] =
+      toByteArrayPublisher(FileIO.fromFile(Paths.get(uri.getPath).toFile))
+
+    val tmpDir = new File(System.getProperty("java.io.tmpdir"))
+
+    val bundleConf = extractZipEntry("bundle.conf", bundle, tmpDir).get
+    val bundleConfOverlay = config.flatMap(extractZipEntry("bundle.conf", _, tmpDir))
+
+    val bundleConfData = filePublisher(bundleConf)
+    val bundleConfOverlayData = bundleConfOverlay.map(filePublisher)
+    val bundleData = BundleFile(filename(bundle), filePublisher(bundle))
+    val configData = config.map(v => BundleConfigurationFile(filename(v), filePublisher(v)))
+
+    loadBundle(bundleConfData, bundleConfOverlayData, bundleData, configData)
+  }
+
+  /**
+   * @see [[AbstractControlClient.loadBundle()]]
+   * @param bundleConf bundle.conf contained within the `bundle` file.
+   * @param bundleConfOverlay bundle.conf override contained within the `config` file.
+   * @param bundle The file that is the bundle.
+   *               The filename is important with its hex digest string and is required to be consistent
+   *               with the SHA-256 hash of the bundle’s contents.
+   *               Any inconsistency between the hashes will result in the load being rejected.
+   * @param config Similar in form to the bundle, only that is the file that describes the configuration.
+   *               Again any inconsistency between the hex digest string in the filename, and the SHA-256 digest
+   *               of the actual contents will result in the load being rejected.
+   * @param cc implicit connection context
+   * @return The result as a Future[BundleRequestResult]. BundleRequestResult is a sealed trait and can be either:
+   *         - BundleRequestSuccess if the loading request has been succeeded. This object contains the request and bundle id
+   *         - BundleRequestFailure if the loading request has been failed. This object contains the HTTP status code and error message.
+   */
+  override def loadBundle(bundleConf: Publisher[Array[Byte]], bundleConfOverlay: Option[Publisher[Array[Byte]]], bundle: BundleFile, config: Option[BundleConfigurationFile])(implicit cc: ConnectionContext): Future[BundleRequestResult] = {
+    import cc.actorMaterializer
+    import cc.context.dispatcher
+
+    def createRequestBody: Future[RequestEntity] = {
+
+      def fileBodyPart(name: String, filename: String, source: Source[ByteString, _]): Multipart.FormData.BodyPart =
         Multipart.FormData.BodyPart(
           name,
           IndefiniteLength(MediaTypes.`application/octet-stream`, source),
           Map("filename" -> filename)
         )
 
-      def publisher(uri: URI): Source[ByteString, Future[Long]] =
-        StreamConverters.fromInputStream(() => new URL(absolute(uri).toString).openStream())
+      def toByteStringSource(input: Publisher[Array[Byte]]): Source[ByteString, _] =
+        Source.fromPublisher(input).map(ByteString(_))
 
-      val tmpDir = new File(System.getProperty("java.io.tmpdir"))
-      val bundleConf = extractZipEntry("bundle.conf", bundle, tmpDir).get
-      val bundleConfBodyPart = fileBodyPart("bundleConf", filename(bundleConf.toString), publisher(bundleConf))
-      val bundleConfOverlay = config.flatMap(extractZipEntry("bundle.conf", _, tmpDir))
-      val bundleConfOverlayBodyPart = bundleConfOverlay.map(overlay => fileBodyPart("bundleConfOverlay", filename(overlay.toString), publisher(overlay)))
-      val bundleFileBodyPart = fileBodyPart("bundle", filename(bundle.toString), publisher(bundle))
-      val configFileBodyPart = config.map(c => fileBodyPart("configuration", filename(c.toString), publisher(c)))
+      val bundleConfBodyPart = fileBodyPart("bundleConf", "bundle.conf", toByteStringSource(bundleConf))
+      val bundleConfOverlayBodyPart = bundleConfOverlay.map(overlay => fileBodyPart("bundleConfOverlay", "bundle.conf", toByteStringSource(overlay)))
+      val bundleFileBodyPart = fileBodyPart("bundle", bundle.fileName, toByteStringSource(bundle.data))
+      val configFileBodyPart = config.map(c => fileBodyPart("configuration", c.fileName, toByteStringSource(c.data)))
 
       val bodyParts = List(Some(bundleConfBodyPart), bundleConfOverlayBodyPart, Some(bundleFileBodyPart), configFileBodyPart).flatten
       val result = Marshal(Multipart.FormData(Source(bodyParts))).to[RequestEntity]
@@ -419,6 +453,11 @@ class ControlClient(handler: ConnectionHandler, conductrAddress: URL, apiVersion
 
   private def filename(path: String): String =
     path.split('/').lastOption.getOrElse("")
+
+  private def toByteArrayPublisher(input: Source[ByteString, _])(implicit cc: ConnectionContext): Publisher[Array[Byte]] = {
+    import cc.actorMaterializer
+    input.map(_.toArray).runWith(Sink.asPublisher(fanout = false))
+  }
 
   // TODO: Use Akka stream to extract and read the zip file.
   //       In the current Akka streams version 2.0.1 there is no utility to extract a zip file and iterate over

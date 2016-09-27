@@ -11,6 +11,7 @@ import akka.http.scaladsl.model.HttpEntity.IndefiniteLength
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.ActorMaterializer
 import akka.stream.actor.ActorPublisher
 import akka.stream.scaladsl.{ FileIO, Flow, Keep, Sink, Source }
@@ -25,7 +26,7 @@ import de.heikoseeberger.akkasse.{ EventStreamMarshalling, ServerSentEvent }
 import org.reactivestreams.Publisher
 import org.scalatest.Inside
 import scala.concurrent.duration._
-import scala.concurrent.{ Future, Await }
+import scala.concurrent.{ ExecutionContext, Future, Await }
 import akka.http.scaladsl.model._
 import scala.util.{ Failure, Success }
 
@@ -41,6 +42,24 @@ object ControlClientSpec {
       Source.fromPublisher(pub).map(new String(_)).runFold("")(_ + _),
       timeout.duration
     )
+
+  def extractFromBodyPart(bodyPart: Multipart.FormData.BodyPart)(implicit mat: ActorMaterializer, ec: ExecutionContext): (String, String) = {
+    bodyPart.entity.dataBytes.runWith(Sink.ignore)
+    val name = bodyPart.name
+    val fileName = bodyPart.contentDispositionHeader.flatMap(_.params.get("filename")).getOrElse("n/a")
+    (name, fileName)
+  }
+
+  def extractFromMultipartForm(formData: Multipart.FormData, expectedLength: Int)(implicit mat: ActorMaterializer, ec: ExecutionContext): Future[Seq[(String, String)]] =
+    for {
+      parts <- formData.parts.prefixAndTail(expectedLength).runWith(Sink.head)
+    } yield {
+      val (expectedParts, _) = parts
+      expectedParts.map(extractFromBodyPart)
+    }
+
+  def toByteArrayPublisher(input: String)(implicit mat: ActorMaterializer): Publisher[Array[Byte]] =
+    Source.single(input).map(_.getBytes).runWith(Sink.asPublisher(fanout = false))
 }
 
 class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") with Inside {
@@ -54,7 +73,7 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
 
   def systemFixture(f: this.FixtureParam) = new {
     implicit val system = f.system
-    implicit val cc = ConnectionContext()
+    implicit val cc: ConnectionContext = ConnectionContext()
     implicit val mat = cc.actorMaterializer
     implicit val ec = cc.actorMaterializer.executionContext
     implicit val timeout = f.timeout
@@ -264,19 +283,29 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
       val sys = systemFixture(f)
       import sys._
 
+      val bodyPartsMonitor = TestProbe()
+
       // format: OFF
       val route =
         pathPrefix(ApiVersion / "bundles") {
           post {
-            complete {
-              HttpResponse(entity = HttpEntity(ContentTypes.`application/json`,
-                s"""
-                   |{
-                   |  "requestId": "$RequestId",
-                   |  "bundleId": "${BundleFrontend.bundleId}"
-                   |}
-                """.stripMargin)
-              )
+            extractRequest { request =>
+              complete {
+              for {
+                formData <- Unmarshal(request.entity).to[Multipart.FormData]
+                expectedBodyParts <- ControlClientSpec.extractFromMultipartForm(formData, expectedLength = 2)
+              } yield {
+                bodyPartsMonitor.ref ! expectedBodyParts
+                HttpResponse(entity = HttpEntity(ContentTypes.`application/json`,
+                  s"""
+                     |{
+                     |  "requestId": "$RequestId",
+                     |  "bundleId": "${BundleFrontend.bundleId}"
+                     |}
+                  """.stripMargin)
+                )
+              }
+            }
             }
           }
         }
@@ -284,7 +313,62 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
 
       withServer(route) {
         val request = ControlClient(HostUrl).loadBundle(BundleUri, None)
-        Await.result(request, timeout.duration) shouldBe BundleRequestSuccess(RequestId, BundleFrontend.bundleId)
+        Await.result(request, timeout.duration * 2) shouldBe BundleRequestSuccess(RequestId, BundleFrontend.bundleId)
+
+        bodyPartsMonitor.expectMsg(Seq(
+          ("bundleConf", "bundle.conf"),
+          ("bundle", BundleFileName)
+        ))
+      }
+    }
+
+    "load a valid bundle + config overlay + configuration" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
+      val bodyPartsMonitor = TestProbe()
+
+      // format: OFF
+      val route =
+        pathPrefix(ApiVersion / "bundles") {
+          post {
+            extractRequest { request =>
+              complete {
+              for {
+                formData <- Unmarshal(request.entity).to[Multipart.FormData]
+                expectedBodyParts <- ControlClientSpec.extractFromMultipartForm(formData, expectedLength = 4)
+              } yield {
+                bodyPartsMonitor.ref ! expectedBodyParts
+                HttpResponse(entity = HttpEntity(ContentTypes.`application/json`,
+                  s"""
+                     |{
+                     |  "requestId": "$RequestId",
+                     |  "bundleId": "${BundleFrontend.bundleId}"
+                     |}
+                  """.stripMargin)
+                )
+              }
+            }
+            }
+          }
+        }
+      // format: ON
+
+      withServer(route) {
+        val request = ControlClient(HostUrl).loadBundle(
+          bundleConf = ControlClientSpec.toByteArrayPublisher("bundle.conf"),
+          bundleConfOverlay = Some(ControlClientSpec.toByteArrayPublisher("bundle.conf overlay")),
+          bundle = BundleFile("bundle-1.zip", ControlClientSpec.toByteArrayPublisher("bundle zip file")),
+          config = Some(BundleConfigurationFile("config-1.zip", ControlClientSpec.toByteArrayPublisher("config zip file")))
+        )
+        Await.result(request, timeout.duration * 2) shouldBe BundleRequestSuccess(RequestId, BundleFrontend.bundleId)
+
+        bodyPartsMonitor.expectMsg(Seq(
+          ("bundleConf", "bundle.conf"),
+          ("bundleConfOverlay", "bundle.conf"),
+          ("bundle", "bundle-1.zip"),
+          ("configuration", "config-1.zip")
+        ))
       }
     }
 
