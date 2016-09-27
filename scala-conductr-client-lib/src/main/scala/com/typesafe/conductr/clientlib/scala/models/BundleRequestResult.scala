@@ -24,3 +24,11 @@ final case class BundleRequestSuccess(requestId: UUID, bundleId: BundleId) exten
  * @param error The error message
  */
 final case class BundleRequestFailure(code: Int, error: String) extends HttpFailure with BundleRequestResult
+
+/**
+ * Thrown when timed out waiting for bundle to be installed during loading, or waiting for number of scale to be
+ * reached during scaling.
+ *
+ * @param message The error message
+ */
+final case class BundleRequestTimedOut(message: String) extends RuntimeException(message)

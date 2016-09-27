@@ -10,7 +10,6 @@ lazy val root = project
     scalaConductRClientLib,
     akka23Common,
     akka23ConductRBundleLib,
-    akka23ConductRClientLib,
     akka24Common,
     akka24ConductRBundleLib,
     akka24ConductRClientLib,
@@ -77,12 +76,6 @@ lazy val akka23Common = project
 lazy val akka23ConductRBundleLib = project
   .in(file("akka23-conductr-bundle-lib"))
   .dependsOn(scalaConductRBundleLib)
-  .dependsOn(akka23Common)
-  .dependsOn(akka23TestLib % "test->compile")
-
-lazy val akka23ConductRClientLib = project
-  .in(file("akka23-conductr-client-lib"))
-  .dependsOn(scalaConductRClientLib)
   .dependsOn(akka23Common)
   .dependsOn(akka23TestLib % "test->compile")
 
