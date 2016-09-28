@@ -4,11 +4,13 @@ import java.net.{ URLEncoder, URI, URL }
 import com.typesafe.conductr.lib.HttpPayload
 import com.typesafe.conductr.clientlib.scala.models._
 import com.typesafe.conductr.lib.scala.AbstractConnectionContext
+import org.reactivestreams.Publisher
 
 import scala.concurrent.Future
 
 /**
  * Abstract ConductR control client for all projects based on Scala.
+ *
  * @param conductrAddress contains the protocol://host:port of the ConductR control server
  */
 abstract class AbstractControlClient(conductrAddress: URL) {
@@ -16,6 +18,7 @@ abstract class AbstractControlClient(conductrAddress: URL) {
 
   /**
    * Retrieve information of all bundles.
+   *
    * @param cc implicit connection context
    * @return the bundles
    */
@@ -23,6 +26,7 @@ abstract class AbstractControlClient(conductrAddress: URL) {
 
   /**
    * Retrieve bundle file and bundle configuration file given a particular bundle id.
+   *
    * @param bundleId An existing bundle identifier, a shortened version of it (min 7 characters) or
    *                 a non-ambiguous name given to the bundle during loading.
    * @param cc implicit connection context
@@ -34,6 +38,7 @@ abstract class AbstractControlClient(conductrAddress: URL) {
 
   /**
    * Scale a loaded bundle to a number of instances.
+   *
    * @param bundleId An existing bundle identifier, a shortened version of it (min 7 characters) or
    *                 a non-ambiguous name given to the bundle during loading.
    * @param scale The number of instances of the bundle to start. Defaults to 1.
@@ -50,6 +55,7 @@ abstract class AbstractControlClient(conductrAddress: URL) {
   /**
    * Stop a running bundle. Requests for already stopped bundles will be send to the ConductR control server as well.
    * In this case ConductR is ignoring the request.
+   *
    * @param bundleId An existing bundle identifier, a shortened version of it (min 7 characters) or
    *                 a non-ambiguous name given to the bundle during loading.
    * @return The result as a Future[BundleRequestResult]. BundleRequestResult is a sealed trait and can be either:
@@ -60,6 +66,7 @@ abstract class AbstractControlClient(conductrAddress: URL) {
 
   /**
    * Load a bundle with optional configuration.
+   *
    * @param bundle The file that is the bundle.
    *               The filename is important with its hex digest string and is required to be consistent
    *               with the SHA-256 hash of the bundle’s contents.
@@ -72,10 +79,30 @@ abstract class AbstractControlClient(conductrAddress: URL) {
    *         - BundleRequestSuccess if the loading request has been succeeded. This object contains the request and bundle id
    *         - BundleRequestFailure if the loading request has been failed. This object contains the HTTP status code and error message.
    */
+  @deprecated("To be replaced with loadBundle with files supplied via reactive stream publishers", since = "1.4.11")
   def loadBundle(bundle: URI, config: Option[URI] = None)(implicit cc: CC): Future[BundleRequestResult]
 
   /**
+   * Load a bundle with optional bundle conf override and optional configuration.
+   * @param bundleConf bundle.conf contained within the `bundle` file.
+   * @param bundleConfOverlay bundle.conf override contained within the `config` file.
+   * @param bundle The file that is the bundle.
+   *               The filename is important with its hex digest string and is required to be consistent
+   *               with the SHA-256 hash of the bundle’s contents.
+   *               Any inconsistency between the hashes will result in the load being rejected.
+   * @param config Similar in form to the bundle, only that is the file that describes the configuration.
+   *               Again any inconsistency between the hex digest string in the filename, and the SHA-256 digest
+   *               of the actual contents will result in the load being rejected.
+   * @param cc implicit connection context
+   * @return The result as a Future[BundleRequestResult]. BundleRequestResult is a sealed trait and can be either:
+   *         - BundleRequestSuccess if the loading request has been succeeded. This object contains the request and bundle id
+   *         - BundleRequestFailure if the loading request has been failed. This object contains the HTTP status code and error message.
+   */
+  def loadBundle(bundleConf: Publisher[Array[Byte]], bundleConfOverlay: Option[Publisher[Array[Byte]]], bundle: BundleFile, config: Option[BundleConfigurationFile])(implicit cc: CC): Future[BundleRequestResult]
+
+  /**
    * Unload a bundle from all ConductR instances.
+   *
    * @param bundleId An existing bundle identifier, a shortened version of it (min 7 characters) or
    *                 a non-ambiguous name given to the bundle during loading.
    * @param cc implicit connection context
@@ -87,6 +114,7 @@ abstract class AbstractControlClient(conductrAddress: URL) {
 
   /**
    * Retrieve the events of a given bundle. Events with the latest timestamp are going to be returned in a 'tail' like fashion.
+   *
    * @param bundleId An existing bundle identifier, a shortened version of it (min 7 characters) or
    *                 a non-ambiguous name given to the bundle during loading.
    * @param count The number of events to return.  Defaults to 10.
@@ -100,6 +128,7 @@ abstract class AbstractControlClient(conductrAddress: URL) {
   /**
    * Retrieve the log messages of a given bundle. Log messages with the latest timestamp are going to be returned
    * in a 'tail' like fashion.
+   *
    * @param bundleId An existing bundle identifier, a shortened version of it (min 7 characters) or
    *                 a non-ambiguous name given to the bundle during loading.
    * @param count The number of events to return.  Defaults to 10.
@@ -112,6 +141,7 @@ abstract class AbstractControlClient(conductrAddress: URL) {
 
   /**
    * Retrieve the current state of ConductR cluster members.
+   *
    * @param cc implicit connection context
    * @return the current ConductR cluster members.
    */
@@ -119,6 +149,7 @@ abstract class AbstractControlClient(conductrAddress: URL) {
 
   /**
    * Retrieve the current state of a given ConductR cluster member.
+   *
    * @param address The uri representing the ConductR cluster member.
    * @param cc implicit connection context
    * @return The result as a Future[MemberInfoResult]. MemberInfoResult is a sealed trait and can be either:
@@ -130,6 +161,7 @@ abstract class AbstractControlClient(conductrAddress: URL) {
   /**
    * The current ConductR instance joins the given ConductR cluster.
    * This method can be only used inside ConductR.
+   *
    * @param joinTo The uri representing the ConductR cluster member.
    * @param cc implicit connection context
    * @return true if the request has been succeeded.
@@ -140,6 +172,7 @@ abstract class AbstractControlClient(conductrAddress: URL) {
   /**
    * The current ConductR instance is downed for the given ConductR cluster.
    * This method can be only used inside ConductR.
+   *
    * @param address The uri representing the ConductR cluster member.
    * @param cc implicit connection context
    * @return true if the request has been succeeded.
@@ -150,6 +183,7 @@ abstract class AbstractControlClient(conductrAddress: URL) {
   /**
    * The current ConductR instance leaves the given ConductR cluster.
    * This method can be only used inside ConductR.
+   *
    * @param address The uri representing the ConductR cluster member.
    * @param cc implicit connection context
    * @return true if the request has been succeeded.
@@ -160,6 +194,7 @@ abstract class AbstractControlClient(conductrAddress: URL) {
   /**
    * The BasePayload containing helper methods
    * to create [[com.typesafe.conductr.HttpPayload]] objects for all given ControlClient endpoints.
+   *
    * @param apiVersion The version of ConductR's REST API
    */
   protected class BasePayload(apiVersion: ApiVersion.Value) {

@@ -15,8 +15,8 @@ object TestData {
 
   val RequestId = UUID.randomUUID()
 
-  val BundleFile = "typesafe-conductr-tester-v0-5dd6695ed93ea6f10d856a97e2e90b56eb28bdc7d98555be944066b83f536a55.zip"
-  val BundleUri = TestData.getClass.getClassLoader.getResource(BundleFile).toURI
+  val BundleFileName = "typesafe-conductr-tester-v0-5dd6695ed93ea6f10d856a97e2e90b56eb28bdc7d98555be944066b83f536a55.zip"
+  val BundleUri = TestData.getClass.getClassLoader.getResource(BundleFileName).toURI
 
   val BundleSystem = "some-system"
   val BundleSystemVersion = "1.0.0"
