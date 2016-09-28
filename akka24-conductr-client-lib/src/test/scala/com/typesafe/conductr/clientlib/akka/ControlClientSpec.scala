@@ -17,7 +17,7 @@ import akka.stream.actor.ActorPublisher
 import akka.stream.scaladsl.{ FileIO, Flow, Keep, Sink, Source }
 import akka.testkit.TestProbe
 import akka.util.{ ByteString, Timeout }
-import com.typesafe.conductr.lib.AkkaUnitTestWithFixture
+import com.typesafe.conductr.lib.{ UnitTestLike, AkkaUnitTestWithFixture }
 import com.typesafe.conductr.lib.akka.ConnectionContext
 import com.typesafe.conductr.clientlib.akka.models.{ EventStreamFailure, EventStreamSuccess }
 import com.typesafe.conductr.clientlib.scala.models._
@@ -838,6 +838,30 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
       withServer(route) {
         Await.result(ControlClient(HostUrl).leaveMember(MemberUpAddress), timeout.duration) shouldBe true
       }
+    }
+  }
+
+  "Bundle Events Payload" should {
+    "be built correctly" in { f =>
+      val fixture = systemFixture(f)
+      import fixture._
+
+      val controlClient = ControlClient(HostUrl)
+
+      val httpPayload = controlClient.Payload.bundlesEvents(Set.empty)
+      httpPayload.getRequestMethod shouldBe "GET"
+      httpPayload.getUrl shouldBe new URL(s"${HostUrl}/v2/bundles/events")
+    }
+
+    "be built correctly when events are specified" in { f =>
+      val fixture = systemFixture(f)
+      import fixture._
+
+      val controlClient = ControlClient(HostUrl)
+
+      val httpPayload = controlClient.Payload.bundlesEvents(Set("bundleExecutionAdded", "bundleExecutionChanged"))
+      httpPayload.getRequestMethod shouldBe "GET"
+      httpPayload.getUrl shouldBe new URL(s"${HostUrl}/v2/bundles/events?events=bundleExecutionAdded&events=bundleExecutionChanged")
     }
   }
 

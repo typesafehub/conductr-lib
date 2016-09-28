@@ -843,6 +843,30 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
     }
   }
 
+  "Bundle Events Payload" should {
+    "be built correctly" in { f =>
+      val fixture = systemFixture(f)
+      import fixture._
+
+      val controlClient = ControlClient(HostUrl)
+
+      val httpPayload = controlClient.Payload.bundlesEvents(Set.empty)
+      httpPayload.getRequestMethod shouldBe "GET"
+      httpPayload.getUrl shouldBe new URL(s"${HostUrl}/v2/bundles/events")
+    }
+
+    "be built correctly when events are specified" in { f =>
+      val fixture = systemFixture(f)
+      import fixture._
+
+      val controlClient = ControlClient(HostUrl)
+
+      val httpPayload = controlClient.Payload.bundlesEvents(Set("bundleExecutionAdded", "bundleExecutionChanged"))
+      httpPayload.getRequestMethod shouldBe "GET"
+      httpPayload.getUrl shouldBe new URL(s"${HostUrl}/v2/bundles/events?events=bundleExecutionAdded&events=bundleExecutionChanged")
+    }
+  }
+
   def withServer(route: => Route)(testHandler: => Unit)(implicit system: ActorSystem, cc: ConnectionContext, HostUrl: URL, timeout: Timeout): Unit = {
     import system.dispatcher
     import cc.actorMaterializer

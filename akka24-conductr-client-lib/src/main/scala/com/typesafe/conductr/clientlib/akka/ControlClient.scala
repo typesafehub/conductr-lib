@@ -371,7 +371,7 @@ class ControlClient(handler: ConnectionHandler, conductrAddress: URL, apiVersion
     def bundlesEvents(events: Set[String]): HttpPayload = {
       val eventsQueryParam = events.map(event => s"events=$event").mkString("&")
       val query = if (eventsQueryParam.isEmpty) "" else s"?$eventsQueryParam"
-      createPayload("GET", s"$Prefix/bundles/events?events$query")
+      createPayload("GET", s"$Prefix/bundles/events$query")
     }
 
     val membersEvents: HttpPayload = createPayload("GET", s"$Prefix/members/events")
