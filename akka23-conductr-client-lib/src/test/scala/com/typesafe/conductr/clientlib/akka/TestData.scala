@@ -41,7 +41,7 @@ object TestData {
       compatibilityVersion = BundleCompatibilityVersion
     ),
     bundleConfig = Some(BundleConfig(Map(
-      "ep1" -> BundleConfigEndpoint("http", Set(
+      "ep1" -> BundleConfigEndpoint("http", Some("webster"), Set(
         new URI("http://:8000/webster")
       ))
     ))),
@@ -86,6 +86,7 @@ object TestData {
        |    "endpoints": {
        |      "ep1": {
        |        "bindProtocol": "http",
+       |        "serviceName": "webster",
        |        "services": [
        |          "http://:8000/webster"
        |        ]
@@ -135,7 +136,7 @@ object TestData {
       compatibilityVersion = BundleCompatibilityVersion
     ),
     bundleConfig = Some(BundleConfig(Map(
-      "ep1" -> BundleConfigEndpoint("http", Set(
+      "ep1" -> BundleConfigEndpoint("http", None, Set(
         new URI("http://:5555")
       ))
     ))),
