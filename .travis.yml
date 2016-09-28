@@ -1,6 +1,6 @@
 language: scala
 scala:
-- 2.11.7
+- 2.11.8
 script:
 - jdk_switcher use oraclejdk7
 - sbt conductRBundleLib/test:test scalaConductRBundleLib/test:test akka23ConductRBundleLib/test:test play23ConductRBundleLib/test:test scalaConductRClientLib/test:test akka23ConductRClientLib/test:test play23ConductRClientLib/test:test
