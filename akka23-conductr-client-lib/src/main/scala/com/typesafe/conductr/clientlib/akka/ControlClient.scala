@@ -17,7 +17,7 @@ import com.typesafe.conductr.clientlib.akka.models._
 import com.typesafe.conductr.clientlib.scala.models._
 import com.typesafe.conductr.clientlib.scala.AbstractControlClient
 import de.heikoseeberger.akkasse.{ EventStreamUnmarshalling, ServerSentEvent }
-import org.reactivestreams.Publisher
+import org.reactivestreams.{ Subscriber, Publisher }
 import play.api.libs.json.{ Json, Reads }
 import scala.concurrent.{ Future, blocking }
 import com.typesafe.conductr.clientlib.scala.{ withCloseable, withZipInputStream }
@@ -69,77 +69,92 @@ class ControlClient(handler: ConnectionHandler, conductrAddress: URL, apiVersion
    * @see [[AbstractControlClient.getBundle()]]
    * @param bundleId An existing bundle identifier, a shortened version of it (min 7 characters) or
    *                 a non-ambiguous name given to the bundle during loading.
+   * @param bundleData A byte array subscriber to which the bundle data will be streamed into.
+   * @param configData A byte array subscriber to which the config data will be streamed into.
    * @param cc implicit connection context
    * @return The result as a Future[BundleGetResult]. BundleGetResult is a sealed trait and can be either:
    *         - BundleGetSuccess if the get bundle request has been succeeded. This object contains the bundle id, bundle file, and optionally the config file.
    *         - BundleGetFailure if the get bundle request has been failed. This object contains the HTTP status code and error message.
    */
-  override def getBundle(bundleId: BundleId)(implicit cc: ConnectionContext): Future[BundleGetResult] =
+  override def getBundle(bundleId: BundleId, bundleData: Subscriber[Array[Byte]], configData: Subscriber[Array[Byte]])(implicit cc: ConnectionContext): Future[BundleGetResult] =
     handler.withConnectedRequest(Payload.getBundle(bundleId)) { (responseCode, responseHeader, responseEntity) =>
       import cc.actorMaterializer
       import cc.actorMaterializer.executionContext
 
       def bundleGet: Future[BundleGetResult] = {
-        def toByteArrayPublisher(input: Source[ByteString, _]): Publisher[Array[Byte]] =
-          input.map(_.toArray).runWith(Sink.asPublisher(fanout = false))
 
-        def bundleFileFromResponse(bundleParts: Seq[(String, String, Multipart.FormData.BodyPart)]): BundleFile =
+        def bundleFileFromResponse(bundleParts: Seq[(String, Multipart.FormData.BodyPart)]): String =
           bundleParts match {
-            case Seq(entry) if entry._1 == "bundle" =>
-              val (_, fileName, bodyPart) = entry
-              BundleFile(fileName, toByteArrayPublisher(bodyPart.entity.dataBytes))
+            case Seq((fileName, bodyPart)) if bodyPart.name == "bundle" =>
+              bodyPart.entity.dataBytes
+                .map(_.toArray)
+                .runWith(Sink.fromSubscriber(bundleData))
+
+              fileName
 
             case _ =>
-              throw new InvalidBundleGetResponseBody("Unable to find bundle file in the response body")
+              val error = InvalidBundleGetResponseBody("Unable to find bundle file in the response body")
+
+              Source.failed[Array[Byte]](error)
+                .alsoTo(Sink.fromSubscriber(configData))
+                .runWith(Sink.fromSubscriber(bundleData))
+
+              throw error
           }
 
-        def configFileFromResponse(configParts: Seq[(String, String, Multipart.FormData.BodyPart)]): Option[BundleConfigurationFile] =
-          configParts.find(_._1 == "configuration") match {
-            case Some((_, fileName, bodyPart)) =>
-              Some(BundleConfigurationFile(fileName, toByteArrayPublisher(bodyPart.entity.dataBytes)))
+        def configFileFromResponse(configParts: Seq[(String, Multipart.FormData.BodyPart)]): Option[String] =
+          configParts.find(_._2.name == "configuration") match {
+            case Some((fileName, configPart)) =>
+              configPart.entity.dataBytes
+                .map(_.toArray)
+                .runWith(Sink.fromSubscriber(configData))
+
+              Some(fileName)
 
             case _ =>
+              Source.empty[Array[Byte]]
+                .runWith(Sink.fromSubscriber(configData))
               None
           }
 
         for {
           formData <- Unmarshal(responseEntity.withSizeLimit(Long.MaxValue)).to[Multipart.FormData]
-
-          bundleAndOthers <- formData
-            .parts
-            .map { bodyPart =>
-              (
-                bodyPart.contentDispositionHeader.flatMap(_.params.get("name")),
-                bodyPart.contentDispositionHeader.flatMap(_.params.get("filename")),
-                bodyPart
-              )
-            }
+          bundleAndOthers <- formData.parts
+            .map(b => b.filename -> b)
             .collect {
-              case (Some(partName), Some(fileName), bodyPart) =>
-                (partName, fileName, bodyPart)
+              case (Some(fileName), bodyPart) =>
+                fileName -> bodyPart
             }
             .prefixAndTail(1)
             .runWith(Sink.head)
 
           (bundleParts, otherParts) = bundleAndOthers
-          bundleFile = bundleFileFromResponse(bundleParts)
+          bundleFileName = bundleFileFromResponse(bundleParts)
 
           configAndOthers <- otherParts.prefixAndTail(1).runWith(Sink.head)
-          (configParts, _) = configAndOthers
-          configFile = configFileFromResponse(configParts)
-        } yield {
-          BundleGetSuccess(bundleId, bundleFile, configFile)
-        }
+          (configParts, remaining) = configAndOthers
+          configFileName = configFileFromResponse(configParts)
+
+          _ <- remaining.map(_._2.entity.dataBytes.runWith(Sink.ignore)).runWith(Sink.ignore)
+        } yield BundleGetSuccess(bundleId, bundleFileName, configFileName)
       }
 
       def bundleGetFailure: Future[BundleGetFailure] = {
         implicit val unmarshaller = PredefinedFromEntityUnmarshallers.stringUnmarshaller
-        Unmarshal(responseEntity).to[String]
-          .map(BundleGetFailure(responseCode, _))
+        for {
+          httpErrorMessage <- Unmarshal(responseEntity).to[String]
+        } yield {
+          Source.failed[Array[Byte]](new RuntimeException(s"HTTP Failure when getting bundle - http code [$responseCode] - message [$httpErrorMessage]"))
+            .alsoTo(Sink.fromSubscriber(configData))
+            .runWith(Sink.fromSubscriber(bundleData))
+
+          BundleGetFailure(responseCode, httpErrorMessage)
+        }
       }
 
       ResponseHandler.withHttpFailure(responseCode)(bundleGet, bundleGetFailure)
     }
+
   /**
    * @see [[AbstractControlClient.loadBundle()]]
    * @param bundle The file that is the bundle.

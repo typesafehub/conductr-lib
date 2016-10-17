@@ -149,17 +149,18 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
         }
       // format: ON
 
+      val (bundleDataSubscriber, bundleData) = Source.asSubscriber[Array[Byte]].map(new String(_)).toMat(Sink.fold("")(_ + _))(Keep.both).run()
+      val (configDataSubscriber, configData) = Source.asSubscriber[Array[Byte]].map(new String(_)).toMat(Sink.fold("")(_ + _))(Keep.both).run()
+
       withServer(route) {
-        val result = Await.result(ControlClient(HostUrl).getBundle("vis"), timeout.duration)
+        val result = Await.result(ControlClient(HostUrl).getBundle("vis", bundleDataSubscriber, configDataSubscriber), timeout.duration)
         inside(result) {
           case v: BundleGetSuccess =>
             v.bundleId shouldBe "vis"
-
-            v.bundleFile.fileName shouldBe bundleFile.getName
-            ControlClientSpec.readFromByteArrayPublisher(v.bundleFile.data) shouldBe "bundle zip file"
-
-            v.configFile.get.fileName shouldBe configFile.getName
-            ControlClientSpec.readFromByteArrayPublisher(v.configFile.get.data) shouldBe "bundle configuration zip file"
+            v.bundleFileName shouldBe bundleFile.getName
+            v.configFileName.get shouldBe configFile.getName
+            Await.result(bundleData, timeout.duration) shouldBe "bundle zip file"
+            Await.result(configData, timeout.duration) shouldBe "bundle configuration zip file"
         }
         routeInputMonitor.expectMsg("vis")
       }
@@ -196,16 +197,19 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
         }
       // format: ON
 
+      val (bundleDataSubscriber, bundleData) = Source.asSubscriber[Array[Byte]].map(new String(_)).toMat(Sink.fold("")(_ + _))(Keep.both).run()
+      val (configDataSubscriber, configData) = Source.asSubscriber[Array[Byte]].map(new String(_)).toMat(Sink.fold("")(_ + _))(Keep.both).run()
+
       withServer(route) {
-        val result = Await.result(ControlClient(HostUrl).getBundle("vis"), timeout.duration)
+
+        val result = Await.result(ControlClient(HostUrl).getBundle("vis", bundleDataSubscriber, configDataSubscriber), timeout.duration)
         inside(result) {
           case v: BundleGetSuccess =>
             v.bundleId shouldBe "vis"
-
-            v.bundleFile.fileName shouldBe bundleFile.getName
-            ControlClientSpec.readFromByteArrayPublisher(v.bundleFile.data) shouldBe "bundle zip file"
-
-            v.configFile shouldBe None
+            v.bundleFileName shouldBe bundleFile.getName
+            v.configFileName shouldBe None
+            Await.result(bundleData, timeout.duration) shouldBe "bundle zip file"
+            Await.result(configData, timeout.duration) shouldBe ""
         }
         routeInputMonitor.expectMsg("vis")
       }
@@ -246,10 +250,20 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
         }
       // format: ON
 
+      val (bundleDataSubscriber, bundleData) = Source.asSubscriber[Array[Byte]].map(new String(_)).toMat(Sink.fold("")(_ + _))(Keep.both).run()
+      val (configDataSubscriber, configData) = Source.asSubscriber[Array[Byte]].map(new String(_)).toMat(Sink.fold("")(_ + _))(Keep.both).run()
+
       withServer(route) {
         intercept[InvalidBundleGetResponseBody] {
-          Await.result(ControlClient(HostUrl).getBundle("vis"), timeout.duration)
+          Await.result(ControlClient(HostUrl).getBundle("vis", bundleDataSubscriber, configDataSubscriber), timeout.duration)
         }
+        intercept[InvalidBundleGetResponseBody] {
+          Await.result(bundleData, timeout.duration)
+        }
+        intercept[InvalidBundleGetResponseBody] {
+          Await.result(configData, timeout.duration)
+        }
+
         routeInputMonitor.expectMsg("vis")
       }
     }
@@ -274,8 +288,17 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
         }
       // format: ON
 
+      val (bundleDataSubscriber, bundleData) = Source.asSubscriber[Array[Byte]].map(new String(_)).toMat(Sink.fold("")(_ + _))(Keep.both).run()
+      val (configDataSubscriber, configData) = Source.asSubscriber[Array[Byte]].map(new String(_)).toMat(Sink.fold("")(_ + _))(Keep.both).run()
+
       withServer(route) {
-        Await.result(ControlClient(HostUrl).getBundle("vis"), timeout.duration) shouldBe BundleGetFailure(500, "test error")
+        Await.result(ControlClient(HostUrl).getBundle("vis", bundleDataSubscriber, configDataSubscriber), timeout.duration) shouldBe BundleGetFailure(500, "test error")
+        intercept[RuntimeException] {
+          Await.result(bundleData, timeout.duration)
+        }
+        intercept[RuntimeException] {
+          Await.result(configData, timeout.duration)
+        }
         routeInputMonitor.expectMsg("vis")
       }
     }

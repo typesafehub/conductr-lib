@@ -4,7 +4,7 @@ import java.net.{ URLEncoder, URI, URL }
 import com.typesafe.conductr.lib.HttpPayload
 import com.typesafe.conductr.clientlib.scala.models._
 import com.typesafe.conductr.lib.scala.AbstractConnectionContext
-import org.reactivestreams.Publisher
+import org.reactivestreams.{ Subscriber, Publisher }
 
 import scala.concurrent.Future
 
@@ -34,7 +34,7 @@ abstract class AbstractControlClient(conductrAddress: URL) {
    *         - BundleGetSuccess if the get bundle request has been succeeded. This object contains the bundle id, bundle file, and optionally the config file.
    *         - BundleGetFailure if the get bundle request has been failed. This object contains the HTTP status code and error message.
    */
-  def getBundle(bundleId: BundleId)(implicit cc: CC): Future[BundleGetResult]
+  def getBundle(bundleId: BundleId, bundleData: Subscriber[Array[Byte]], configData: Subscriber[Array[Byte]])(implicit cc: CC): Future[BundleGetResult]
 
   /**
    * Scale a loaded bundle to a number of instances.
@@ -84,6 +84,7 @@ abstract class AbstractControlClient(conductrAddress: URL) {
 
   /**
    * Load a bundle with optional bundle conf override and optional configuration.
+   *
    * @param bundleConf bundle.conf contained within the `bundle` file.
    * @param bundleConfOverlay bundle.conf override contained within the `config` file.
    * @param bundle The file that is the bundle.
