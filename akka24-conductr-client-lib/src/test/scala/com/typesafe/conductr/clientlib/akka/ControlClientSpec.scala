@@ -4,7 +4,7 @@ import java.io.File
 import java.net.URL
 
 import akka.actor.ActorDSL._
-import akka.actor.ActorSystem
+import akka.actor.{ ActorRef, ActorSystem }
 import akka.contrib.http.Directives._
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model.HttpEntity.IndefiniteLength
@@ -12,9 +12,11 @@ import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.unmarshalling.Unmarshal
+import akka.pattern._
 import akka.stream.ActorMaterializer
 import akka.stream.actor.ActorPublisher
 import akka.stream.scaladsl.{ FileIO, Flow, Keep, Sink, Source }
+import akka.testkit.TestActor.AutoPilot
 import akka.testkit.TestProbe
 import akka.util.{ ByteString, Timeout }
 import com.typesafe.conductr.lib.AkkaUnitTestWithFixture
@@ -25,21 +27,19 @@ import com.typesafe.conductr.clientlib.scala.models._
 import de.heikoseeberger.akkasse.{ EventStreamMarshalling, ServerSentEvent }
 import org.reactivestreams.Publisher
 import org.scalatest.Inside
+import scala.collection.immutable.Seq
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future, Await }
 import akka.http.scaladsl.model._
 import scala.util.{ Failure, Success }
 
 object ControlClientSpec {
+  case object GetBundleEvents
+  case object GetBundles
+
   def writeToFile(file: File, text: String)(implicit mat: ActorMaterializer, timeout: Timeout): Unit =
     Await.result(
       Source.single(ByteString.fromString(text)).runWith(FileIO.toPath(file.toPath)),
-      timeout.duration
-    )
-
-  def readFromByteArrayPublisher(pub: Publisher[Array[Byte]])(implicit mat: ActorMaterializer, timeout: Timeout): String =
-    Await.result(
-      Source.fromPublisher(pub).map(new String(_)).runFold("")(_ + _),
       timeout.duration
     )
 
@@ -148,17 +148,18 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
         }
       // format: ON
 
+      val (bundleDataSubscriber, bundleData) = Source.asSubscriber[Array[Byte]].map(new String(_)).toMat(Sink.fold("")(_ + _))(Keep.both).run()
+      val (configDataSubscriber, configData) = Source.asSubscriber[Array[Byte]].map(new String(_)).toMat(Sink.fold("")(_ + _))(Keep.both).run()
+
       withServer(route) {
-        val result = Await.result(ControlClient(HostUrl).getBundle("vis"), timeout.duration)
+        val result = Await.result(ControlClient(HostUrl).getBundle("vis", bundleDataSubscriber, configDataSubscriber), timeout.duration)
         inside(result) {
           case v: BundleGetSuccess =>
             v.bundleId shouldBe "vis"
-
-            v.bundleFile.fileName shouldBe bundleFile.getName
-            ControlClientSpec.readFromByteArrayPublisher(v.bundleFile.data) shouldBe "bundle zip file"
-
-            v.configFile.get.fileName shouldBe configFile.getName
-            ControlClientSpec.readFromByteArrayPublisher(v.configFile.get.data) shouldBe "bundle configuration zip file"
+            v.bundleFileName shouldBe bundleFile.getName
+            v.configFileName.get shouldBe configFile.getName
+            Await.result(bundleData, timeout.duration) shouldBe "bundle zip file"
+            Await.result(configData, timeout.duration) shouldBe "bundle configuration zip file"
         }
         routeInputMonitor.expectMsg("vis")
       }
@@ -195,16 +196,19 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
         }
       // format: ON
 
+      val (bundleDataSubscriber, bundleData) = Source.asSubscriber[Array[Byte]].map(new String(_)).toMat(Sink.fold("")(_ + _))(Keep.both).run()
+      val (configDataSubscriber, configData) = Source.asSubscriber[Array[Byte]].map(new String(_)).toMat(Sink.fold("")(_ + _))(Keep.both).run()
+
       withServer(route) {
-        val result = Await.result(ControlClient(HostUrl).getBundle("vis"), timeout.duration)
+
+        val result = Await.result(ControlClient(HostUrl).getBundle("vis", bundleDataSubscriber, configDataSubscriber), timeout.duration)
         inside(result) {
           case v: BundleGetSuccess =>
             v.bundleId shouldBe "vis"
-
-            v.bundleFile.fileName shouldBe bundleFile.getName
-            ControlClientSpec.readFromByteArrayPublisher(v.bundleFile.data) shouldBe "bundle zip file"
-
-            v.configFile shouldBe None
+            v.bundleFileName shouldBe bundleFile.getName
+            v.configFileName shouldBe None
+            Await.result(bundleData, timeout.duration) shouldBe "bundle zip file"
+            Await.result(configData, timeout.duration) shouldBe ""
         }
         routeInputMonitor.expectMsg("vis")
       }
@@ -245,10 +249,20 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
         }
       // format: ON
 
+      val (bundleDataSubscriber, bundleData) = Source.asSubscriber[Array[Byte]].map(new String(_)).toMat(Sink.fold("")(_ + _))(Keep.both).run()
+      val (configDataSubscriber, configData) = Source.asSubscriber[Array[Byte]].map(new String(_)).toMat(Sink.fold("")(_ + _))(Keep.both).run()
+
       withServer(route) {
         intercept[InvalidBundleGetResponseBody] {
-          Await.result(ControlClient(HostUrl).getBundle("vis"), timeout.duration)
+          Await.result(ControlClient(HostUrl).getBundle("vis", bundleDataSubscriber, configDataSubscriber), timeout.duration)
         }
+        intercept[InvalidBundleGetResponseBody] {
+          Await.result(bundleData, timeout.duration)
+        }
+        intercept[InvalidBundleGetResponseBody] {
+          Await.result(configData, timeout.duration)
+        }
+
         routeInputMonitor.expectMsg("vis")
       }
     }
@@ -273,8 +287,17 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
         }
       // format: ON
 
+      val (bundleDataSubscriber, bundleData) = Source.asSubscriber[Array[Byte]].map(new String(_)).toMat(Sink.fold("")(_ + _))(Keep.both).run()
+      val (configDataSubscriber, configData) = Source.asSubscriber[Array[Byte]].map(new String(_)).toMat(Sink.fold("")(_ + _))(Keep.both).run()
+
       withServer(route) {
-        Await.result(ControlClient(HostUrl).getBundle("vis"), timeout.duration) shouldBe BundleGetFailure(500, "test error")
+        Await.result(ControlClient(HostUrl).getBundle("vis", bundleDataSubscriber, configDataSubscriber), timeout.duration) shouldBe BundleGetFailure(500, "test error")
+        intercept[RuntimeException] {
+          Await.result(bundleData, timeout.duration)
+        }
+        intercept[RuntimeException] {
+          Await.result(configData, timeout.duration)
+        }
         routeInputMonitor.expectMsg("vis")
       }
     }
@@ -372,6 +395,210 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
       }
     }
 
+    "load a valid bundle + config overlay + configuration which completes when bundle is installed" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
+      val bodyPartsMonitor = TestProbe()
+
+      val getBundleEvents = TestProbe()
+      val getBundles = TestProbe()
+
+      // format: OFF
+      val route =
+        pathPrefix(ApiVersion / "bundles") {
+          path("events") {
+            get {
+              complete {
+                import EventStreamMarshalling._
+                getBundleEvents.ref.ask(ControlClientSpec.GetBundleEvents)
+                  .mapTo[Source[ServerSentEvent, _]]
+                  .map(Marshal(_).to[HttpResponse])
+              }
+            }
+          } ~
+          post {
+            extractRequest { request =>
+              complete {
+              for {
+                formData <- Unmarshal(request.entity).to[Multipart.FormData]
+                expectedBodyParts <- ControlClientSpec.extractFromMultipartForm(formData, expectedLength = 4)
+              } yield {
+                bodyPartsMonitor.ref ! expectedBodyParts
+                HttpResponse(entity = HttpEntity(ContentTypes.`application/json`,
+                  s"""
+                     |{
+                     |  "requestId": "$RequestId",
+                     |  "bundleId": "${BundleFrontend.bundleId}"
+                     |}
+                  """.stripMargin)
+                )
+              }
+            }
+            }
+          } ~
+          get {
+            complete {
+              getBundles.ref.ask(ControlClientSpec.GetBundles)
+                .mapTo[String]
+                .map { json =>
+                  HttpResponse(entity = HttpEntity(ContentTypes.`application/json`, json))
+                }
+            }
+          }
+        }
+      // format: ON
+
+      withServer(route) {
+        val request = ControlClient(HostUrl).loadBundleComplete(
+          bundleConf = ControlClientSpec.toByteArrayPublisher("bundle.conf"),
+          bundleConfOverlay = Some(ControlClientSpec.toByteArrayPublisher("bundle.conf overlay")),
+          bundle = BundleFile("bundle-1.zip", ControlClientSpec.toByteArrayPublisher("bundle zip file")),
+          config = Some(BundleConfigurationFile("config-1.zip", ControlClientSpec.toByteArrayPublisher("config zip file")))
+        )
+
+        // Simulate bundle not installed
+        getBundles.expectMsg(ControlClientSpec.GetBundles)
+        getBundles.reply("[]")
+        request.isCompleted shouldBe false
+
+        // Bundle Events should be requested
+        getBundleEvents.expectMsg(ControlClientSpec.GetBundleEvents)
+        getBundleEvents.reply(
+          Source.tick(
+            initialDelay = 100.millis,
+            interval = 800.millis,
+            tick = Seq(
+              ServerSentEvent(s"${BundleFrontend.bundleId}", "bundleInstallationAdded"),
+              ServerSentEvent.heartbeat,
+              ServerSentEvent.heartbeat,
+              ServerSentEvent.heartbeat,
+              ServerSentEvent.heartbeat
+            )
+          ).mapConcat(identity)
+        )
+
+        // Simulate no bundle being installed just yet
+        getBundles.expectMsg(ControlClientSpec.GetBundles)
+        getBundles.reply("[]")
+        request.isCompleted shouldBe false
+
+        // And then simulate bundle installed
+        getBundles.expectMsg(ControlClientSpec.GetBundles)
+        getBundles.reply(s"[$BundleFrontendAsJson]")
+
+        Await.result(request, timeout.duration * 2) shouldBe BundleRequestSuccess(RequestId, BundleFrontend.bundleId)
+
+        bodyPartsMonitor.expectMsg(Seq(
+          ("bundleConf", "bundle.conf"),
+          ("bundleConfOverlay", "bundle.conf"),
+          ("bundle", "bundle-1.zip"),
+          ("configuration", "config-1.zip")
+        ))
+      }
+    }
+
+    "load a valid bundle + config overlay + configuration which timed out waiting for bundle installed" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
+      val bodyPartsMonitor = TestProbe()
+
+      val getBundleEvents = TestProbe()
+      val getBundles = TestProbe()
+
+      // format: OFF
+      val route =
+        pathPrefix(ApiVersion / "bundles") {
+          path("events") {
+            get {
+              complete {
+                import EventStreamMarshalling._
+                getBundleEvents.ref.ask(ControlClientSpec.GetBundleEvents)
+                  .mapTo[Source[ServerSentEvent, _]]
+                  .map(Marshal(_).to[HttpResponse])
+              }
+            }
+          } ~
+          post {
+            extractRequest { request =>
+              complete {
+              for {
+                formData <- Unmarshal(request.entity).to[Multipart.FormData]
+                expectedBodyParts <- ControlClientSpec.extractFromMultipartForm(formData, expectedLength = 4)
+              } yield {
+                bodyPartsMonitor.ref ! expectedBodyParts
+                HttpResponse(entity = HttpEntity(ContentTypes.`application/json`,
+                  s"""
+                     |{
+                     |  "requestId": "$RequestId",
+                     |  "bundleId": "${BundleFrontend.bundleId}"
+                     |}
+                  """.stripMargin)
+                )
+              }
+            }
+            }
+          } ~
+          get {
+            complete {
+              getBundles.ref.ask(ControlClientSpec.GetBundles)
+                .mapTo[String]
+                .map { json =>
+                  HttpResponse(entity = HttpEntity(ContentTypes.`application/json`, json))
+                }
+            }
+          }
+        }
+      // format: ON
+
+      withServer(route) {
+        val request = ControlClient(HostUrl).loadBundleComplete(
+          bundleConf = ControlClientSpec.toByteArrayPublisher("bundle.conf"),
+          bundleConfOverlay = Some(ControlClientSpec.toByteArrayPublisher("bundle.conf overlay")),
+          bundle = BundleFile("bundle-1.zip", ControlClientSpec.toByteArrayPublisher("bundle zip file")),
+          config = Some(BundleConfigurationFile("config-1.zip", ControlClientSpec.toByteArrayPublisher("config zip file"))),
+          completeTimeout = timeout.duration / 2
+        )
+
+        // Simulate bundle is never installed
+        getBundles.setAutoPilot(new AutoPilot {
+          override def run(sender: ActorRef, msg: Any): AutoPilot = {
+            msg shouldBe ControlClientSpec.GetBundles
+            sender ! "[]"
+            keepRunning
+          }
+        })
+
+        // Bundle Events should be requested
+        getBundleEvents.expectMsg(ControlClientSpec.GetBundleEvents)
+        getBundleEvents.reply(
+          Source.tick(
+            initialDelay = 100.millis,
+            interval = 800.millis,
+            tick = Seq(
+              ServerSentEvent(s"${BundleFrontend.bundleId}", "bundleInstallationAdded"),
+              ServerSentEvent.heartbeat,
+              ServerSentEvent.heartbeat,
+              ServerSentEvent.heartbeat,
+              ServerSentEvent.heartbeat
+            )
+          ).mapConcat(identity)
+        )
+
+        intercept[BundleRequestTimedOut] {
+          Await.result(request, timeout.duration)
+        }
+
+        bodyPartsMonitor.expectMsg(Seq(
+          ("bundleConf", "bundle.conf"),
+          ("bundleConfOverlay", "bundle.conf"),
+          ("bundle", "bundle-1.zip"),
+          ("configuration", "config-1.zip")
+        ))
+      }
+    }
+
     "handle error when loading an invalid bundle" in { f =>
       val sys = systemFixture(f)
       import sys._
@@ -421,6 +648,173 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
 
       withServer(route) {
         Await.result(ControlClient(HostUrl).runBundle(BundleFrontend.bundleId), timeout.duration) shouldBe BundleRequestSuccess(RequestId, BundleFrontend.bundleId)
+      }
+    }
+
+    "run a bundle which completes when desired bundle scale is achieved" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
+      val getBundleEvents = TestProbe()
+      val getBundles = TestProbe()
+
+      // format: OFF
+      val route =
+        pathPrefix(ApiVersion / "bundles") {
+          path("events") {
+            get {
+              complete {
+                import EventStreamMarshalling._
+                getBundleEvents.ref.ask(ControlClientSpec.GetBundleEvents)
+                  .mapTo[Source[ServerSentEvent, _]]
+                  .map(Marshal(_).to[HttpResponse])
+              }
+            }
+          } ~
+          get {
+            complete {
+              getBundles.ref.ask(ControlClientSpec.GetBundles)
+                .mapTo[String]
+                .map { json =>
+                  HttpResponse(entity = HttpEntity(ContentTypes.`application/json`, json))
+                }
+            }
+          } ~
+          path(Segment) { bundleId =>
+            put {
+              parameter('scale.as[Int]) { scale =>
+                complete {
+                  HttpResponse(entity = HttpEntity(ContentTypes.`application/json`,
+                    s"""
+                       |{
+                       |  "requestId": "$RequestId",
+                       |  "bundleId": "${BundleFrontend.bundleId}"
+                       |}
+                   """.stripMargin)
+                  )
+                }
+              }
+            }
+          }
+        }
+      // format: ON
+
+      withServer(route) {
+        val request = ControlClient(HostUrl).runBundleComplete(BundleFrontend.bundleId)
+
+        // Simulate bundle not running
+        getBundles.expectMsg(ControlClientSpec.GetBundles)
+        getBundles.reply(s"[$BundleFrontendNoExecutionAsJson]")
+        request.isCompleted shouldBe false
+
+        // Bundle Events should be requested
+        getBundleEvents.expectMsg(ControlClientSpec.GetBundleEvents)
+        getBundleEvents.reply(
+          Source.tick(
+            initialDelay = 100.millis,
+            interval = 800.millis,
+            tick = Seq(
+              ServerSentEvent(s"${BundleFrontend.bundleId}", "bundleExecutionAdded"),
+              ServerSentEvent.heartbeat,
+              ServerSentEvent.heartbeat,
+              ServerSentEvent.heartbeat,
+              ServerSentEvent.heartbeat
+            )
+          ).mapConcat(identity)
+        )
+
+        // Simulate no bundle running just yet
+        getBundles.expectMsg(ControlClientSpec.GetBundles)
+        getBundles.reply(s"[$BundleFrontendNoExecutionAsJson]")
+        request.isCompleted shouldBe false
+
+        // And then simulate bundle running
+        getBundles.expectMsg(ControlClientSpec.GetBundles)
+        getBundles.reply(s"[$BundleFrontendAsJson]")
+
+        Await.result(request, timeout.duration) shouldBe BundleRequestSuccess(RequestId, BundleFrontend.bundleId)
+      }
+    }
+
+    "run a bundle which times out waiting for desired bundle scale to be achieved" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
+      val getBundleEvents = TestProbe()
+      val getBundles = TestProbe()
+
+      // format: OFF
+      val route =
+        pathPrefix(ApiVersion / "bundles") {
+          path("events") {
+            get {
+              complete {
+                import EventStreamMarshalling._
+                getBundleEvents.ref.ask(ControlClientSpec.GetBundleEvents)
+                  .mapTo[Source[ServerSentEvent, _]]
+                  .map(Marshal(_).to[HttpResponse])
+              }
+            }
+          } ~
+          get {
+            complete {
+              getBundles.ref.ask(ControlClientSpec.GetBundles)
+                .mapTo[String]
+                .map { json =>
+                  HttpResponse(entity = HttpEntity(ContentTypes.`application/json`, json))
+                }
+            }
+          } ~
+          path(Segment) { bundleId =>
+            put {
+              parameter('scale.as[Int]) { scale =>
+                complete {
+                  HttpResponse(entity = HttpEntity(ContentTypes.`application/json`,
+                    s"""
+                       |{
+                       |  "requestId": "$RequestId",
+                       |  "bundleId": "${BundleFrontend.bundleId}"
+                       |}
+                   """.stripMargin)
+                  )
+                }
+              }
+            }
+          }
+        }
+      // format: ON
+
+      withServer(route) {
+        val request = ControlClient(HostUrl).runBundleComplete(BundleFrontend.bundleId, completeTimeout = timeout.duration / 2)
+
+        // Simulate bundle desired scale never achieved
+        getBundles.setAutoPilot(new AutoPilot {
+          override def run(sender: ActorRef, msg: Any): AutoPilot = {
+            msg shouldBe ControlClientSpec.GetBundles
+            sender ! s"[$BundleFrontendNoExecutionAsJson]"
+            keepRunning
+          }
+        })
+
+        // Bundle Events should be requested
+        getBundleEvents.expectMsg(ControlClientSpec.GetBundleEvents)
+        getBundleEvents.reply(
+          Source.tick(
+            initialDelay = 100.millis,
+            interval = 800.millis,
+            tick = Seq(
+              ServerSentEvent(s"${BundleFrontend.bundleId}", "bundleExecutionAdded"),
+              ServerSentEvent.heartbeat,
+              ServerSentEvent.heartbeat,
+              ServerSentEvent.heartbeat,
+              ServerSentEvent.heartbeat
+            )
+          ).mapConcat(identity)
+        )
+
+        intercept[BundleRequestTimedOut] {
+          Await.result(request, timeout.duration)
+        }
       }
     }
 
@@ -838,6 +1232,30 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
       withServer(route) {
         Await.result(ControlClient(HostUrl).leaveMember(MemberUpAddress), timeout.duration) shouldBe true
       }
+    }
+  }
+
+  "Bundle Events Payload" should {
+    "be built correctly" in { f =>
+      val fixture = systemFixture(f)
+      import fixture._
+
+      val controlClient = ControlClient(HostUrl)
+
+      val httpPayload = controlClient.Payload.bundlesEvents(Set.empty)
+      httpPayload.getRequestMethod shouldBe "GET"
+      httpPayload.getUrl shouldBe new URL(s"${HostUrl}/v2/bundles/events")
+    }
+
+    "be built correctly when events are specified" in { f =>
+      val fixture = systemFixture(f)
+      import fixture._
+
+      val controlClient = ControlClient(HostUrl)
+
+      val httpPayload = controlClient.Payload.bundlesEvents(Set("bundleExecutionAdded", "bundleExecutionChanged"))
+      httpPayload.getRequestMethod shouldBe "GET"
+      httpPayload.getUrl shouldBe new URL(s"${HostUrl}/v2/bundles/events?events=bundleExecutionAdded&events=bundleExecutionChanged")
     }
   }
 

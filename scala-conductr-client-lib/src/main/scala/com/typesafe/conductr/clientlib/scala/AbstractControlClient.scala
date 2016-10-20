@@ -4,9 +4,10 @@ import java.net.{ URLEncoder, URI, URL }
 import com.typesafe.conductr.lib.HttpPayload
 import com.typesafe.conductr.clientlib.scala.models._
 import com.typesafe.conductr.lib.scala.AbstractConnectionContext
-import org.reactivestreams.Publisher
+import org.reactivestreams.{ Subscriber, Publisher }
 
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 /**
  * Abstract ConductR control client for all projects based on Scala.
@@ -29,12 +30,14 @@ abstract class AbstractControlClient(conductrAddress: URL) {
    *
    * @param bundleId An existing bundle identifier, a shortened version of it (min 7 characters) or
    *                 a non-ambiguous name given to the bundle during loading.
+   * @param bundleData A byte array subscriber to which the bundle data will be streamed into.
+   * @param configData A byte array subscriber to which the config data will be streamed into.
    * @param cc implicit connection context
    * @return The result as a Future[BundleGetResult]. BundleGetResult is a sealed trait and can be either:
    *         - BundleGetSuccess if the get bundle request has been succeeded. This object contains the bundle id, bundle file, and optionally the config file.
    *         - BundleGetFailure if the get bundle request has been failed. This object contains the HTTP status code and error message.
    */
-  def getBundle(bundleId: BundleId)(implicit cc: CC): Future[BundleGetResult]
+  def getBundle(bundleId: BundleId, bundleData: Subscriber[Array[Byte]], configData: Subscriber[Array[Byte]])(implicit cc: CC): Future[BundleGetResult]
 
   /**
    * Scale a loaded bundle to a number of instances.
@@ -51,6 +54,28 @@ abstract class AbstractControlClient(conductrAddress: URL) {
    *         - BundleRequestFailure if the scaling request has been failed. This object contains the HTTP status code and error message.
    */
   def runBundle(bundleId: BundleId, scale: Option[Int], affinity: Option[String] = None)(implicit cc: CC): Future[BundleRequestResult]
+
+  /**
+   * Scale a loaded bundle to a number of instances and returns a future.
+   * If `completeWhenScaleAchieved` is set to true, the future will be completed when the requested number of scale is
+   * achieved. Otherwise, the future is completed when the HTTP call to be control protocol is completed.
+   *
+   * @param bundleId An existing bundle identifier, a shortened version of it (min 7 characters) or
+   *                 a non-ambiguous name given to the bundle during loading.
+   * @param scale The number of instances of the bundle to start. Defaults to 1.
+   * @param affinity Optional: Identifier to other bundle.
+   *                 If specified, the current bundle will be run on the same host where
+   *                 the specified bundle is currently running.
+   * @param completeWhenScaleAchieved if set to true, then the future returned will be completed when bundle to be scaled reaches the
+   *                     number of requested instances.
+   *                     This is done by subscribing to bundle events SSE, and checking for number of running bundles
+   *                     whenever there are changes in the bundle events.
+   * @param cc implicit connection context
+   * @return The result as a Future[BundleRequestResult]. BundleRequestResult is a sealed trait and can be either:
+   *         - BundleRequestSuccess if the scaling request has been succeeded. This object contains the request and bundle id
+   *         - BundleRequestFailure if the scaling request has been failed. This object contains the HTTP status code and error message.
+   */
+  def runBundleComplete(bundleId: BundleId, scale: Option[Int] = None, affinity: Option[String] = None, completeWhenScaleAchieved: Boolean = true, completeTimeout: FiniteDuration = 30.seconds)(implicit cc: CC): Future[BundleRequestResult]
 
   /**
    * Stop a running bundle. Requests for already stopped bundles will be send to the ConductR control server as well.
@@ -84,6 +109,7 @@ abstract class AbstractControlClient(conductrAddress: URL) {
 
   /**
    * Load a bundle with optional bundle conf override and optional configuration.
+   *
    * @param bundleConf bundle.conf contained within the `bundle` file.
    * @param bundleConfOverlay bundle.conf override contained within the `config` file.
    * @param bundle The file that is the bundle.
@@ -100,6 +126,27 @@ abstract class AbstractControlClient(conductrAddress: URL) {
    */
   def loadBundle(bundleConf: Publisher[Array[Byte]], bundleConfOverlay: Option[Publisher[Array[Byte]]], bundle: BundleFile, config: Option[BundleConfigurationFile])(implicit cc: CC): Future[BundleRequestResult]
 
+  /**
+   * Load a bundle with optional configuration and returns a future.
+   * If completeWhenInstalled is set to true, the future will be completed when the bundle is installed.
+   * Otherwise, the future is completed when the HTTP call to be control protocol is completed.
+   *
+   * @param bundle The file that is the bundle.
+   *               The filename is important with its hex digest string and is required to be consistent
+   *               with the SHA-256 hash of the bundle’s contents.
+   *               Any inconsistency between the hashes will result in the load being rejected.
+   * @param config Optional: Similar in form to the bundle, only that is the file that describes the configuration.
+   *               Again any inconsistency between the hex digest string in the filename, and the SHA-256 digest
+   *               of the actual contents will result in the load being rejected.
+   * @param completeWhenInstalled if set to true, then the future returned will be completed when bundle is installed.
+   *                       This is done by subscribing to bundle events SSE, and checking for bundle installation
+   *                       whenever there are changes in the bundle events.
+   * @param cc implicit connection context
+   * @return The result as a Future[BundleRequestResult]. BundleRequestResult is a sealed trait and can be either:
+   *         - BundleRequestSuccess if the loading request has been succeeded. This object contains the request and bundle id
+   *         - BundleRequestFailure if the loading request has been failed. This object contains the HTTP status code and error message.
+   */
+  def loadBundleComplete(bundleConf: Publisher[Array[Byte]], bundleConfOverlay: Option[Publisher[Array[Byte]]], bundle: BundleFile, config: Option[BundleConfigurationFile], completeWhenInstalled: Boolean = true, completeTimeout: FiniteDuration = 30.seconds)(implicit cc: CC): Future[BundleRequestResult]
   /**
    * Unload a bundle from all ConductR instances.
    *

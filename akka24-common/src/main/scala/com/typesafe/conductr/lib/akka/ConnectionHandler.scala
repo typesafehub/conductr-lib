@@ -115,7 +115,7 @@ class ConnectionHandler extends AbstractConnectionHandler {
   private def createConnection(payload: HttpPayload)(implicit cc: CC) =
     cc.httpExt.outgoingConnection(payload.getUrl.getHost, payload.getUrl.getPort)
 
-  private def createRequest(payload: HttpPayload, body: Option[Future[RequestEntity]] = None)(implicit cc: CC): Future[HttpRequest] = {
+  def createRequest(payload: HttpPayload, body: Option[Future[RequestEntity]] = None)(implicit cc: CC): Future[HttpRequest] = {
     val url = payload.getUrl
 
     val requestBuilder = payload.getRequestMethod match {

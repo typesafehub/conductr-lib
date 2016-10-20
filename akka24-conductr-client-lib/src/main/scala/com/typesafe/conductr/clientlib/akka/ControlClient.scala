@@ -8,6 +8,8 @@ import java.util.zip.ZipInputStream
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model.HttpEntity.IndefiniteLength
 import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.headers.CacheDirectives.`no-cache`
+import akka.http.scaladsl.model.headers.`Cache-Control`
 import akka.http.scaladsl.unmarshalling.{ PredefinedFromEntityUnmarshallers, Unmarshal }
 import akka.stream.scaladsl.{ FileIO, Sink, Source }
 import akka.util.ByteString
@@ -17,8 +19,9 @@ import com.typesafe.conductr.clientlib.akka.models._
 import com.typesafe.conductr.clientlib.scala.models._
 import com.typesafe.conductr.clientlib.scala.{ AbstractControlClient, withCloseable, withZipInputStream }
 import de.heikoseeberger.akkasse.{ EventStreamUnmarshalling, ServerSentEvent }
-import org.reactivestreams.Publisher
+import org.reactivestreams.{ Subscriber, Publisher }
 import play.api.libs.json.{ Json, Reads }
+import scala.concurrent.duration._
 import scala.concurrent.{ Future, blocking }
 
 /**
@@ -68,71 +71,87 @@ class ControlClient(handler: ConnectionHandler, conductrAddress: URL, apiVersion
    * @see [[AbstractControlClient.getBundle()]]
    * @param bundleId An existing bundle identifier, a shortened version of it (min 7 characters) or
    *                 a non-ambiguous name given to the bundle during loading.
+   * @param bundleData A byte array subscriber to which the bundle data will be streamed into.
+   * @param configData A byte array subscriber to which the config data will be streamed into.
    * @param cc implicit connection context
    * @return The result as a Future[BundleGetResult]. BundleGetResult is a sealed trait and can be either:
    *         - BundleGetSuccess if the get bundle request has been succeeded. This object contains the bundle id, bundle file, and optionally the config file.
    *         - BundleGetFailure if the get bundle request has been failed. This object contains the HTTP status code and error message.
    */
-  override def getBundle(bundleId: BundleId)(implicit cc: ConnectionContext): Future[BundleGetResult] =
+  override def getBundle(bundleId: BundleId, bundleData: Subscriber[Array[Byte]], configData: Subscriber[Array[Byte]])(implicit cc: ConnectionContext): Future[BundleGetResult] =
     handler.withConnectedRequest(Payload.getBundle(bundleId)) { (responseCode, responseHeader, responseEntity) =>
       import cc.actorMaterializer
       import cc.actorMaterializer.executionContext
 
       def bundleGet: Future[BundleGetResult] = {
 
-        def bundleFileFromResponse(bundleParts: Seq[(String, String, Multipart.FormData.BodyPart)]): BundleFile =
+        def bundleFileFromResponse(bundleParts: Seq[(String, Multipart.FormData.BodyPart)]): String =
           bundleParts match {
-            case Seq(entry) if entry._1 == "bundle" =>
-              val (_, fileName, bodyPart) = entry
-              BundleFile(fileName, toByteArrayPublisher(bodyPart.entity.dataBytes))
+            case Seq((fileName, bodyPart)) if bodyPart.name == "bundle" =>
+              bodyPart.entity.dataBytes
+                .map(_.toArray)
+                .runWith(Sink.fromSubscriber(bundleData))
+
+              fileName
 
             case _ =>
-              throw new InvalidBundleGetResponseBody("Unable to find bundle file in the response body")
+              val error = InvalidBundleGetResponseBody("Unable to find bundle file in the response body")
+
+              Source.failed[Array[Byte]](error)
+                .alsoTo(Sink.fromSubscriber(configData))
+                .runWith(Sink.fromSubscriber(bundleData))
+
+              throw error
           }
 
-        def configFileFromResponse(configParts: Seq[(String, String, Multipart.FormData.BodyPart)]): Option[BundleConfigurationFile] =
-          configParts.find(_._1 == "configuration") match {
-            case Some((_, fileName, bodyPart)) =>
-              Some(BundleConfigurationFile(fileName, toByteArrayPublisher(bodyPart.entity.dataBytes)))
+        def configFileFromResponse(configParts: Seq[(String, Multipart.FormData.BodyPart)]): Option[String] =
+          configParts.find(_._2.name == "configuration") match {
+            case Some((fileName, configPart)) =>
+              configPart.entity.dataBytes
+                .map(_.toArray)
+                .runWith(Sink.fromSubscriber(configData))
+
+              Some(fileName)
 
             case _ =>
+              Source.empty[Array[Byte]]
+                .runWith(Sink.fromSubscriber(configData))
               None
           }
 
         for {
           formData <- Unmarshal(responseEntity.withoutSizeLimit()).to[Multipart.FormData]
-
-          bundleAndOthers <- formData
-            .parts
-            .map { bodyPart =>
-              (
-                bodyPart.contentDispositionHeader.flatMap(_.params.get("name")),
-                bodyPart.contentDispositionHeader.flatMap(_.params.get("filename")),
-                bodyPart
-              )
-            }
+          bundleAndOthers <- formData.parts
+            .map(b => b.filename -> b)
             .collect {
-              case (Some(partName), Some(fileName), bodyPart) =>
-                (partName, fileName, bodyPart)
+              case (Some(fileName), bodyPart) =>
+                fileName -> bodyPart
             }
             .prefixAndTail(1)
             .runWith(Sink.head)
 
           (bundleParts, otherParts) = bundleAndOthers
-          bundleFile = bundleFileFromResponse(bundleParts)
+          bundleFileName = bundleFileFromResponse(bundleParts)
 
           configAndOthers <- otherParts.prefixAndTail(1).runWith(Sink.head)
-          (configParts, _) = configAndOthers
-          configFile = configFileFromResponse(configParts)
-        } yield {
-          BundleGetSuccess(bundleId, bundleFile, configFile)
-        }
+          (configParts, remaining) = configAndOthers
+          configFileName = configFileFromResponse(configParts)
+
+          _ <- remaining.map(_._2.entity.dataBytes.runWith(Sink.ignore)).runWith(Sink.ignore)
+        } yield BundleGetSuccess(bundleId, bundleFileName, configFileName)
       }
 
       def bundleGetFailure: Future[BundleGetFailure] = {
         implicit val unmarshaller = PredefinedFromEntityUnmarshallers.stringUnmarshaller
-        Unmarshal(responseEntity).to[String]
-          .map(BundleGetFailure(responseCode, _))
+        for {
+          httpErrorMessage <- Unmarshal(responseEntity).to[String]
+        } yield {
+          Source.failed[Array[Byte]](new RuntimeException(s"HTTP Failure when getting bundle - http code [$responseCode] - message [$httpErrorMessage]"))
+            .alsoTo(Sink.fromSubscriber(configData))
+            .runWith(Sink.fromSubscriber(bundleData))
+
+          BundleGetFailure(responseCode, httpErrorMessage)
+        }
       }
 
       ResponseHandler.withHttpFailure(responseCode)(bundleGet, bundleGetFailure)
@@ -152,6 +171,7 @@ class ControlClient(handler: ConnectionHandler, conductrAddress: URL, apiVersion
    *         - BundleRequestSuccess if the loading request has been succeeded. This object contains the request and bundle id
    *         - BundleRequestFailure if the loading request has been failed. This object contains the HTTP status code and error message.
    */
+  @deprecated("To be replaced with loadBundle with files supplied via reactive stream publishers", since = "1.4.11")
   override def loadBundle(bundle: URI, config: Option[URI] = None)(implicit cc: ConnectionContext): Future[BundleRequestResult] = {
     def filename(uri: URI): String =
       Paths.get(uri.getPath).getFileName.toString
@@ -218,6 +238,57 @@ class ControlClient(handler: ConnectionHandler, conductrAddress: URL, apiVersion
   }
 
   /**
+   * @see [[AbstractControlClient.loadBundleComplete()]]
+   *
+   * @param bundle The file that is the bundle.
+   *               The filename is important with its hex digest string and is required to be consistent
+   *               with the SHA-256 hash of the bundle’s contents.
+   *               Any inconsistency between the hashes will result in the load being rejected.
+   * @param config Optional: Similar in form to the bundle, only that is the file that describes the configuration.
+   *               Again any inconsistency between the hex digest string in the filename, and the SHA-256 digest
+   *               of the actual contents will result in the load being rejected.
+   * @param completeWhenInstalled if set to true, then the future returned will be completed when bundle is installed.
+   *                       This is done by subscribing to bundle events SSE, and checking for bundle installation
+   *                       whenever there are changes in the bundle events.
+   * @param cc implicit connection context
+   * @return The result as a Future[BundleRequestResult]. BundleRequestResult is a sealed trait and can be either:
+   *         - BundleRequestSuccess if the loading request has been succeeded. This object contains the request and bundle id
+   *         - BundleRequestFailure if the loading request has been failed. This object contains the HTTP status code and error message.
+   */
+  def loadBundleComplete(bundleConf: Publisher[Array[Byte]], bundleConfOverlay: Option[Publisher[Array[Byte]]], bundle: BundleFile, config: Option[BundleConfigurationFile], completeWhenInstalled: Boolean = true, completeTimeout: FiniteDuration = 30.seconds)(implicit cc: ConnectionContext): Future[BundleRequestResult] = {
+    import cc.context
+    import cc.context.dispatcher
+    import cc.actorMaterializer
+
+    val loadResult = loadBundle(bundleConf, bundleConfOverlay, bundle, config)
+    if (!completeWhenInstalled)
+      loadResult
+    else
+      loadResult.flatMap {
+        case v @ BundleRequestSuccess(_, bundleIdActual) =>
+          def isInstalled(bundles: Seq[Bundle]): Boolean =
+            bundles.filter(_.bundleId == bundleIdActual).exists(_.bundleInstallations.nonEmpty)
+
+          for {
+            bundlesEventsRequest <- handler.createRequest(Payload.bundlesEvents(Set.empty))
+            bundlesRequest <- handler.createRequest(Payload.bundlesInfo)
+            result <- Source.single(bundlesEventsRequest -> bundlesRequest)
+              .via(BundlesConnector.connect(conductrAddress, stopAfter = Some(completeTimeout)))
+              .filter(isInstalled)
+              .runWith(Sink.head)
+              .map(_ => v)
+              .recoverWith {
+                case BundlesConnector.TimeoutException =>
+                  Future.failed(BundleRequestTimedOut(s"Timed out waiting for bundle [$bundleIdActual] to be installed"))
+              }
+          } yield result
+
+        case v: BundleRequestFailure =>
+          Future.successful(v)
+      }
+  }
+
+  /**
    * @see [[AbstractControlClient.runBundle()]]
    * @param bundleId An existing bundle identifier, a shortened version of it (min 7 characters) or
    *                 a non-ambiguous name given to the bundle during loading.
@@ -232,6 +303,65 @@ class ControlClient(handler: ConnectionHandler, conductrAddress: URL, apiVersion
    */
   override def runBundle(bundleId: BundleId, scale: Option[Int] = None, affinity: Option[String] = None)(implicit cc: ConnectionContext): Future[BundleRequestResult] =
     handler.withConnectedRequest(Payload.runBundle(bundleId, scale.getOrElse(DefaultScale), affinity))(handleAsHttpFailure[BundleRequestResult, BundleRequestSuccess, BundleRequestFailure])
+
+  /**
+   * @see [[AbstractControlClient.runBundleComplete()]]
+   *
+   * @param bundleId An existing bundle identifier, a shortened version of it (min 7 characters) or
+   *                 a non-ambiguous name given to the bundle during loading.
+   * @param scale The number of instances of the bundle to start. Defaults to 1.
+   * @param affinity Optional: Identifier to other bundle.
+   *                 If specified, the current bundle will be run on the same host where
+   *                 the specified bundle is currently running.
+   * @param completeWhenScaleAchieved if set to true, then the future returned will be completed when bundle to be scaled reaches the
+   *                     number of requested instances.
+   *                     This is done by subscribing to bundle events SSE, and checking for number of running bundles
+   *                     whenever there are changes in the bundle events.
+   * @param cc implicit connection context
+   * @return The result as a Future[BundleRequestResult]. BundleRequestResult is a sealed trait and can be either:
+   *         - BundleRequestSuccess if the scaling request has been succeeded. This object contains the request and bundle id
+   *         - BundleRequestFailure if the scaling request has been failed. This object contains the HTTP status code and error message.
+   */
+  def runBundleComplete(bundleId: BundleId, scale: Option[Int] = None, affinity: Option[String] = None, completeWhenScaleAchieved: Boolean = true, completeTimeout: FiniteDuration = 30.seconds)(implicit cc: ConnectionContext): Future[BundleRequestResult] = {
+    import cc.context
+    import cc.context.dispatcher
+    import cc.actorMaterializer
+
+    val runResult = runBundle(bundleId, scale, affinity)
+    if (!completeWhenScaleAchieved)
+      runResult
+    else
+      runResult.flatMap {
+        case v @ BundleRequestSuccess(_, bundleIdActual) =>
+          val requiredScale = scale.getOrElse(1)
+
+          def runningBundlesCount(bundles: Seq[Bundle]): Int =
+            bundles
+              .filter(_.bundleId == bundleIdActual)
+              .map(_.bundleExecutions.count(_.isStarted))
+              .sum
+
+          def isDesiredScaleAchieved(bundles: Seq[Bundle]) =
+            runningBundlesCount(bundles) >= requiredScale
+
+          for {
+            bundlesEventsRequest <- handler.createRequest(Payload.bundlesEvents(Set.empty))
+            bundlesRequest <- handler.createRequest(Payload.bundlesInfo)
+            result <- Source.single(bundlesEventsRequest -> bundlesRequest)
+              .via(BundlesConnector.connect(conductrAddress, stopAfter = Some(completeTimeout)))
+              .filter(isDesiredScaleAchieved)
+              .runWith(Sink.head)
+              .map(_ => v)
+              .recoverWith {
+                case BundlesConnector.TimeoutException =>
+                  Future.failed(BundleRequestTimedOut(s"Timed out waiting for bundle [$bundleIdActual] to be installed"))
+              }
+          } yield result
+
+        case v: BundleRequestFailure =>
+          Future.successful(v)
+      }
+  }
 
   /**
    * @see [[AbstractControlClient.stopBundle()]]
@@ -371,7 +501,8 @@ class ControlClient(handler: ConnectionHandler, conductrAddress: URL, apiVersion
     def bundlesEvents(events: Set[String]): HttpPayload = {
       val eventsQueryParam = events.map(event => s"events=$event").mkString("&")
       val query = if (eventsQueryParam.isEmpty) "" else s"?$eventsQueryParam"
-      createPayload("GET", s"$Prefix/bundles/events?events$query")
+      createPayload("GET", s"$Prefix/bundles/events$query")
+        .addRequestHeader(`Cache-Control`.name, `no-cache`.toString)
     }
 
     val membersEvents: HttpPayload = createPayload("GET", s"$Prefix/members/events")

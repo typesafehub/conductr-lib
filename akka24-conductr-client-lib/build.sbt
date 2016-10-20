@@ -4,7 +4,7 @@ name := "akka24-conductr-client-lib"
 
 libraryDependencies ++= List(
   Library.akka24Sse,
-  Library.play24Json,
+  Library.play25Json,
   Library.akka24HttpTestkit % "test",
   Library.akka24Testkit     % "test",
   Library.akka24ContribExtra  % "test",

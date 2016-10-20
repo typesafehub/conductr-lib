@@ -84,9 +84,24 @@ object JsonMarshalling {
     Format(reads, writes)
   }
 
+  implicit object BundleConfigEndpointFormat extends Format[BundleConfigEndpoint] {
+    override def writes(o: BundleConfigEndpoint): JsValue =
+      throw new UnsupportedOperationException()
+
+    override def reads(json: JsValue): JsResult[BundleConfigEndpoint] =
+      for {
+        bindProtocol <- (json \ "bindProtocol").validate[String]
+        serviceName <- (json \ "serviceName").validateOpt[String]
+        services <- (json \ "services").validateOpt[Set[URI]]
+      } yield BundleConfigEndpoint(
+        bindProtocol,
+        serviceName,
+        services.getOrElse(Set.empty)
+      )
+  }
+
   // format: OFF
   implicit val uniqueAddressFormat: Format[UniqueAddress]                 = Json.format
-  implicit val bundleConfigEndpointFormat: Format[BundleConfigEndpoint]   = Json.format
   implicit val bundleExecEndpointFormat: Format[BundleExecutionEndpoint]  = Json.format
   implicit val bundleInstallationFormat: Format[BundleInstallation]       = Json.format
   implicit val bundleExecutionFormat: Format[BundleExecution]             = Json.format

@@ -41,7 +41,7 @@ object TestData {
       compatibilityVersion = BundleCompatibilityVersion
     ),
     bundleConfig = Some(BundleConfig(Map(
-      "ep1" -> BundleConfigEndpoint("http", Set(
+      "ep1" -> BundleConfigEndpoint("http", Some("webster"), Set(
         new URI("http://:8000/webster")
       ))
     ))),
@@ -86,6 +86,7 @@ object TestData {
        |    "endpoints": {
        |      "ep1": {
        |        "bindProtocol": "http",
+       |        "serviceName": "webster",
        |        "services": [
        |          "http://:8000/webster"
        |        ]
@@ -120,6 +121,62 @@ object TestData {
        |}
      """.stripMargin
 
+  val BundleFrontendNoExecutionAsJson =
+    s"""
+       |{
+       |  "bundleId": "${BundleFrontend.bundleId}",
+       |  "bundleDigest": "$Digest",
+       |  "attributes": {
+       |    "system": "$BundleSystem",
+       |    "nrOfCpus": 1,
+       |    "memory": 1024000,
+       |    "diskSpace": 64000,
+       |    "roles": [
+       |      "frontend"
+       |    ],
+       |    "bundleName": "$BundleName",
+       |    "systemVersion": "$BundleSystemVersion",
+       |    "compatibilityVersion": "$BundleCompatibilityVersion"
+       |  },
+       |  "bundleConfig": {
+       |    "endpoints": {
+       |      "ep1": {
+       |        "bindProtocol": "http",
+       |        "serviceName": "webster",
+       |        "services": [
+       |          "http://:8000/webster"
+       |        ]
+       |      }
+       |    }
+       |  },
+       |  "bundleScale": {
+       |    "scale": 1
+       |  },
+       |  "bundleExecutions": [
+       |    {
+       |      "host": "${Host.getHost}",
+       |      "endpoints": {
+       |        "ep1": {
+       |          "bindPort": 9011,
+       |          "hostPort": 9011
+       |        }
+       |      },
+       |      "isStarted": false
+       |    }
+       |  ],
+       |  "bundleInstallations": [
+       |    {
+       |      "uniqueAddress": {
+       |        "address": "akka.tcp://conductr@${Host.getHost}:${Host.getPort}",
+       |        "uid": 123
+       |      },
+       |      "bundleFile": "$BundleUri"
+       |    }
+       |  ],
+       |  "hasError": false
+       |}
+     """.stripMargin
+
   val BundleBackend = Bundle(
     bundleId = "5dd6695ed93ea6f10d856a97e2e90b56eb28bdc7d98555be944066b83f536a56",
     bundleDigest = Digest,
@@ -135,7 +192,7 @@ object TestData {
       compatibilityVersion = BundleCompatibilityVersion
     ),
     bundleConfig = Some(BundleConfig(Map(
-      "ep1" -> BundleConfigEndpoint("http", Set(
+      "ep1" -> BundleConfigEndpoint("http", None, Set(
         new URI("http://:5555")
       ))
     ))),

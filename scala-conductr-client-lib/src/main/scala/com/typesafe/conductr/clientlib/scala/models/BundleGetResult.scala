@@ -24,15 +24,9 @@ final case class BundleConfigurationFile(fileName: String, data: Publisher[Array
 /**
  * Represents a HTTP success result for retrieving bundle.
  *
- * @param bundleId the given bundle id of the [[bundleFile]] and [[configFile]].
- * @param bundleFile the bundle file downloaded from ConductR.
- * @param configFile the bundle configuration file downloaded from ConductR if present.
+ * @param bundleId the given bundle id of the requested bundle.
  */
-final case class BundleGetSuccess(
-  bundleId: BundleId,
-  bundleFile: BundleFile,
-  configFile: Option[BundleConfigurationFile]
-) extends BundleGetResult
+final case class BundleGetSuccess(bundleId: BundleId, bundleFileName: String, configFileName: Option[String]) extends BundleGetResult
 
 /**
  * Represents a HTTP failure result for retrieving bundle.
