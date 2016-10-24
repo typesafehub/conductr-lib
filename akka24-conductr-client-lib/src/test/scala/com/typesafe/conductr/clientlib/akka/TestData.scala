@@ -2,6 +2,7 @@ package com.typesafe.conductr.clientlib.akka
 
 import java.net.{ URL, URI }
 import java.util.UUID
+import com.typesafe.conductr.clientlib.scala.models.HttpRequestMapping.{ Path, PathBeg, PathRegex }
 import com.typesafe.conductr.clientlib.scala.models._
 import com.typesafe.conductr.lib.scala.ConductrTypeOps
 import java.util.Date
@@ -41,9 +42,7 @@ object TestData {
       compatibilityVersion = BundleCompatibilityVersion
     ),
     bundleConfig = Some(BundleConfig(Map(
-      "ep1" -> BundleConfigEndpoint("http", Some("webster"), Set(
-        new URI("http://:8000/webster")
-      ))
+      "ep1" -> BundleConfigEndpoint("http", Some("webster"), Set(new URI("http://:8000/webster")), Seq.empty)
     ))),
     bundleScale = Some(BundleScale(1, None)),
     bundleExecutions = Iterable(
@@ -192,9 +191,7 @@ object TestData {
       compatibilityVersion = BundleCompatibilityVersion
     ),
     bundleConfig = Some(BundleConfig(Map(
-      "ep1" -> BundleConfigEndpoint("http", None, Set(
-        new URI("http://:5555")
-      ))
+      "ep1" -> BundleConfigEndpoint("http", None, Set(new URI("http://:5555")), Seq.empty)
     ))),
     bundleScale = None,
     bundleExecutions = Iterable.empty,
@@ -248,6 +245,141 @@ object TestData {
        |  "hasError": false
        |}
      """.stripMargin
+
+  val BundleWithServicesAndRequestAcl = Bundle(
+    bundleId = "98409f27bacd3e5fb334961999497a02025038b0985c384bb5d86417b246c773",
+    bundleDigest = Digest,
+    configurationDigest = None,
+    attributes = BundleAttributes(
+      system = BundleSystem,
+      nrOfCpus = 2.0,
+      memory = 1024000,
+      diskSpace = 64000,
+      roles = SortedSet("hub"),
+      bundleName = "hub",
+      systemVersion = BundleSystemVersion,
+      compatibilityVersion = BundleCompatibilityVersion
+    ),
+    bundleConfig = Some(BundleConfig(Map(
+      "old-hub" -> BundleConfigEndpoint("http", Some("old-hub"), Set(new URI("http://:5555/hub1")), Seq.empty),
+      "hub" -> BundleConfigEndpoint("http", Some("hub"), Set.empty, Seq(
+        RequestAcl(Set(
+          HttpFamilyRequestMappings(Seq(
+            Path("/path-1"),
+            Path("/path-2", method = Some("GET"), rewrite = Some("/other-path-2")),
+            PathBeg("/path-beg-1"),
+            PathBeg("/path-beg-2", method = Some("GET"), rewrite = Some("/other-path-beg-2")),
+            PathRegex("/path-regex-1"),
+            PathRegex("/path-regex-2", method = Some("GET"), rewrite = Some("/other-path-regex-2"))
+          ))
+        ))
+      )),
+      "tunnel" -> BundleConfigEndpoint("tcp", None, Set.empty, Seq(
+        RequestAcl(Set(
+          TcpFamilyRequestMappings(Set(
+            TcpRequestMapping(7001)
+          ))
+        ))
+      )),
+      "broadcast" -> BundleConfigEndpoint("udp", None, Set.empty, Seq(
+        RequestAcl(Set(
+          UdpFamilyRequestMappings(Set(
+            UdpRequestMapping(5001)
+          ))
+        ))
+      ))
+    ))),
+    bundleScale = None,
+    bundleExecutions = Iterable.empty,
+    bundleInstallations = Iterable(
+      BundleInstallation(
+        uniqueAddress = UniqueAddress(new URI(s"akka.tcp://conductr@${Host.getHost}:${Host.getPort}"), 456),
+        bundleFile = BundleUri,
+        configurationFile = None
+      )
+    ),
+    hasError = false
+  )
+
+  val BundleWithServicesAndRequestAclJson =
+    s"""
+      |{
+      |    "bundleId": "98409f27bacd3e5fb334961999497a02025038b0985c384bb5d86417b246c773",
+      |    "bundleDigest": "$Digest",
+      |    "attributes": {
+      |      "system": "$BundleSystem",
+      |      "nrOfCpus": 2.0,
+      |      "memory": 1024000,
+      |      "diskSpace": 64000,
+      |      "roles": [
+      |        "hub"
+      |      ],
+      |      "bundleName": "hub",
+      |      "systemVersion": "$BundleSystemVersion",
+      |      "compatibilityVersion": "$BundleCompatibilityVersion"
+      |    },
+      |    "bundleConfig": {
+      |      "endpoints": {
+      |        "old-hub": {
+      |          "bindProtocol": "http",
+      |          "serviceName": "old-hub",
+      |          "services": [
+      |            "http://:5555/hub1"
+      |          ]
+      |        },
+      |        "hub": {
+      |          "bindProtocol": "http",
+      |          "serviceName": "hub",
+      |          "acls": [
+      |            {
+      |              "http": {
+      |                "requests": [
+      |                  { "path": "/path-1" },
+      |                  { "path": "/path-2", "method": "GET", "rewrite": "/other-path-2" },
+      |                  { "pathBeg": "/path-beg-1" },
+      |                  { "pathBeg": "/path-beg-2", "method": "GET", "rewrite": "/other-path-beg-2" },
+      |                  { "pathRegex": "/path-regex-1" },
+      |                  { "pathRegex": "/path-regex-2", "method": "GET", "rewrite": "/other-path-regex-2" }
+      |                ]
+      |              }
+      |            }
+      |          ]
+      |        },
+      |        "tunnel": {
+      |          "bindProtocol": "tcp",
+      |          "acls": [
+      |            {
+      |              "tcp": {
+      |                "requests": [7001]
+      |              }
+      |            }
+      |          ]
+      |        },
+      |        "broadcast": {
+      |          "bindProtocol": "udp",
+      |          "acls": [
+      |            {
+      |              "udp": {
+      |                "requests": [5001]
+      |              }
+      |            }
+      |          ]
+      |        }
+      |      }
+      |    },
+      |    "bundleExecutions": [],
+      |    "bundleInstallations": [
+      |      {
+      |        "uniqueAddress": {
+      |          "address": "akka.tcp://conductr@${Host.getHost}:${Host.getPort}",
+      |          "uid": 456
+      |        },
+      |        "bundleFile": "$BundleUri"
+      |      }
+      |    ],
+      |    "hasError": false
+      |  }
+    """.stripMargin
 
   val BundleEvents = Seq(
     BundleEvent(

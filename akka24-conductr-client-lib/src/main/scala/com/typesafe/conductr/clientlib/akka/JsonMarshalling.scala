@@ -84,6 +84,77 @@ object JsonMarshalling {
     Format(reads, writes)
   }
 
+  implicit object TcpFamilyRequestMappingsFormat extends Format[TcpFamilyRequestMappings] {
+    override def writes(o: TcpFamilyRequestMappings): JsValue =
+      throw new UnsupportedOperationException()
+
+    override def reads(json: JsValue): JsResult[TcpFamilyRequestMappings] =
+      for {
+        ports <- (json \ "requests").validate[Set[Int]]
+      } yield TcpFamilyRequestMappings(ports.map(TcpRequestMapping))
+  }
+
+  implicit object UdpFamilyRequestMappingsFormat extends Format[UdpFamilyRequestMappings] {
+    override def writes(o: UdpFamilyRequestMappings): JsValue =
+      throw new UnsupportedOperationException()
+
+    override def reads(json: JsValue): JsResult[UdpFamilyRequestMappings] =
+      for {
+        ports <- (json \ "requests").validate[Set[Int]]
+      } yield UdpFamilyRequestMappings(ports.map(UdpRequestMapping))
+  }
+
+  implicit val httpPathFormat = Json.format[HttpRequestMapping.Path]
+  implicit val httpPathBegFormat = Json.format[HttpRequestMapping.PathBeg]
+  implicit val httpPathRegexFormat = Json.format[HttpRequestMapping.PathRegex]
+
+  implicit object HttpRequestMappingFormat extends Format[HttpRequestMapping] {
+    override def writes(o: HttpRequestMapping): JsValue =
+      throw new UnsupportedOperationException()
+
+    override def reads(json: JsValue): JsResult[HttpRequestMapping] =
+      json.validate[HttpRequestMapping.Path]
+        .orElse(json.validate[HttpRequestMapping.PathBeg])
+        .orElse(json.validate[HttpRequestMapping.PathRegex])
+  }
+
+  implicit object HttpFamilyRequestMappingsFormat extends Format[HttpFamilyRequestMappings] {
+    override def writes(o: HttpFamilyRequestMappings): JsValue =
+      throw new UnsupportedOperationException()
+
+    override def reads(json: JsValue): JsResult[HttpFamilyRequestMappings] =
+      for {
+        requestMappings <- (json \ "requests").validate[Seq[HttpRequestMapping]]
+      } yield HttpFamilyRequestMappings(requestMappings)
+  }
+
+  implicit object ProtocolFamilyRequestMappingsFormat extends Format[Set[ProtocolFamilyRequestMappings]] {
+    override def writes(o: Set[ProtocolFamilyRequestMappings]): JsValue =
+      throw new UnsupportedOperationException()
+
+    override def reads(json: JsValue): JsResult[Set[ProtocolFamilyRequestMappings]] =
+      for {
+        httpRequestMappings <- (json \ "http").validateOpt[HttpFamilyRequestMappings]
+        tcpRequestMappings <- (json \ "tcp").validateOpt[TcpFamilyRequestMappings]
+        udpRequestMappings <- (json \ "udp").validateOpt[UdpFamilyRequestMappings]
+      } yield {
+        Set(httpRequestMappings, tcpRequestMappings, udpRequestMappings)
+          .collect {
+            case Some(value) => value
+          }
+      }
+  }
+
+  implicit object RequestAclFormat extends Format[RequestAcl] {
+    override def writes(requestAcl: RequestAcl): JsValue =
+      throw new UnsupportedOperationException()
+
+    override def reads(json: JsValue): JsResult[RequestAcl] =
+      for {
+        jsonValues <- json.validate[Set[ProtocolFamilyRequestMappings]]
+      } yield RequestAcl(jsonValues)
+  }
+
   implicit object BundleConfigEndpointFormat extends Format[BundleConfigEndpoint] {
     override def writes(o: BundleConfigEndpoint): JsValue =
       throw new UnsupportedOperationException()
@@ -93,10 +164,12 @@ object JsonMarshalling {
         bindProtocol <- (json \ "bindProtocol").validate[String]
         serviceName <- (json \ "serviceName").validateOpt[String]
         services <- (json \ "services").validateOpt[Set[URI]]
+        acls <- (json \ "acls").validateOpt[Seq[RequestAcl]]
       } yield BundleConfigEndpoint(
         bindProtocol,
         serviceName,
-        services.getOrElse(Set.empty)
+        services.getOrElse(Set.empty),
+        acls.getOrElse(Seq.empty)
       )
   }
 

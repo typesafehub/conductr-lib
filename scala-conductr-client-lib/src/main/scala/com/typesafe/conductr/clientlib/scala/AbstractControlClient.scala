@@ -66,16 +66,12 @@ abstract class AbstractControlClient(conductrAddress: URL) {
    * @param affinity Optional: Identifier to other bundle.
    *                 If specified, the current bundle will be run on the same host where
    *                 the specified bundle is currently running.
-   * @param completeWhenScaleAchieved if set to true, then the future returned will be completed when bundle to be scaled reaches the
-   *                     number of requested instances.
-   *                     This is done by subscribing to bundle events SSE, and checking for number of running bundles
-   *                     whenever there are changes in the bundle events.
    * @param cc implicit connection context
    * @return The result as a Future[BundleRequestResult]. BundleRequestResult is a sealed trait and can be either:
    *         - BundleRequestSuccess if the scaling request has been succeeded. This object contains the request and bundle id
    *         - BundleRequestFailure if the scaling request has been failed. This object contains the HTTP status code and error message.
    */
-  def runBundleComplete(bundleId: BundleId, scale: Option[Int] = None, affinity: Option[String] = None, completeWhenScaleAchieved: Boolean = true, completeTimeout: FiniteDuration = 30.seconds)(implicit cc: CC): Future[BundleRequestResult]
+  def runBundleComplete(bundleId: BundleId, scale: Option[Int] = None, affinity: Option[String] = None, completeTimeout: FiniteDuration = 30.seconds)(implicit cc: CC): Future[BundleRequestResult]
 
   /**
    * Stop a running bundle. Requests for already stopped bundles will be send to the ConductR control server as well.
@@ -138,15 +134,12 @@ abstract class AbstractControlClient(conductrAddress: URL) {
    * @param config Optional: Similar in form to the bundle, only that is the file that describes the configuration.
    *               Again any inconsistency between the hex digest string in the filename, and the SHA-256 digest
    *               of the actual contents will result in the load being rejected.
-   * @param completeWhenInstalled if set to true, then the future returned will be completed when bundle is installed.
-   *                       This is done by subscribing to bundle events SSE, and checking for bundle installation
-   *                       whenever there are changes in the bundle events.
    * @param cc implicit connection context
    * @return The result as a Future[BundleRequestResult]. BundleRequestResult is a sealed trait and can be either:
    *         - BundleRequestSuccess if the loading request has been succeeded. This object contains the request and bundle id
    *         - BundleRequestFailure if the loading request has been failed. This object contains the HTTP status code and error message.
    */
-  def loadBundleComplete(bundleConf: Publisher[Array[Byte]], bundleConfOverlay: Option[Publisher[Array[Byte]]], bundle: BundleFile, config: Option[BundleConfigurationFile], completeWhenInstalled: Boolean = true, completeTimeout: FiniteDuration = 30.seconds)(implicit cc: CC): Future[BundleRequestResult]
+  def loadBundleComplete(bundleConf: Publisher[Array[Byte]], bundleConfOverlay: Option[Publisher[Array[Byte]]], bundle: BundleFile, config: Option[BundleConfigurationFile], completeTimeout: FiniteDuration = 30.seconds)(implicit cc: CC): Future[BundleRequestResult]
   /**
    * Unload a bundle from all ConductR instances.
    *
