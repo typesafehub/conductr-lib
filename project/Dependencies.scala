@@ -6,8 +6,9 @@ object Version {
   val akka23Http         = "2.0.4"
   val akka23Stream       = "2.0.4"
   val akka23Sse          = "1.5.0"
-  val akka24             = "2.4.10"
-  val akka24Sse          = "1.10.0"
+  val akka24             = "2.4.14"
+  val akka24Sse          = "1.11.0"
+  val akka24Http         = "10.0.0"
   val akka23ContribExtra = "2.0.2"
   val akka24ContribExtra = "3.3.0"
   val java8Compat        = "0.7.0"
@@ -28,8 +29,8 @@ object Library {
   val akka23Testkit      = "com.typesafe.akka"      %% "akka-testkit"                   % Version.akka23
   val akka23Sse          = "de.heikoseeberger"      %% "akka-sse"                       % Version.akka23Sse
   val akka24Cluster      = "com.typesafe.akka"      %% "akka-cluster"                   % Version.akka24
-  val akka24Http         = "com.typesafe.akka"      %% "akka-http-experimental"         % Version.akka24
-  val akka24HttpTestkit  = "com.typesafe.akka"      %% "akka-http-testkit"              % Version.akka24
+  val akka24Http         = "com.typesafe.akka"      %% "akka-http"                      % Version.akka24Http
+  val akka24HttpTestkit  = "com.typesafe.akka"      %% "akka-http-testkit"              % Version.akka24Http
   val akka24Testkit      = "com.typesafe.akka"      %% "akka-testkit"                   % Version.akka24
   val akka24Sse          = "de.heikoseeberger"      %% "akka-sse"                       % Version.akka24Sse
   val akka23ContribExtra = "com.typesafe.akka"      %% "akka-contrib-extra"             % Version.akka23ContribExtra
