@@ -10,7 +10,7 @@ object Version {
   val akka24Sse          = "1.11.0"
   val akka24Http         = "10.0.0"
   val akka23ContribExtra = "2.0.2"
-  val akka24ContribExtra = "3.3.0"
+  val akka24ContribExtra = "3.3.2"
   val java8Compat        = "0.7.0"
   val junit              = "4.12"
   val play23             = "2.3.10"
