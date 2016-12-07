@@ -11,6 +11,10 @@ libraryDependencies ++= List(
   Library.scalaTest         % "test"
 )
 
+// Cannot use the client lib with 2.12 until Play also moves there, and we use an akka-sse
+// for 2.12.
+crossScalaVersions := crossScalaVersions.value.filterNot(_.startsWith("2.12"))
+
 fork in Test := true
 
 def groupByFirst(tests: Seq[TestDefinition]) =

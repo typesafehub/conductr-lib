@@ -19,7 +19,7 @@ object Version {
   val lagom1             = "1.2.0"
   val reactiveStreams    = "1.0.0"
   val scala              = "2.11.8"
-  val scalaTest          = "2.2.6"
+  val scalaTest          = "3.0.1"
 }
 
 object Library {

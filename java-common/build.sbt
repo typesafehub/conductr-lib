@@ -7,3 +7,4 @@ unmanagedSourceDirectories in Compile := List((javaSource in Compile).value)
 
 autoScalaLibrary := false
 crossPaths := false
+crossScalaVersions := List(crossScalaVersions.value.head) // Requires building just the once

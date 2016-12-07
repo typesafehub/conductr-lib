@@ -1,8 +1,7 @@
 language: scala
 scala:
 - 2.11.8
+jdk:
+- oraclejdk8
 script:
-- jdk_switcher use oraclejdk7
-- sbt conductRBundleLib/test:test scalaConductRBundleLib/test:test akka23ConductRBundleLib/test:test play23ConductRBundleLib/test:test scalaConductRClientLib/test:test play23ConductRClientLib/test:test
-- jdk_switcher use oraclejdk8
-- sbt test
+- sbt +test
