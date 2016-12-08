@@ -57,7 +57,7 @@ object Build extends AutoPlugin {
         setReleaseVersion,
         commitReleaseVersion,
         tagRelease,
-        releaseStepCommandAndRemaining("+publish"),
+        releaseStepCommandAndRemaining("+publishSigned"),
         setNextVersion,
         commitNextVersion,
         pushChanges
