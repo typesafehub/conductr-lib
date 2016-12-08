@@ -8,15 +8,15 @@ This project provides a number of libraries to facilitate [ConductR](http://type
 
 Add one of the following libraries to your project.
 
-* `"com.typesafe.conductr" %  "conductr-bundle-lib"         % "1.4.14"`
-* `"com.typesafe.conductr" %  "java-conductr-bundle-lib"    % "1.4.14"`
-* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"   % "1.4.14"`
-* `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib"  % "1.4.14"`
-* `"com.typesafe.conductr" %% "akka24-conductr-bundle-lib"  % "1.4.14"`
-* `"com.typesafe.conductr" %% "play23-conductr-bundle-lib"  % "1.4.14"`
-* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib"  % "1.4.14"`
-* `"com.typesafe.conductr" %% "play25-conductr-bundle-lib"  % "1.4.14"`
-* `"com.typesafe.conductr" %% "lagom1-conductr-bundle-lib"  % "1.4.14"`
+* `"com.typesafe.conductr" %  "conductr-bundle-lib"         % "1.5.0"`
+* `"com.typesafe.conductr" %  "java-conductr-bundle-lib"    % "1.5.0"`
+* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"   % "1.5.0"`
+* `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib"  % "1.5.0"`
+* `"com.typesafe.conductr" %% "akka24-conductr-bundle-lib"  % "1.5.0"`
+* `"com.typesafe.conductr" %% "play23-conductr-bundle-lib"  % "1.5.0"`
+* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib"  % "1.5.0"`
+* `"com.typesafe.conductr" %% "play25-conductr-bundle-lib"  % "1.5.0"`
+* `"com.typesafe.conductr" %% "lagom1-conductr-bundle-lib"  % "1.5.0"`
 
 Note that the examples here use the following import to conveniently build the JDK `URI` and `URL` types. 
 
@@ -408,3 +408,22 @@ class MyCustomApplicationLoader extends ApplicationLoader {
   }
 }
 ```
+
+# For Developers
+
+## Releasing
+
+You'll need permissions to release to the typesafe.com organization at Sonatype. You will also require a PGP key.
+
+This projects uses `sbt-release`. To release use the `release` command. This will cross publish releases for Scala. Note that you will see messages like this:
+
+```
+[trace] Stack trace suppressed: run last conductRBundleLib/*:publish for the full output.
+[trace] Stack trace suppressed: run last common/*:publish for the full output.
+[error] (conductRBundleLib/*:publish) java.io.IOException: destination file exists and overwrite == false
+[error] (common/*:publish) java.io.IOException: destination file exists and overwrite == false
+```
+
+This is because the same Java libraries are used for multiple Scala versions. Do not be concerned, the publishing tool is actually just warning you i.e. they are not errors.
+
+Once released you need to close the Sonatype repository. While you can do that from within sbt, you should visit the staging repository on Sonatype and verify that the packages that you expect to see there are indeed there.
