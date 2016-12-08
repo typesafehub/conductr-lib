@@ -1,5 +1,6 @@
 import com.typesafe.sbt.SbtScalariform._
 import sbtrelease.ReleasePlugin.autoImport._
+import sbtrelease.ReleaseStateTransformations._
 import com.typesafe.sbt.SbtPgp.autoImport._
 import PgpKeys._
 import xerial.sbt.Sonatype.autoImport._
@@ -49,8 +50,17 @@ object Build extends AutoPlugin {
       releaseCrossBuild := false,
       releaseIgnoreUntrackedFiles := true,
       releaseProcess := Seq[ReleaseStep](
-        releaseStepCommandAndRemaining("+publish")
+        checkSnapshotDependencies,
+        inquireVersions,
+        runClean,
+        releaseStepCommandAndRemaining("+test"),
+        setReleaseVersion,
+        commitReleaseVersion,
+        tagRelease,
+        releaseStepCommandAndRemaining("+publish"),
+        setNextVersion,
+        commitNextVersion,
+        pushChanges
       )
-
     )
 }
