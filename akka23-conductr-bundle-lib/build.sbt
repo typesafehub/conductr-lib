@@ -8,6 +8,8 @@ libraryDependencies ++= List(
   Library.scalaTest     % "test"
 )
 
+crossScalaVersions := crossScalaVersions.value.filterNot(_.startsWith("2.12"))
+
 fork in Test := true
 
 def groupByFirst(tests: Seq[TestDefinition]) =

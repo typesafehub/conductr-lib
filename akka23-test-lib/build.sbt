@@ -6,3 +6,5 @@ libraryDependencies ++= List(
   Library.junit,
   Library.scalaTest
 )
+
+crossScalaVersions := crossScalaVersions.value.filterNot(_.startsWith("2.12"))

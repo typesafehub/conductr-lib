@@ -8,6 +8,9 @@ libraryDependencies ++= List(
   Library.scalaTest     % "test"
 )
 
+crossScalaVersions := crossScalaVersions.value.filterNot(_.startsWith("2.12"))
+scalacOptions += "-target:jvm-1.6"
+
 fork in Test := true
 
 def groupByFirst(tests: Seq[TestDefinition]) =

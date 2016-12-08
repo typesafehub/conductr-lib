@@ -5,3 +5,6 @@ libraryDependencies ++= List(
 )
 
 resolvers += Resolvers.typesafeReleases // For netty-http-pipeline
+
+crossScalaVersions := crossScalaVersions.value.filterNot(_.startsWith("2.12"))
+scalacOptions += "-target:jvm-1.6"

@@ -21,13 +21,13 @@ object Build extends AutoPlugin {
       // Core settings
       organization := "com.typesafe.conductr",
       scalaVersion := Version.scala,
-      crossScalaVersions := List(scalaVersion.value, "2.10.4"),
+      crossScalaVersions := List(scalaVersion.value, "2.12.1"),
       scalacOptions ++= List(
         "-unchecked",
         "-deprecation",
         "-feature",
         "-language:_",
-        "-target:jvm-1.6",
+        "-target:jvm-1.8",
         "-encoding", "UTF-8"
       ),
       homepage := Some(url("http://conductr.lightbend.com/")),
@@ -45,6 +45,12 @@ object Build extends AutoPlugin {
       // Sonatype settings
       sonatypeProfileName := "com.typesafe",
       // Release settings
-      releasePublishArtifactsAction := publishSigned.value
+      releasePublishArtifactsAction := publishSigned.value,
+      releaseCrossBuild := false,
+      releaseIgnoreUntrackedFiles := true,
+      releaseProcess := Seq[ReleaseStep](
+        releaseStepCommandAndRemaining("+publish")
+      )
+
     )
 }

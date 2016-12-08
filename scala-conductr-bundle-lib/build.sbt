@@ -3,8 +3,8 @@ import Tests._
 name := "scala-conductr-bundle-lib"
 
 libraryDependencies ++= List(
-  Library.akka23HttpTestkit % "test",
-  Library.akka23Testkit     % "test",
+  Library.akka24HttpTestkit % "test",
+  Library.akka24Testkit     % "test",
   Library.scalaTest         % "test"
 )
 
