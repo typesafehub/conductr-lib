@@ -32,3 +32,14 @@ class ConductRLifecycle @Inject() (statusService: StatusService) {
       if (Env.isRunByConductR) Logger.info("Signalled start to ConductR")
     }(statusService.cc.executionContext)
 }
+
+/**
+ * Takes care of managing ConductR lifecycle events. In order to enable
+ * ConductR lifecycle events for your compile time dependency injected
+ * application, extend this trait.
+ */
+trait ConductRLifecycleComponents {
+  def conductRStatusService: StatusService
+
+  new ConductRLifecycle(conductRStatusService)
+}

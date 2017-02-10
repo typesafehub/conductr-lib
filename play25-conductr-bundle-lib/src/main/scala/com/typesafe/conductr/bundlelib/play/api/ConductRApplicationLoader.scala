@@ -21,3 +21,28 @@ class ConductRApplicationLoader extends ApplicationLoader {
     (new GuiceApplicationLoader(new GuiceApplicationBuilder(environment = prodEnv))).load(newContext)
   }
 }
+
+/**
+ * Mixing this trait into your application cake will provide you with the
+ * necessary configuration for Play from ConductR's environment variables.
+ * You will need to mix this configuration into your own applications
+ * configuration, like so:
+ *
+ * ```
+ * class MyApplication(ctx: Context) extends BuiltInComponentsFromContext(ctx)
+ *   with ConductRApplicationComponents
+ *   with ... {
+ *
+ *   override lazy val configuration = super.configuration ++ conductRConfiguration
+ *
+ *   ...
+ * }
+ * ```
+ *
+ * It will also ensure provide the core ConductR bundle lib components, and
+ * hook ConductR into the Play lifecycle.
+ */
+trait ConductRApplicationComponents extends BundlelibComponents with ConductRLifecycleComponents {
+
+  lazy val conductRConfiguration = Configuration(AkkaEnv.asConfig) ++ Configuration(PlayEnv.asConfig)
+}
