@@ -46,20 +46,20 @@ object Build extends AutoPlugin {
       // Sonatype settings
       sonatypeProfileName := "com.typesafe",
       // Release settings
-      releasePublishArtifactsAction := publishSigned.value,
-      releaseCrossBuild := false,
+      releaseCrossBuild := true,
       releaseIgnoreUntrackedFiles := true,
       releaseProcess := Seq[ReleaseStep](
         checkSnapshotDependencies,
         inquireVersions,
         runClean,
-        releaseStepCommandAndRemaining("+test"),
+        runTest,
         setReleaseVersion,
         commitReleaseVersion,
         tagRelease,
-        releaseStepCommandAndRemaining("+publishSigned"),
+        ReleaseStep(action = Command.process("publishSigned", _), enableCrossBuild = true),
         setNextVersion,
         commitNextVersion,
+        ReleaseStep(action = Command.process("sonatypeReleaseAll", _), enableCrossBuild = true),
         pushChanges
       )
     )
