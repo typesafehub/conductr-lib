@@ -206,4 +206,4 @@ lazy val javaTestLib = project
   .enablePlugins(CrossPerProjectPlugin)
 
 
-name := "root"
+name := "conductr-lib"
