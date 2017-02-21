@@ -28,4 +28,4 @@ def groupByFirst(tests: Seq[TestDefinition]) =
         ))))
     }.toSeq
 
-testGrouping in Test <<= (definedTests in Test).map(groupByFirst)
+testGrouping in Test := { (definedTests in Test).map(groupByFirst).value }
