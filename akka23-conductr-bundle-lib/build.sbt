@@ -3,7 +3,9 @@ import Tests._
 name := "akka23-conductr-bundle-lib"
 
 libraryDependencies ++= List(
-  Library.akka23Cluster,
+  // Adding akka23Http here is necessary because akka23-common is adding the library as 'provided'
+  Library.akka23Http    % "provided",
+  Library.akka23Cluster % "provided",
   Library.akka23Testkit % "test",
   Library.scalaTest     % "test"
 )
@@ -12,7 +14,7 @@ crossScalaVersions := crossScalaVersions.value.filterNot(_.startsWith("2.12"))
 
 fork in Test := true
 
-def groupByFirst(tests: Seq[TestDefinition]) =
+def groupByFirst(tests: Seq[TestDefinition]): Seq[Group] =
   tests
     .groupBy(t => t.name.drop(t.name.indexOf("WithEnv")))
     .map {

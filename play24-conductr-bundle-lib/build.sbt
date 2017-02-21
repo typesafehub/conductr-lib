@@ -3,6 +3,8 @@ import Tests._
 name := "play24-conductr-bundle-lib"
 
 libraryDependencies ++= List(
+  // Adding play24Ws here is necessary because play24-common is adding the library as 'provided'
+  Library.play24Ws      % "provided",
   Library.akka23Testkit % "test",
   Library.play24Test    % "test",
   Library.scalaTest     % "test"
