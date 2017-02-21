@@ -53,4 +53,4 @@ def groupByFirst(tests: Seq[TestDefinition]) =
         new Group("WithoutEnv", t, SubProcess(ForkOptions()))
     }.toSeq
 
-testGrouping in Test <<= (definedTests in Test).map(groupByFirst)
+testGrouping in Test := { (definedTests in Test).map(groupByFirst).value }
