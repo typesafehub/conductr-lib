@@ -14,6 +14,7 @@ import com.typesafe.conductr.lib.scala.ConductrTypeOps
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
 import play.api.libs.json.Reads._
+import scala.collection.immutable.SortedSet
 import scala.concurrent.ExecutionContext
 import scala.util.Try
 
@@ -173,13 +174,40 @@ object JsonMarshalling {
       )
   }
 
+  implicit object BundleAttributesFormat extends Format[BundleAttributes] {
+    override def writes(o: BundleAttributes): JsValue =
+      throw new UnsupportedOperationException()
+
+    override def reads(json: JsValue): JsResult[BundleAttributes] =
+      for {
+        system <- (json \ "system").validate[String]
+        nrOfCpus <- (json \ "nrOfCpus").validate[Double]
+        memory <- (json \ "memory").validate[Long]
+        diskSpace <- (json \ "diskSpace").validate[Long]
+        roles <- (json \ "roles").validate[SortedSet[String]]
+        bundleName <- (json \ "bundleName").validate[String]
+        systemVersion <- (json \ "systemVersion").validate[String]
+        compatibilityVersion <- (json \ "compatibilityVersion").validate[String]
+        tags <- (json \ "tags").validateOpt[Seq[String]]
+      } yield BundleAttributes(
+        system,
+        nrOfCpus,
+        memory,
+        diskSpace,
+        roles,
+        bundleName,
+        systemVersion,
+        compatibilityVersion,
+        tags.getOrElse(Seq.empty)
+      )
+  }
+
   // format: OFF
   implicit val uniqueAddressFormat: Format[UniqueAddress]                 = Json.format
   implicit val bundleExecEndpointFormat: Format[BundleExecutionEndpoint]  = Json.format
   implicit val bundleInstallationFormat: Format[BundleInstallation]       = Json.format
   implicit val bundleExecutionFormat: Format[BundleExecution]             = Json.format
   implicit val bundleConfigFormat: Format[BundleConfig]                   = Json.format
-  implicit val bundleAttributesFormat: Format[BundleAttributes]           = Json.format
   implicit val bundleScaleFormat: Format[BundleScale]                     = Json.format
   implicit val bundleFormat: Format[Bundle]                               = Json.format
   implicit val bundleEventFormat: Format[BundleEvent]                     = Json.format
