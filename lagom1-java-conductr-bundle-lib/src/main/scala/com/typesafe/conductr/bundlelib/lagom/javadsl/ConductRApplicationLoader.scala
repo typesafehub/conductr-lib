@@ -1,7 +1,6 @@
 package com.typesafe.conductr.bundlelib.lagom.javadsl
 
 import com.typesafe.conductr.bundlelib.akka.{ Env => AkkaEnv }
-import com.typesafe.conductr.bundlelib.lagom.javadsl.{ Env => LagomEnv }
 import com.typesafe.conductr.bundlelib.play.api.{ Env => PlayEnv }
 import play.api._
 import play.api.inject.guice.{ GuiceApplicationBuilder, GuiceApplicationLoader }
@@ -15,7 +14,7 @@ import play.api.inject.guice.{ GuiceApplicationBuilder, GuiceApplicationLoader }
  */
 class ConductRApplicationLoader extends ApplicationLoader {
   def load(context: ApplicationLoader.Context): Application = {
-    val conductRConfig = Configuration(AkkaEnv.asConfig) ++ Configuration(PlayEnv.asConfig) ++ Configuration(LagomEnv.asConfig)
+    val conductRConfig = Configuration(AkkaEnv.asConfig) ++ Configuration(PlayEnv.asConfig)
     val newConfig = context.initialConfiguration ++ conductRConfig
     val newContext = context.copy(initialConfiguration = newConfig)
     val prodEnv = Environment.simple(mode = Mode.Prod)

@@ -400,7 +400,7 @@ Note that if you are using your own application loader then you should ensure th
 ```java
 class MyCustomApplicationLoader extends ApplicationLoader {
   def load(context: ApplicationLoader.Context): Application = {
-    val conductRConfig = Configuration(AkkaEnv.asConfig) ++ Configuration(PlayEnv.asConfig) ++ Configuration(LagomEnv.asConfig)
+    val conductRConfig = Configuration(AkkaEnv.asConfig) ++ Configuration(PlayEnv.asConfig)
     val newConfig = context.initialConfiguration ++ conductRConfig
     val newContext = context.copy(initialConfiguration = newConfig)
     val prodEnv = Environment.simple(mode = Mode.Prod)
