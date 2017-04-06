@@ -18,6 +18,7 @@ import com.typesafe.conductr.lib.akka.{ ConnectionContext, ConnectionHandler }
 import com.typesafe.conductr.clientlib.akka.models._
 import com.typesafe.conductr.clientlib.scala.models._
 import com.typesafe.conductr.clientlib.scala.{ AbstractControlClient, withCloseable, withZipInputStream }
+import com.typesafe.config.{ ConfigFactory, ConfigObject }
 import de.heikoseeberger.akkasse.{ EventStreamUnmarshalling, ServerSentEvent }
 import org.reactivestreams.{ Subscriber, Publisher }
 import play.api.libs.json.{ Json, Reads }
@@ -158,6 +159,64 @@ class ControlClient(handler: ConnectionHandler, conductrAddress: URL, apiVersion
     }
 
   /**
+   * @see [[AbstractControlClient.getBundleDescriptor()]]
+   *
+   * Bundle descriptor is derived from `bundle.conf` and merging it with `bundle.conf` from bundle configuration if supplied.
+   * @param bundleId An existing bundle identifier, a shortened version of it (min 7 characters) or
+   *                 a non-ambiguous name given to the bundle during loading.
+   * @param cc implicit connection context
+   * @return The result as a `Future[BundleGetDescriptorResult]`. `BundleGetDescriptorResult` is a sealed trait and can
+   *         be either:
+   *         - BundleDescriptorGetSuccess if the bundle descriptor retrieval is successful. This object contains the actual bundle descriptor.
+   *         - BundleDescriptorGetFailure if http request failed. The object contains the HTTP status code and error message.
+   */
+  def getBundleDescriptor(bundleId: BundleId)(implicit cc: CC): Future[BundleGetDescriptorResult] = {
+    import cc.actorMaterializer.executionContext
+    getBundleDescriptorConfig(bundleId)
+      .map {
+        case BundleDescriptorGetConfigSuccess(config) => BundleDescriptorGetSuccess(BundleDescriptor.fromConfig(config))
+        case v                                        => v
+      }
+  }
+
+  /**
+   * @see [[AbstractControlClient.getBundleDescriptorConfig()]]
+   *
+   * Bundle descriptor is derived from `bundle.conf` and merging it with `bundle.conf` from bundle configuration if supplied.
+   * @param bundleId An existing bundle identifier, a shortened version of it (min 7 characters) or
+   *                 a non-ambiguous name given to the bundle during loading.
+   * @param cc implicit connection context
+   * @return The result as a `Future[BundleGetDescriptorResult]`. `BundleGetDescriptorResult` is a sealed trait and can
+   *         be either:
+   *         - BundleDescriptorGetConfigSuccess if the bundle descriptor retrieval is successful. This object contains the actual bundle descriptor.
+   *         - BundleDescriptorGetFailure if http request failed. The object contains the HTTP status code and error message.
+   */
+  def getBundleDescriptorConfig(bundleId: BundleId)(implicit cc: CC): Future[BundleGetDescriptorResult] =
+    handler.withConnectedRequest(Payload.getBundleDescriptor(bundleId)) { (responseCode, responseHeader, responseEntity) =>
+      import cc.actorMaterializer
+      import cc.actorMaterializer.executionContext
+
+      def bundleGetDescriptor: Future[BundleDescriptorGetConfigSuccess] = {
+        implicit val unmarshaller = PredefinedFromEntityUnmarshallers.stringUnmarshaller
+        for {
+          hoconText <- Unmarshal(responseEntity).to[String]
+        } yield {
+          BundleDescriptorGetConfigSuccess(ConfigFactory.parseString(hoconText).root())
+        }
+      }
+
+      def bundleGetDescriptorFailure: Future[BundleDescriptorGetFailure] = {
+        implicit val unmarshaller = PredefinedFromEntityUnmarshallers.stringUnmarshaller
+        for {
+          httpErrorMessage <- Unmarshal(responseEntity).to[String]
+        } yield {
+          BundleDescriptorGetFailure(responseCode, httpErrorMessage)
+        }
+      }
+      ResponseHandler.withHttpFailure(responseCode)(bundleGetDescriptor, bundleGetDescriptorFailure)
+    }
+
+  /**
    * @see [[AbstractControlClient.loadBundle()]]
    * @param bundle The file that is the bundle.
    *               The filename is important with its hex digest string and is required to be consistent
@@ -239,7 +298,6 @@ class ControlClient(handler: ConnectionHandler, conductrAddress: URL, apiVersion
 
   /**
    * @see [[AbstractControlClient.loadBundleComplete()]]
-   *
    * @param bundle The file that is the bundle.
    *               The filename is important with its hex digest string and is required to be consistent
    *               with the SHA-256 hash of the bundle’s contents.
@@ -299,7 +357,6 @@ class ControlClient(handler: ConnectionHandler, conductrAddress: URL, apiVersion
 
   /**
    * @see [[AbstractControlClient.runBundleComplete()]]
-   *
    * @param bundleId An existing bundle identifier, a shortened version of it (min 7 characters) or
    *                 a non-ambiguous name given to the bundle during loading.
    * @param scale The number of instances of the bundle to start. Defaults to 1.

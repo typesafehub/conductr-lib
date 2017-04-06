@@ -90,7 +90,7 @@ object JsonMarshalling {
 
     override def reads(json: JsValue): JsResult[TcpFamilyRequestMappings] =
       for {
-        ports <- (json \ "requests").validate[Set[Int]]
+        ports <- (json \ "requests").validate[Seq[Int]]
       } yield TcpFamilyRequestMappings(ports.map(TcpRequestMapping))
   }
 
@@ -100,7 +100,7 @@ object JsonMarshalling {
 
     override def reads(json: JsValue): JsResult[UdpFamilyRequestMappings] =
       for {
-        ports <- (json \ "requests").validate[Set[Int]]
+        ports <- (json \ "requests").validate[Seq[Int]]
       } yield UdpFamilyRequestMappings(ports.map(UdpRequestMapping))
   }
 
@@ -128,17 +128,17 @@ object JsonMarshalling {
       } yield HttpFamilyRequestMappings(requestMappings)
   }
 
-  implicit object ProtocolFamilyRequestMappingsFormat extends Format[Set[ProtocolFamilyRequestMappings]] {
-    override def writes(o: Set[ProtocolFamilyRequestMappings]): JsValue =
+  implicit object ProtocolFamilyRequestMappingsFormat extends Format[Seq[ProtocolFamilyRequestMappings]] {
+    override def writes(o: Seq[ProtocolFamilyRequestMappings]): JsValue =
       throw new UnsupportedOperationException()
 
-    override def reads(json: JsValue): JsResult[Set[ProtocolFamilyRequestMappings]] =
+    override def reads(json: JsValue): JsResult[Seq[ProtocolFamilyRequestMappings]] =
       for {
         httpRequestMappings <- (json \ "http").validateOpt[HttpFamilyRequestMappings]
         tcpRequestMappings <- (json \ "tcp").validateOpt[TcpFamilyRequestMappings]
         udpRequestMappings <- (json \ "udp").validateOpt[UdpFamilyRequestMappings]
       } yield {
-        Set(httpRequestMappings, tcpRequestMappings, udpRequestMappings)
+        Seq(httpRequestMappings, tcpRequestMappings, udpRequestMappings)
           .collect {
             case Some(value) => value
           }
@@ -151,7 +151,7 @@ object JsonMarshalling {
 
     override def reads(json: JsValue): JsResult[RequestAcl] =
       for {
-        jsonValues <- json.validate[Set[ProtocolFamilyRequestMappings]]
+        jsonValues <- json.validate[Seq[ProtocolFamilyRequestMappings]]
       } yield RequestAcl(jsonValues)
   }
 

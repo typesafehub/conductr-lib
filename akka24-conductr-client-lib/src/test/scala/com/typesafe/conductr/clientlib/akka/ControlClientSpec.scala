@@ -32,8 +32,82 @@ import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future, Await }
 import akka.http.scaladsl.model._
 import scala.util.{ Failure, Success }
+import scala.collection.JavaConverters._
 
 object ControlClientSpec {
+  val BundleDescriptorHocon =
+    """
+      |compatibilityVersion="1"
+      |components {
+      |  eslite {
+      |    description = eslite
+      |    endpoints {
+      |      akka-remote {
+      |        bind-port = 0
+      |        bind-protocol = tcp
+      |        services = []
+      |      }
+      |      es {
+      |        bind-port = 0
+      |        bind-protocol = http
+      |        service-name = elastic-search
+      |        services = []
+      |      }
+      |    }
+      |    file-system-type = universal
+      |    start-command = [
+      |      "eslite/bin/eslite",
+      |      "-J-Xms134217728",
+      |      "-J-Xmx134217728",
+      |      "-Dhttp.address=$ES_BIND_IP",
+      |      "-Dhttp.port=$ES_BIND_PORT",
+      |      "-Dplay.crypto.secret=65736c697465"
+      |    ]
+      |  }
+      |}
+      |diskSpace = 200000000
+      |memory = 402653184
+      |name = eslite
+      |nrOfCpus = 0.1
+      |roles = [elasticsearch]
+      |system = eslite
+      |systemVersion = "1"
+      |version = "1"
+    """.stripMargin
+
+  val BundleDescriptorFromHocon =
+    BundleDescriptor(
+      version = "1",
+      system = "eslite",
+      systemVersion = "1",
+      nrOfCpus = 0.1,
+      memory = 402653184L,
+      diskSpace = 200000000L,
+      roles = Seq("elasticsearch"),
+      bundleName = "eslite",
+      compatibilityVersion = "1",
+      tags = Seq.empty,
+      annotations = None,
+      components = Map(
+        "eslite" -> new BundleDescriptor.Component(
+          "eslite",
+          BundleDescriptor.Component.FileSystemType.Universal,
+          Seq(
+            "eslite/bin/eslite",
+            "-J-Xms134217728",
+            "-J-Xmx134217728",
+            "-Dhttp.address=$ES_BIND_IP",
+            "-Dhttp.port=$ES_BIND_PORT",
+            "-Dplay.crypto.secret=65736c697465"
+          ),
+          Map(
+            "akka-remote" -> BundleDescriptor.Component.Endpoint("tcp", 0, None, Seq.empty),
+            "es" -> BundleDescriptor.Component.Endpoint("http", 0, Some("elastic-search"), Seq.empty)
+          )
+        )
+      )
+    )
+
   case object GetBundleEvents
   case object GetBundles
 
@@ -300,6 +374,99 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
         }
         routeInputMonitor.expectMsg("vis")
       }
+    }
+
+    "get bundle descriptor returning success" in { f =>
+      import ControlClientSpec._
+
+      val sys = systemFixture(f)
+      import sys._
+
+      val routeInputMonitor = TestProbe()
+      val `application/hocon` = MediaType.applicationWithFixedCharset("hocon", HttpCharsets.`UTF-8`)
+
+      // format: OFF
+      val route =
+        pathPrefix(ApiVersion / "bundles" / Segment) { bundleId =>
+          get {
+            routeInputMonitor.ref ! bundleId
+            accept(`application/hocon`) {
+              complete {
+                HttpResponse(status = StatusCodes.OK, entity = HttpEntity(BundleDescriptorHocon))
+              }
+            }
+          }
+        }
+      // format: ON
+
+      withServer(route) {
+        val result = Await.result(ControlClient(HostUrl).getBundleDescriptor("vis"), timeout.duration)
+        inside(result) {
+          case BundleDescriptorGetSuccess(descriptor) =>
+            descriptor shouldBe BundleDescriptorFromHocon
+        }
+        routeInputMonitor.expectMsg("vis")
+      }
+    }
+
+    "get bundle descriptor config returning success" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
+      val routeInputMonitor = TestProbe()
+      val `application/hocon` = MediaType.applicationWithFixedCharset("hocon", HttpCharsets.`UTF-8`)
+
+      // format: OFF
+      val route =
+        pathPrefix(ApiVersion / "bundles" / Segment) { bundleId =>
+          get {
+            routeInputMonitor.ref ! bundleId
+            accept(`application/hocon`) {
+              complete {
+                HttpResponse(status = StatusCodes.OK, entity = HttpEntity("a = b"))
+              }
+            }
+          }
+        }
+      // format: ON
+
+      withServer(route) {
+        val result = Await.result(ControlClient(HostUrl).getBundleDescriptorConfig("vis"), timeout.duration)
+        inside(result) {
+          case BundleDescriptorGetConfigSuccess(config) =>
+            config.unwrapped().asScala shouldBe Map("a" -> "b")
+        }
+        routeInputMonitor.expectMsg("vis")
+      }
+    }
+
+    "get bundle descriptor returning failure" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
+      val routeInputMonitor = TestProbe()
+      val `application/hocon` = MediaType.applicationWithFixedCharset("hocon", HttpCharsets.`UTF-8`)
+
+      // format: OFF
+      val route =
+        pathPrefix(ApiVersion / "bundles" / Segment) { bundleId =>
+          get {
+            routeInputMonitor.ref ! bundleId
+            accept(`application/hocon`) {
+              complete {
+                HttpResponse(status = StatusCodes.InternalServerError, entity = HttpEntity("test error"))
+              }
+            }
+          }
+        }
+      // format: ON
+
+      withServer(route) {
+        val result = Await.result(ControlClient(HostUrl).getBundleDescriptorConfig("vis"), timeout.duration)
+        result shouldBe BundleDescriptorGetFailure(500, "test error")
+        routeInputMonitor.expectMsg("vis")
+      }
+
     }
 
     "load a valid bundle" in { f =>
