@@ -263,7 +263,7 @@ object TestData {
     bundleConfig = Some(BundleConfig(Map(
       "old-hub" -> BundleConfigEndpoint("http", Some("old-hub"), Set(new URI("http://:5555/hub1")), Seq.empty),
       "hub" -> BundleConfigEndpoint("http", Some("hub"), Set.empty, Seq(
-        RequestAcl(Set(
+        RequestAcl(Seq(
           HttpFamilyRequestMappings(Seq(
             Path("/path-1"),
             Path("/path-2", method = Some("GET"), rewrite = Some("/other-path-2")),
@@ -275,15 +275,15 @@ object TestData {
         ))
       )),
       "tunnel" -> BundleConfigEndpoint("tcp", None, Set.empty, Seq(
-        RequestAcl(Set(
-          TcpFamilyRequestMappings(Set(
+        RequestAcl(Seq(
+          TcpFamilyRequestMappings(Seq(
             TcpRequestMapping(7001)
           ))
         ))
       )),
       "broadcast" -> BundleConfigEndpoint("udp", None, Set.empty, Seq(
-        RequestAcl(Set(
-          UdpFamilyRequestMappings(Set(
+        RequestAcl(Seq(
+          UdpFamilyRequestMappings(Seq(
             UdpRequestMapping(5001)
           ))
         ))

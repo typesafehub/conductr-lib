@@ -57,6 +57,7 @@ case class UdpRequestMapping(port: Int) extends RequestMapping
  */
 trait ProtocolFamilyRequestMappings {
   type Mapping <: RequestMapping
+  def protocolFamily: String
   def requestMappings: Iterable[Mapping]
 }
 
@@ -65,18 +66,21 @@ trait ProtocolFamilyRequestMappings {
  */
 case class HttpFamilyRequestMappings(requestMappings: Seq[HttpRequestMapping]) extends ProtocolFamilyRequestMappings {
   override type Mapping = HttpRequestMapping
+  val protocolFamily = "http"
 }
 
 /**
  * Base type which represents request mapping for a TCP protocol family.
  */
-case class TcpFamilyRequestMappings(requestMappings: Set[TcpRequestMapping]) extends ProtocolFamilyRequestMappings {
+case class TcpFamilyRequestMappings(requestMappings: Seq[TcpRequestMapping]) extends ProtocolFamilyRequestMappings {
   override type Mapping = TcpRequestMapping
+  val protocolFamily = "tcp"
 }
 
 /**
  * Base type which represents request mapping for a UDP protocol family.
  */
-case class UdpFamilyRequestMappings(requestMappings: Set[UdpRequestMapping]) extends ProtocolFamilyRequestMappings {
+case class UdpFamilyRequestMappings(requestMappings: Seq[UdpRequestMapping]) extends ProtocolFamilyRequestMappings {
   override type Mapping = UdpRequestMapping
+  val protocolFamily = "udp"
 }

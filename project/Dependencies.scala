@@ -18,6 +18,7 @@ object Version {
   val play25             = "2.5.12"
   val lagom1             = "1.3.0-RC2"
   val reactiveStreams    = "1.0.0"
+  val typesafeConfig     = "1.3.0"
   val scala              = "2.11.8"
   val scalaTest          = "3.0.1"
 }
@@ -50,6 +51,7 @@ object Library {
   val play25Test         = "com.typesafe.play"      %% "play-test"                      % Version.play25
   val play25Json         = "com.typesafe.play"      %% "play-json"                      % Version.play25
   val play25Ws           = "com.typesafe.play"      %% "play-ws"                        % Version.play25
+  val typesafeConfig     = "com.typesafe"           %  "config"                         % Version.typesafeConfig
   val scalaTest          = "org.scalatest"          %% "scalatest"                      % Version.scalaTest
 }
 

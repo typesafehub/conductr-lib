@@ -4,6 +4,7 @@ import java.net.{ URLEncoder, URI, URL }
 import com.typesafe.conductr.lib.HttpPayload
 import com.typesafe.conductr.clientlib.scala.models._
 import com.typesafe.conductr.lib.scala.AbstractConnectionContext
+import com.typesafe.config.ConfigObject
 import org.reactivestreams.{ Subscriber, Publisher }
 
 import scala.concurrent.Future
@@ -38,6 +39,34 @@ abstract class AbstractControlClient(conductrAddress: URL) {
    *         - BundleGetFailure if the get bundle request has been failed. This object contains the HTTP status code and error message.
    */
   def getBundle(bundleId: BundleId, bundleData: Subscriber[Array[Byte]], configData: Subscriber[Array[Byte]])(implicit cc: CC): Future[BundleGetResult]
+
+  /**
+   * Obtains a bundle descriptor given a particular bundle id.
+   *
+   * Bundle descriptor is derived from `bundle.conf` and merging it with `bundle.conf` from bundle configuration if supplied.
+   * @param bundleId An existing bundle identifier, a shortened version of it (min 7 characters) or
+   *                 a non-ambiguous name given to the bundle during loading.
+   * @param cc implicit connection context
+   * @return The result as a `Future[BundleGetDescriptorResult]`. `BundleGetDescriptorResult` is a sealed trait and can
+   *         be either:
+   *         - BundleDescriptorGetSuccess if the bundle descriptor retrieval is successful. This object contains the actual bundle descriptor.
+   *         - BundleDescriptorGetFailure if http request failed. The object contains the HTTP status code and error message.
+   */
+  def getBundleDescriptor(bundleId: BundleId)(implicit cc: CC): Future[BundleGetDescriptorResult]
+
+  /**
+   * Obtains a bundle descriptor given a particular bundle id.
+   *
+   * Bundle descriptor is derived from `bundle.conf` and merging it with `bundle.conf` from bundle configuration if supplied.
+   * @param bundleId An existing bundle identifier, a shortened version of it (min 7 characters) or
+   *                 a non-ambiguous name given to the bundle during loading.
+   * @param cc implicit connection context
+   * @return The result as a `Future[BundleGetDescriptorResult]`. `BundleGetDescriptorResult` is a sealed trait and can
+   *         be either:
+   *         - BundleDescriptorGetConfigSuccess if the bundle descriptor retrieval is successful. This object contains the actual bundle descriptor.
+   *         - BundleDescriptorGetFailure if http request failed. The object contains the HTTP status code and error message.
+   */
+  def getBundleDescriptorConfig(bundleId: BundleId)(implicit cc: CC): Future[BundleGetDescriptorResult]
 
   /**
    * Scale a loaded bundle to a number of instances.
@@ -247,6 +276,7 @@ abstract class AbstractControlClient(conductrAddress: URL) {
     // Bundles
     val bundlesInfo                                   = createPayload("GET",    s"$Prefix/bundles")
     def getBundle(bundleId: BundleId)                 = createPayload("GET",    s"$Prefix/bundles/$bundleId").addRequestHeader("Accept", "multipart/form-data")
+    def getBundleDescriptor(bundleId: BundleId)       = createPayload("GET",    s"$Prefix/bundles/$bundleId").addRequestHeader("Accept", "application/hocon")
     def loadBundle                                    = createPayload("POST",   s"$Prefix/bundles")
     def runBundle(bundleId: BundleId, scale: Int, affinity: Option[String]) =
       createPayload("PUT",    s"$Prefix/bundles/$bundleId?scale=$scale${affinity.fold("")("&affinity=" + _)}")
