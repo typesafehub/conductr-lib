@@ -637,10 +637,10 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
             interval = 800.millis,
             tick = Seq(
               ServerSentEvent(s"${BundleFrontend.bundleId}", "bundleInstallationAdded"),
-              ServerSentEvent.heartbeat,
-              ServerSentEvent.heartbeat,
-              ServerSentEvent.heartbeat,
-              ServerSentEvent.heartbeat
+              ServerSentEvent.Heartbeat,
+              ServerSentEvent.Heartbeat,
+              ServerSentEvent.Heartbeat,
+              ServerSentEvent.Heartbeat
             )
           ).mapConcat(identity)
         )
@@ -745,10 +745,10 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
             interval = 800.millis,
             tick = Seq(
               ServerSentEvent(s"${BundleFrontend.bundleId}", "bundleInstallationAdded"),
-              ServerSentEvent.heartbeat,
-              ServerSentEvent.heartbeat,
-              ServerSentEvent.heartbeat,
-              ServerSentEvent.heartbeat
+              ServerSentEvent.Heartbeat,
+              ServerSentEvent.Heartbeat,
+              ServerSentEvent.Heartbeat,
+              ServerSentEvent.Heartbeat
             )
           ).mapConcat(identity)
         )
@@ -882,10 +882,10 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
             interval = 800.millis,
             tick = Seq(
               ServerSentEvent(s"${BundleFrontend.bundleId}", "bundleExecutionAdded"),
-              ServerSentEvent.heartbeat,
-              ServerSentEvent.heartbeat,
-              ServerSentEvent.heartbeat,
-              ServerSentEvent.heartbeat
+              ServerSentEvent.Heartbeat,
+              ServerSentEvent.Heartbeat,
+              ServerSentEvent.Heartbeat,
+              ServerSentEvent.Heartbeat
             )
           ).mapConcat(identity)
         )
@@ -971,10 +971,10 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
             interval = 800.millis,
             tick = Seq(
               ServerSentEvent(s"${BundleFrontend.bundleId}", "bundleExecutionAdded"),
-              ServerSentEvent.heartbeat,
-              ServerSentEvent.heartbeat,
-              ServerSentEvent.heartbeat,
-              ServerSentEvent.heartbeat
+              ServerSentEvent.Heartbeat,
+              ServerSentEvent.Heartbeat,
+              ServerSentEvent.Heartbeat,
+              ServerSentEvent.Heartbeat
             )
           ).mapConcat(identity)
         )
