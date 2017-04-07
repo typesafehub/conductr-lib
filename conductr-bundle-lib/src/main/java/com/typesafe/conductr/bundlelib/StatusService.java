@@ -24,13 +24,15 @@ public class StatusService {
      */
     public static HttpPayload createSignalStartedPayload() throws IOException {
         if (isRunByConductR())
-            return createSignalStartedPayload(CONDUCTR_STATUS, BUNDLE_ID);
+            return createSignalStartedPayload(BUNDLE_HOST_IP, CONDUCTR_STATUS, BUNDLE_ID);
         else
             return null;
     }
 
-    static HttpPayload createSignalStartedPayload(String conductrControl, String bundleId) throws IOException {
+    static HttpPayload createSignalStartedPayload(String hostIp, String conductrControl, String bundleId) throws IOException {
         URL controlUrl = new URL(conductrControl + "/bundles/" + bundleId + "?isStarted=true");
-        return new HttpPayload(controlUrl, "PUT");
+
+        return new HttpPayload(controlUrl, "PUT")
+            .addRequestHeader("X-Forwarded-For", hostIp);
     }
 }
