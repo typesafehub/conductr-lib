@@ -43,8 +43,6 @@ object Build extends AutoPlugin {
         .setPreference(AlignSingleLineCaseStatements.MaxArrowIndent, 100)
         .setPreference(DoubleIndentClassDeclaration, true)
         .setPreference(PreserveDanglingCloseParenthesis, true),
-      // Sonatype settings
-      sonatypeProfileName := "com.typesafe",
       // Release settings
       releasePublishArtifactsAction := publishSigned.value,
       releaseCrossBuild := false,
@@ -58,6 +56,7 @@ object Build extends AutoPlugin {
         commitReleaseVersion,
         tagRelease,
         releaseStepCommandAndRemaining("+publishSigned"),
+        releaseStepCommandAndRemaining("sonatypeReleaseAll"),
         setNextVersion,
         commitNextVersion,
         pushChanges
