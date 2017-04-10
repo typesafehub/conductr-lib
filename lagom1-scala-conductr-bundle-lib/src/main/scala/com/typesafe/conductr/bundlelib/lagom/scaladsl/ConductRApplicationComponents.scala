@@ -5,7 +5,6 @@ import com.lightbend.lagom.internal.client.{ CircuitBreakerConfig, CircuitBreake
 import com.lightbend.lagom.internal.spi.CircuitBreakerMetricsProvider
 import com.lightbend.lagom.scaladsl.api.{ AdditionalConfiguration, ProvidesAdditionalConfiguration, ServiceLocator }
 import com.typesafe.conductr.bundlelib.akka.{ Env => AkkaEnv }
-import com.typesafe.conductr.bundlelib.lagom.scaladsl.{ Env => LagomEnv }
 import com.typesafe.conductr.bundlelib.play.api.{ BundlelibComponents, ConductRLifecycleComponents, Env => PlayEnv }
 import play.api._
 
@@ -24,7 +23,7 @@ trait ConductRApplicationComponents extends ConductRServiceLocatorComponents wit
   /**
    * The ConductR configuration.
    */
-  lazy val conductRConfiguration: Configuration = Configuration(AkkaEnv.asConfig) ++ Configuration(PlayEnv.asConfig) ++ Configuration(LagomEnv.asConfig)
+  lazy val conductRConfiguration: Configuration = Configuration(AkkaEnv.asConfig) ++ Configuration(PlayEnv.asConfig)
 
   override def additionalConfiguration: AdditionalConfiguration = super.additionalConfiguration ++ conductRConfiguration
 }
