@@ -46,10 +46,10 @@ class BundlesConnectorSpec extends AkkaUnitTest {
         interval = 800.millis,
         tick = Seq(
           ServerSentEvent(s"${BundleFrontend.bundleId}", "bundleInstallationAdded"),
-          ServerSentEvent.heartbeat,
-          ServerSentEvent.heartbeat,
-          ServerSentEvent.heartbeat,
-          ServerSentEvent.heartbeat
+          ServerSentEvent.Heartbeat,
+          ServerSentEvent.Heartbeat,
+          ServerSentEvent.Heartbeat,
+          ServerSentEvent.Heartbeat
         )
       ).mapConcat(identity)
     )
@@ -97,10 +97,10 @@ class BundlesConnectorSpec extends AkkaUnitTest {
         interval = 800.millis,
         tick = Seq(
           ServerSentEvent(s"${BundleFrontend.bundleId}", "bundleInstallationAdded"),
-          ServerSentEvent.heartbeat,
-          ServerSentEvent.heartbeat,
-          ServerSentEvent.heartbeat,
-          ServerSentEvent.heartbeat
+          ServerSentEvent.Heartbeat,
+          ServerSentEvent.Heartbeat,
+          ServerSentEvent.Heartbeat,
+          ServerSentEvent.Heartbeat
         )
       ).mapConcat(identity)
     )

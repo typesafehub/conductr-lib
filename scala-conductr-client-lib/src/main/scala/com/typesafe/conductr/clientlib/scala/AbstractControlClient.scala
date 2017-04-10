@@ -66,7 +66,7 @@ abstract class AbstractControlClient(conductrAddress: URL) {
    *         - BundleDescriptorGetConfigSuccess if the bundle descriptor retrieval is successful. This object contains the actual bundle descriptor.
    *         - BundleDescriptorGetFailure if http request failed. The object contains the HTTP status code and error message.
    */
-  def getBundleDescriptorConfig(bundleId: BundleId)(implicit cc: CC): Future[BundleGetDescriptorResult]
+  def getBundleDescriptorConfig(bundleId: BundleId)(implicit cc: CC): Future[BundleGetDescriptorConfigResult]
 
   /**
    * Scale a loaded bundle to a number of instances.

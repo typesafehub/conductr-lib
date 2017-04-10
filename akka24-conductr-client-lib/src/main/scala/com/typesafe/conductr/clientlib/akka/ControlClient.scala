@@ -174,8 +174,8 @@ class ControlClient(handler: ConnectionHandler, conductrAddress: URL, apiVersion
     import cc.actorMaterializer.executionContext
     getBundleDescriptorConfig(bundleId)
       .map {
-        case BundleDescriptorGetConfigSuccess(config) => BundleDescriptorGetSuccess(BundleDescriptor.fromConfig(config))
-        case v                                        => v
+        case BundleGetDescriptorConfigSuccess(config)      => BundleGetDescriptorSuccess(BundleDescriptor.fromConfig(config))
+        case BundleGetDescriptorConfigFailure(code, error) => BundleGetDescriptorFailure(code, error)
       }
   }
 
@@ -191,26 +191,26 @@ class ControlClient(handler: ConnectionHandler, conductrAddress: URL, apiVersion
    *         - BundleDescriptorGetConfigSuccess if the bundle descriptor retrieval is successful. This object contains the actual bundle descriptor.
    *         - BundleDescriptorGetFailure if http request failed. The object contains the HTTP status code and error message.
    */
-  def getBundleDescriptorConfig(bundleId: BundleId)(implicit cc: CC): Future[BundleGetDescriptorResult] =
+  def getBundleDescriptorConfig(bundleId: BundleId)(implicit cc: CC): Future[BundleGetDescriptorConfigResult] =
     handler.withConnectedRequest(Payload.getBundleDescriptor(bundleId)) { (responseCode, responseHeader, responseEntity) =>
       import cc.actorMaterializer
       import cc.actorMaterializer.executionContext
 
-      def bundleGetDescriptor: Future[BundleDescriptorGetConfigSuccess] = {
+      def bundleGetDescriptor: Future[BundleGetDescriptorConfigSuccess] = {
         implicit val unmarshaller = PredefinedFromEntityUnmarshallers.stringUnmarshaller
         for {
           hoconText <- Unmarshal(responseEntity).to[String]
         } yield {
-          BundleDescriptorGetConfigSuccess(ConfigFactory.parseString(hoconText).root())
+          BundleGetDescriptorConfigSuccess(ConfigFactory.parseString(hoconText).root())
         }
       }
 
-      def bundleGetDescriptorFailure: Future[BundleDescriptorGetFailure] = {
+      def bundleGetDescriptorFailure: Future[BundleGetDescriptorConfigFailure] = {
         implicit val unmarshaller = PredefinedFromEntityUnmarshallers.stringUnmarshaller
         for {
           httpErrorMessage <- Unmarshal(responseEntity).to[String]
         } yield {
-          BundleDescriptorGetFailure(responseCode, httpErrorMessage)
+          BundleGetDescriptorConfigFailure(responseCode, httpErrorMessage)
         }
       }
       ResponseHandler.withHttpFailure(responseCode)(bundleGetDescriptor, bundleGetDescriptorFailure)
