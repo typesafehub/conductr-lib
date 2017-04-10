@@ -402,11 +402,40 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
       withServer(route) {
         val result = Await.result(ControlClient(HostUrl).getBundleDescriptor("vis"), timeout.duration)
         inside(result) {
-          case BundleDescriptorGetSuccess(descriptor) =>
+          case BundleGetDescriptorSuccess(descriptor) =>
             descriptor shouldBe BundleDescriptorFromHocon
         }
         routeInputMonitor.expectMsg("vis")
       }
+    }
+
+    "get bundle descriptor config returning failure" in { f =>
+      val sys = systemFixture(f)
+      import sys._
+
+      val routeInputMonitor = TestProbe()
+      val `application/hocon` = MediaType.applicationWithFixedCharset("hocon", HttpCharsets.`UTF-8`)
+
+      // format: OFF
+      val route =
+        pathPrefix(ApiVersion / "bundles" / Segment) { bundleId =>
+          get {
+            routeInputMonitor.ref ! bundleId
+            accept(`application/hocon`) {
+              complete {
+                HttpResponse(status = StatusCodes.InternalServerError, entity = HttpEntity("test error"))
+              }
+            }
+          }
+        }
+      // format: ON
+
+      withServer(route) {
+        val result = Await.result(ControlClient(HostUrl).getBundleDescriptorConfig("vis"), timeout.duration)
+        result shouldBe BundleGetDescriptorConfigFailure(500, "test error")
+        routeInputMonitor.expectMsg("vis")
+      }
+
     }
 
     "get bundle descriptor config returning success" in { f =>
@@ -433,7 +462,7 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
       withServer(route) {
         val result = Await.result(ControlClient(HostUrl).getBundleDescriptorConfig("vis"), timeout.duration)
         inside(result) {
-          case BundleDescriptorGetConfigSuccess(config) =>
+          case BundleGetDescriptorConfigSuccess(config) =>
             config.unwrapped().asScala shouldBe Map("a" -> "b")
         }
         routeInputMonitor.expectMsg("vis")
@@ -462,8 +491,8 @@ class ControlClientSpec extends AkkaUnitTestWithFixture("ControlClientSpec") wit
       // format: ON
 
       withServer(route) {
-        val result = Await.result(ControlClient(HostUrl).getBundleDescriptorConfig("vis"), timeout.duration)
-        result shouldBe BundleDescriptorGetFailure(500, "test error")
+        val result = Await.result(ControlClient(HostUrl).getBundleDescriptor("vis"), timeout.duration)
+        result shouldBe BundleGetDescriptorFailure(500, "test error")
         routeInputMonitor.expectMsg("vis")
       }
 
