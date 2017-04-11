@@ -16,7 +16,8 @@ Add one of the following libraries to your project.
 * `"com.typesafe.conductr" %% "play23-conductr-bundle-lib"  % "1.6.0"`
 * `"com.typesafe.conductr" %% "play24-conductr-bundle-lib"  % "1.6.0"`
 * `"com.typesafe.conductr" %% "play25-conductr-bundle-lib"  % "1.6.0"`
-* `"com.typesafe.conductr" %% "lagom1-conductr-bundle-lib"  % "1.6.0"`
+* `"com.typesafe.conductr" %% "lagom1-java-conductr-bundle-lib"  % "1.6.0"`
+* `"com.typesafe.conductr" %% "lagom1-scala-conductr-bundle-lib"  % "1.6.0"`
 
 Note that the examples here use the following import to conveniently build the JDK `URI` and `URL` types. 
 
@@ -31,7 +32,8 @@ import com.typesafe.conductr.bundlelib.scala.{URL, URI}
 * [akka[23|24]-conductr-bundle-lib](#akka2324-conductr-bundle-lib)
 * [play[23|24]-conductr-bundle-lib](#play2324-conductr-bundle-lib)
 * [play25-conductr-bundle-lib](#play25-conductr-bundle-lib)
-* [lagom1-conductr-bundle-lib](#lagom1-conductr-bundle-lib)
+* [lagom1-java-conductr-bundle-lib](#lagom1-java-conductr-bundle-lib)
+* [lagom1-scala-conductr-bundle-lib](#lagom1-scala-conductr-bundle-lib)
 
 ## conductr-bundle-lib
 
@@ -389,15 +391,20 @@ object Global extends GlobalSettings {
 }
 ```
 
-## lagom1-conductr-bundle-lib
+## lagom1-java-conductr-bundle-lib
 
-> If you are using Lagom 1.0.x then this section is for you.
+> If you are using Lagom 1.x with Java, then this section is for you.
 
-[sbt-conductr](https://github.com/typesafehub/sbt-conductr) is automatically adding this library to your Lagom project. You don't need set any additional setting for your Lagom services.
+[sbt-conductr](https://github.com/typesafehub/sbt-conductr) automatically adds this library to your Lagom project. You don't need set any additional settings for your Lagom services.
 
 Note that if you are using your own application loader then you should ensure that the Akka, Play and Lagom ConductR-related properties are loaded. Here's a complete implementation (in Scala):
 
-```java
+```scala
+import com.typesafe.conductr.bundlelib.akka.{ Env => AkkaEnv }
+import com.typesafe.conductr.bundlelib.play.api.{ Env => PlayEnv }
+import play.api._
+import play.api.inject.guice.{ GuiceApplicationBuilder, GuiceApplicationLoader }
+
 class MyCustomApplicationLoader extends ApplicationLoader {
   def load(context: ApplicationLoader.Context): Application = {
     val conductRConfig = Configuration(AkkaEnv.asConfig) ++ Configuration(PlayEnv.asConfig)
@@ -408,6 +415,33 @@ class MyCustomApplicationLoader extends ApplicationLoader {
   }
 }
 ```
+
+## lagom1-scala-conductr-bundle-lib
+
+> If you are using Lagom 1.x with Scala, then this section is for you.
+
+[sbt-conductr](https://github.com/typesafehub/sbt-conductr) automatically adds this library to your Lagom project. This provides components, including the service locator and other components necessary for initialization on ConductR, which you can mix in with your application cake. To do so, mix `ConductRApplicationComponents` into your production cake:
+
+```scala
+import com.lightbend.lagom.scaladsl.devmode.LagomDevModeComponents
+import com.lightbend.lagom.scaladsl.server._
+import com.typesafe.conductr.bundlelib.lagom.scaladsl.ConductRApplicationComponents
+
+class HelloApplicationLoader extends LagomApplicationLoader {
+
+  override def load(context: LagomApplicationContext) =
+    new HelloApplication(context) with ConductRApplicationComponents
+
+  override def loadDevMode(context: LagomApplicationContext) =
+    new HelloApplication(context) with LagomDevModeComponents
+
+  override def describeServices = List(
+    readDescriptor[HelloService]
+  )
+}
+```
+
+Once you have added this to each of your services, you should be ready to run in ConductR. Also note that it’s very important to implement the `describeServices` method on `LagomApplicationLoader`, as this will ensure that the ConductR sbt tooling is able to correctly discover the Lagom service APIs offered by each service.
 
 # For Developers
 
