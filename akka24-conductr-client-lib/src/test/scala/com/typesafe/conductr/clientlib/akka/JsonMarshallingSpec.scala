@@ -6,12 +6,18 @@ import play.api.libs.json.Json
 
 class JsonMarshallingSpec extends UnitTest {
   "unmarshalling bundle" should {
-    "result in correct json when bundle is declared with endpoints having service URI and request ACLs" in {
-      import JsonMarshalling._
-      import TestData._
+    import JsonMarshalling._
+    import TestData._
 
-      val result = Json.parse(BundleWithServicesAndRequestAclJson).as[Bundle]
-      result shouldBe BundleWithServicesAndRequestAcl
-    }
+    Seq(
+      "bundle is declared with endpoints having service URI and request ACLs" -> BundleWithServicesAndRequestAclJson -> BundleWithServicesAndRequestAcl,
+      "bundle is declared with tags" -> BundleWithTagsJson -> BundleWithTags
+    ).foreach {
+        case ((scenario, json), expectedBundle) =>
+          s"result in correct json when $scenario" in {
+            val result = Json.parse(json).as[Bundle]
+            result shouldBe expectedBundle
+          }
+      }
   }
 }
