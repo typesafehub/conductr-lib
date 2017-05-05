@@ -4,7 +4,6 @@ import java.util
 
 import com.typesafe.config._
 
-import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.breakOut
 import scala.util.Try
@@ -53,7 +52,7 @@ object BundleDescriptor {
             None
 
           val requestAcls = if (endpoint.hasPath("acls"))
-            endpoint.getConfigList("acls").map(parseRequestAcl)
+            endpoint.getConfigList("acls").asScala.map(parseRequestAcl)
           else
             Seq.empty[RequestAcl]
 
@@ -69,20 +68,20 @@ object BundleDescriptor {
 
     private def parseRequestAcl(config: Config): RequestAcl =
       RequestAcl(
-        config.entrySet()
+        config.entrySet().asScala
           .map(_.getKey.split('.').toSeq)
           .collect {
             case Seq(protocol @ "http", configKey @ "requests") =>
-              val requestMappingsConfigs = config.getConfig(protocol).getConfigList(configKey).toList
+              val requestMappingsConfigs = config.getConfig(protocol).getConfigList(configKey).asScala.toList
               HttpFamilyRequestMappings(requestMappingsConfigs.map(parseHttpRequestMapping))
 
             case Seq(protocol @ "tcp", configKey @ "requests") =>
               val ports = config.getConfig(protocol).getIntList(configKey)
-              TcpFamilyRequestMappings(ports.map(TcpRequestMapping(_)))
+              TcpFamilyRequestMappings(ports.asScala.map(TcpRequestMapping(_)))
 
             case Seq(protocol @ "udp", configKey @ "requests") =>
               val ports = config.getConfig(protocol).getIntList(configKey)
-              UdpFamilyRequestMappings(ports.map(UdpRequestMapping(_)))
+              UdpFamilyRequestMappings(ports.asScala.map(UdpRequestMapping(_)))
           }
           .foldLeft(Seq.empty[ProtocolFamilyRequestMappings])(_ :+ _)
       )
@@ -164,7 +163,7 @@ object BundleDescriptor {
       config.getStringList(Roles).asScala,
       config.getString(BundleName),
       Try(config.getString(CompatibilityVersion)).getOrElse(config.getString(CompatibilityVersionCamelCase)),
-      Try(config.getStringList(Tags).to[List]).getOrElse(List.empty),
+      Try(config.getStringList(Tags).asScala.to[List]).getOrElse(List.empty),
       if (config.hasPath(Annotations)) Some(Try(config.getObject(Annotations)).getOrElse(EmptyAnnotations)) else None,
       componentsObj.keySet.asScala.map { name =>
         name -> Component(componentsObj.get(name).asInstanceOf[ConfigObject].toConfig)
