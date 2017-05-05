@@ -14,10 +14,11 @@ import play.api._
  */
 class ConductRApplicationLoader extends ApplicationLoader {
   def load(context: ApplicationLoader.Context): Application = {
-    val conductRConfig = Configuration(AkkaEnv.asConfig) ++ Configuration(PlayEnv.asConfig)
+    val systemName = AkkaEnv.mkSystemName("application")
+    val conductRConfig = Configuration(AkkaEnv.asConfig(systemName)) ++ Configuration(PlayEnv.asConfig(systemName))
     val newConfig = context.initialConfiguration ++ conductRConfig
     val newContext = context.copy(initialConfiguration = newConfig)
     val prodEnv = Environment.simple(mode = Mode.Prod)
-    (new GuiceApplicationLoader(new GuiceApplicationBuilder(environment = prodEnv))).load(newContext)
+    new GuiceApplicationLoader(new GuiceApplicationBuilder(environment = prodEnv)).load(newContext)
   }
 }
