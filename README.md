@@ -8,16 +8,16 @@ This project provides a number of libraries to facilitate [ConductR](http://type
 
 Add one of the following libraries to your project.
 
-* `"com.typesafe.conductr" %  "conductr-bundle-lib"         % "1.6.0"`
-* `"com.typesafe.conductr" %  "java-conductr-bundle-lib"    % "1.6.0"`
-* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"   % "1.6.0"`
-* `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib"  % "1.6.0"`
-* `"com.typesafe.conductr" %% "akka24-conductr-bundle-lib"  % "1.6.0"`
-* `"com.typesafe.conductr" %% "play23-conductr-bundle-lib"  % "1.6.0"`
-* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib"  % "1.6.0"`
-* `"com.typesafe.conductr" %% "play25-conductr-bundle-lib"  % "1.6.0"`
-* `"com.typesafe.conductr" %% "lagom1-java-conductr-bundle-lib"  % "1.6.0"`
-* `"com.typesafe.conductr" %% "lagom1-scala-conductr-bundle-lib"  % "1.6.0"`
+* `"com.typesafe.conductr" %  "conductr-bundle-lib"         % "1.9.0"`
+* `"com.typesafe.conductr" %  "java-conductr-bundle-lib"    % "1.9.0"`
+* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"   % "1.9.0"`
+* `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib"  % "1.9.0"`
+* `"com.typesafe.conductr" %% "akka24-conductr-bundle-lib"  % "1.9.0"`
+* `"com.typesafe.conductr" %% "play23-conductr-bundle-lib"  % "1.9.0"`
+* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib"  % "1.9.0"`
+* `"com.typesafe.conductr" %% "play25-conductr-bundle-lib"  % "1.9.0"`
+* `"com.typesafe.conductr" %% "lagom1-java-conductr-bundle-lib"  % "1.9.0"`
+* `"com.typesafe.conductr" %% "lagom1-scala-conductr-bundle-lib"  % "1.9.0"`
 
 Note that the examples here use the following import to conveniently build the JDK `URI` and `URL` types. 
 
@@ -243,12 +243,14 @@ In order for an application or service to take advantage of this guarantee provi
 
 ```scala
 import com.typesafe.conductr.bundlelib.akka.Env
+import com.typesafe.conductr.lib.akka.ConnectionContext
 
-val config = Env.asConfig
-val bundleSystem = sys.env.getOrElse("BUNDLE_SYSTEM", "MyApp1")
-val bundleSystemVersion = sys.env.getOrElse("BUNDLE_SYSTEM_VERSION", "1")
-val systemName = s"${Env.mkSystemId(bundleSystem)}-${Env.mkSystemId(bundleSystemVersion)}"
-implicit val system = ActorSystem(systemName, config.withFallback(ConfigFactory.load()))```
+...
+
+val systemName = Env.mkSystemName("MyApp1")
+val config = Env.asConfig(systemName)
+implicit val system = ActorSystem(systemName, config.withFallback(ConfigFactory.load()))
+```
 
 Clusters will then be formed correctly. The above call looks for an endpoint named `akka-remote` by default. Therefore if you must declare the Akka remoting port as seed. The following endpoint declaration within a `build.sbt` shows how:
 
@@ -297,11 +299,12 @@ Note that if you are using your own application loader then you should ensure th
 ```scala
 class MyCustomApplicationLoader extends ApplicationLoader {
   def load(context: ApplicationLoader.Context): Application = {
-    val conductRConfig = Configuration(AkkaEnv.asConfig) ++ Configuration(PlayEnv.asConfig)
+    val systemName = AkkaEnv.mkSystemName("application")
+    val conductRConfig = Configuration(AkkaEnv.asConfig(systemName)) ++ Configuration(PlayEnv.asConfig(systemName))
     val newConfig = context.initialConfiguration ++ conductRConfig
     val newContext = context.copy(initialConfiguration = newConfig)
     val prodEnv = Environment.simple(mode = Mode.Prod)
-    (new GuiceApplicationLoader(new GuiceApplicationBuilder(environment = prodEnv))).load(newContext)
+    new GuiceApplicationLoader(GuiceApplicationBuilder(environment = prodEnv)).load(newContext)
   }
 }
 ```
@@ -369,7 +372,8 @@ Note that if you are using your own application loader then you should ensure th
 ```scala
 class MyCustomApplicationLoader extends ApplicationLoader {
   def load(context: ApplicationLoader.Context): Application = {
-    val conductRConfig = Configuration(AkkaEnv.asConfig) ++ Configuration(PlayEnv.asConfig)
+    val systemName = AkkaEnv.mkSystemName("application")
+    val conductRConfig = Configuration(AkkaEnv.asConfig(systemName)) ++ Configuration(PlayEnv.asConfig(systemName))
     val newConfig = context.initialConfiguration ++ conductRConfig
     val newContext = context.copy(initialConfiguration = newConfig)
     val prodEnv = Environment.simple(mode = Mode.Prod)
@@ -408,11 +412,12 @@ import play.api.inject.guice.{ GuiceApplicationBuilder, GuiceApplicationLoader }
 
 class MyCustomApplicationLoader extends ApplicationLoader {
   def load(context: ApplicationLoader.Context): Application = {
-    val conductRConfig = Configuration(AkkaEnv.asConfig) ++ Configuration(PlayEnv.asConfig)
+    val systemName = AkkaEnv.mkSystemName("application")
+    val conductRConfig = Configuration(AkkaEnv.asConfig(systemName)) ++ Configuration(PlayEnv.asConfig(systemName))
     val newConfig = context.initialConfiguration ++ conductRConfig
     val newContext = context.copy(initialConfiguration = newConfig)
     val prodEnv = Environment.simple(mode = Mode.Prod)
-    (new GuiceApplicationLoader(new GuiceApplicationBuilder(environment = prodEnv))).load(newContext)
+    new GuiceApplicationLoader(GuiceApplicationBuilder(environment = prodEnv)).load(newContext)
   }
 }
 ```
