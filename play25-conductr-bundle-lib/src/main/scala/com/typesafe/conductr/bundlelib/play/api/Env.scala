@@ -11,17 +11,14 @@ import scala.collection.JavaConverters._
 object Env extends com.typesafe.conductr.bundlelib.scala.Env {
 
   /**
-   * Provides various Play related properties.
+   * See [[asConfig()]]
    */
   def asConfig: Config =
-    ConfigFactory.parseMap(playActorSystem.toMap.asJava)
+    asConfig(AkkaEnv.mkSystemName("application"))
 
-  private def playActorSystem: List[(String, String)] =
-    (for {
-      bundleSystem <- sys.env.get("BUNDLE_SYSTEM")
-      bundleSystemVersion <- sys.env.get("BUNDLE_SYSTEM_VERSION")
-    } yield {
-      val actorSystemName = s"${AkkaEnv.mkSystemId(bundleSystem)}-${AkkaEnv.mkSystemId(bundleSystemVersion)}"
-      "play.akka.actor-system" -> actorSystemName
-    }).toList
+  /**
+   * Provides various Play related properties.
+   */
+  def asConfig(systemName: String): Config =
+    ConfigFactory.parseMap(Map("play.akka.actor-system" -> systemName).asJava)
 }

@@ -27,7 +27,8 @@ trait ConductRApplicationComponents extends ConductRServiceLocatorComponents wit
   /**
    * The ConductR configuration.
    */
-  lazy val conductRConfiguration: Configuration = Configuration(AkkaEnv.asConfig) ++ Configuration(PlayEnv.asConfig)
+  lazy val systemName = AkkaEnv.mkSystemName("application")
+  lazy val conductRConfiguration: Configuration = Configuration(AkkaEnv.asConfig(systemName)) ++ Configuration(PlayEnv.asConfig(systemName))
 
   override def additionalConfiguration: AdditionalConfiguration = super.additionalConfiguration ++ conductRConfiguration
 }

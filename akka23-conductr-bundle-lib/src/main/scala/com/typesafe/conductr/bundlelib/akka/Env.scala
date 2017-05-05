@@ -11,6 +11,18 @@ object Env extends com.typesafe.conductr.bundlelib.scala.Env {
   private final val MultiValDelim = ':'
 
   /**
+   * Represents a valid Akka system name. This can be produced by mkSystemName.
+   */
+  type SystemName = String
+
+  /**
+   * See asConfig(systemName)
+   */
+  @deprecated("Use asConfig(systemName) so that a system name is not assumed", "1.9")
+  def asConfig: Config =
+    asConfig(mkSystemName("application"))
+
+  /**
    * Provides various Akka related properties, e.g. Akka seed nodes, given the environment that ConductR's provides.
    * If ConductR did not start this program there is no effect.
    *
@@ -22,19 +34,21 @@ object Env extends com.typesafe.conductr.bundlelib.scala.Env {
    *
    * Also in the case where ConductR did start this bundle but there is no AKKA_REMOTE_OTHER_IPS value then the current
    * node is assumed to be starting the cluster.
+   *
+   * @param systemName the system name to use - requires that mkSystemName is used
+   * @return Typesafe Config that can be merged with any existing configuration - this config
+   *         declares Akka remoting and cluster concerns.
    */
-  def asConfig: Config = {
+  def asConfig(systemName: SystemName): Config = {
     val akkaRemoteEndpointName = sys.env.getOrElse("AKKA_REMOTE_ENDPOINT_NAME", "AKKA_REMOTE")
 
-    def presentSeedNode(protocol: String, bundleSystem: String, bundleSystemVersion: String, ip: String, port: String, n: Int): (String, String) =
-      s"akka.cluster.seed-nodes.$n" -> s"akka.$protocol://$bundleSystem-$bundleSystemVersion@$ip:$port"
+    def presentSeedNode(protocol: String, systemName: String, ip: String, port: String, n: Int): (String, String) =
+      s"akka.cluster.seed-nodes.$n" -> s"akka.$protocol://$systemName@$ip:$port"
 
     val akkaSeeds = {
       val akkaSeeds =
         for {
           bundleHostIp <- sys.env.get("BUNDLE_HOST_IP").toList
-          bundleSystem <- sys.env.get("BUNDLE_SYSTEM")
-          bundleSystemVersion <- sys.env.get("BUNDLE_SYSTEM_VERSION")
           akkaRemoteProtocol <- sys.env.get(s"${akkaRemoteEndpointName}_PROTOCOL")
           akkaRemoteHostPort <- sys.env.get(s"${akkaRemoteEndpointName}_HOST_PORT")
           akkaRemoteOtherProtocolsConcat <- sys.env.get(s"${akkaRemoteEndpointName}_OTHER_PROTOCOLS")
@@ -46,10 +60,10 @@ object Env extends com.typesafe.conductr.bundlelib.scala.Env {
           val akkaRemoteOtherPorts = akkaRemoteOtherPortsConcat.split(MultiValDelim)
           val otherAkkaRemoteNodes = for {
             (((protocol, ip), port), n) <- akkaRemoteOtherProtocols.zip(akkaRemoteOtherIps).zip(akkaRemoteOtherPorts).zipWithIndex
-          } yield presentSeedNode(protocol, mkSystemId(bundleSystem), mkSystemId(bundleSystemVersion), ip, port, n)
+          } yield presentSeedNode(protocol, systemName, ip, port, n)
           otherAkkaRemoteNodes.toList
         } else
-          List(presentSeedNode(akkaRemoteProtocol, mkSystemId(bundleSystem), mkSystemId(bundleSystemVersion), bundleHostIp, akkaRemoteHostPort, 0))
+          List(presentSeedNode(akkaRemoteProtocol, systemName, bundleHostIp, akkaRemoteHostPort, 0))
       akkaSeeds.flatten
     }
     val hostname = sys.env.get("BUNDLE_HOST_IP").toList.map("akka.remote.netty.tcp.hostname" -> _)
@@ -57,6 +71,19 @@ object Env extends com.typesafe.conductr.bundlelib.scala.Env {
 
     ConfigFactory.parseMap((akkaSeeds ++ hostname ++ port).toMap.asJava)
   }
+
+  /**
+   * Form a name for the actor system. When running from ConductR, this will comprise a name that
+   * includes the system name and version.
+   *
+   * @param fallbackName the system name to fallback to when not running within ConductR.
+   * @return the constructed system name or the fallbackName when not running within ConductR.
+   */
+  def mkSystemName(fallbackName: String): SystemName =
+    sys.env.get("BUNDLE_SYSTEM") -> sys.env.get("BUNDLE_SYSTEM_VERSION") match {
+      case (Some(bundleSystem), Some(bundleSystemVersion)) => mkSystemId(s"$bundleSystem-$bundleSystemVersion")
+      case _                                               => fallbackName
+    }
 
   /**
    * take a string representing a system name and form a valid actor system name from it.

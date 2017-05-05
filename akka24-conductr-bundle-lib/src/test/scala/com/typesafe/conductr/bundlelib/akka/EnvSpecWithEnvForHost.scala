@@ -4,7 +4,8 @@ import com.typesafe.conductr.lib.AkkaUnitTest
 
 class EnvSpecWithEnvForHost extends AkkaUnitTest("EnvSpecWithEnvForHost") {
 
-  val config = Env.asConfig
+  val systemName = Env.mkSystemName("MyApp1")
+  val config = Env.asConfig(systemName)
 
   "The Env functionality in the library" should {
     "return seed properties when running with no other seed nodes" in {
