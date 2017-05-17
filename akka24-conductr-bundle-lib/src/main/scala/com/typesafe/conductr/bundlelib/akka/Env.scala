@@ -68,8 +68,10 @@ object Env extends com.typesafe.conductr.bundlelib.scala.Env {
     }
     val hostname = sys.env.get("BUNDLE_HOST_IP").toList.map("akka.remote.netty.tcp.hostname" -> _)
     val port = sys.env.get(s"${akkaRemoteEndpointName}_HOST_PORT").toList.map("akka.remote.netty.tcp.port" -> _)
+    val internalHostname = sys.env.get(s"${akkaRemoteEndpointName}_BIND_IP").toList.map("akka.remote.netty.tcp.bind-hostname" -> _)
+    val internalPort = sys.env.get(s"${akkaRemoteEndpointName}_BIND_PORT").toList.map("akka.remote.netty.tcp.bind-port" -> _)
 
-    ConfigFactory.parseMap((akkaSeeds ++ hostname ++ port).toMap.asJava)
+    ConfigFactory.parseMap((akkaSeeds ++ hostname ++ port ++ internalHostname ++ internalPort).toMap.asJava)
   }
 
   /**
