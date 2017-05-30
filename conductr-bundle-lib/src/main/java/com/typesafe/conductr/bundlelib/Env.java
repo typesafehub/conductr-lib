@@ -8,9 +8,15 @@ public class Env {
     }
 
     /**
+     * The host IP that the current bundle is executing on
+     */
+    public static final String BUNDLE_HOST_IP = System.getenv("BUNDLE_HOST_IP");
+
+    /**
      * The bundle id of the current bundle
      */
     public static final String BUNDLE_ID = System.getenv("BUNDLE_ID");
+
 
     /**
      * The bundle name of the current bundle
