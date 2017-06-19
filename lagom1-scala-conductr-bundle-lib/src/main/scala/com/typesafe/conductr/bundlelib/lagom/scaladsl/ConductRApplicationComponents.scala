@@ -40,9 +40,9 @@ trait ConductRServiceLocatorComponents extends BundlelibComponents {
   def actorSystem: ActorSystem
   def configuration: Configuration
 
-  lazy val circuitBreakerMetricsProvider: CircuitBreakerMetricsProvider = new CircuitBreakerMetricsProviderImpl(actorSystem)
-  lazy val circuitBreakerConfig: CircuitBreakerConfig = new CircuitBreakerConfig(configuration)
-  lazy val circuitBreakers: CircuitBreakers = new CircuitBreakers(actorSystem, circuitBreakerConfig, circuitBreakerMetricsProvider)
+  def circuitBreakerConfig: CircuitBreakerConfig
+  def circuitBreakers: CircuitBreakers
+  def circuitBreakerMetricsProvider: CircuitBreakerMetricsProvider
 
   lazy val serviceLocator: ServiceLocator =
     if (Env.isRunByConductR)
