@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import com.lightbend.lagom.internal.client.{ CircuitBreakerConfig, CircuitBreakerMetricsProviderImpl, CircuitBreakers }
 import com.lightbend.lagom.internal.spi.CircuitBreakerMetricsProvider
 import com.lightbend.lagom.scaladsl.api.{ AdditionalConfiguration, ProvidesAdditionalConfiguration, ServiceLocator }
-import com.lightbend.lagom.scaladsl.client.ConfigurationServiceLocator
+import com.lightbend.lagom.scaladsl.client.{ CircuitBreakerComponents, ConfigurationServiceLocator }
 import com.typesafe.conductr.bundlelib.akka.{ Env => AkkaEnv }
 import com.typesafe.conductr.bundlelib.play.api.{ BundlelibComponents, ConductRLifecycleComponents, Env => PlayEnv }
 import com.typesafe.conductr.bundlelib.scala.Env
@@ -36,7 +36,7 @@ trait ConductRApplicationComponents extends ConductRServiceLocatorComponents wit
 /**
  * Provides the ConductR service locator.
  */
-trait ConductRServiceLocatorComponents extends BundlelibComponents {
+trait ConductRServiceLocatorComponents extends BundlelibComponents with CircuitBreakerComponents {
   def actorSystem: ActorSystem
   def configuration: Configuration
 
