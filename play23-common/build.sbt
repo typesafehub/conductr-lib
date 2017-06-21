@@ -1,7 +1,7 @@
 name := "play23-conductr-lib-common"
 
 libraryDependencies ++= List(
-  Library.play23Ws
+  Library.play23Ws % "provided"
 )
 
 resolvers += Resolvers.typesafeReleases // For netty-http-pipeline

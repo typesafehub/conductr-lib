@@ -3,7 +3,9 @@ import Tests._
 name := "akka24-conductr-bundle-lib"
 
 libraryDependencies ++= List(
-  Library.akka24Cluster,
+  // Adding akka24Http here is necessary because akka24-common is adding the library as 'provided'
+  Library.akka24Http    % "provided",
+  Library.akka24Cluster % "provided",
   Library.akka24Testkit % "test",
   Library.scalaTest     % "test"
 )

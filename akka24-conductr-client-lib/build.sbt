@@ -3,6 +3,8 @@ import Tests._
 name := "akka24-conductr-client-lib"
 
 libraryDependencies ++= List(
+  // Adding akka24Http here is necessary because akka24-common is adding the library as 'provided'
+  Library.akka24Http        % "provided",
   Library.akka24Sse,
   Library.play25Json,
   Library.akka24HttpTestkit % "test",

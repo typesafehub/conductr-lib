@@ -3,6 +3,8 @@ import Tests._
 name := "play25-conductr-bundle-lib"
 
 libraryDependencies ++= List(
+  // Adding play25Ws here is necessary because play25-common is adding the library as 'provided'
+  Library.play25Ws      % "provided",
   Library.java8Compat,
   Library.akka24Testkit % "test",
   Library.play25Test    % "test",
