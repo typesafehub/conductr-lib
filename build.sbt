@@ -9,24 +9,22 @@ lazy val root = project
     scalaCommon,
     scalaConductRBundleLib,
     scalaConductRClientLib,
-    akka23Common,
-    akka23ConductRBundleLib,
-    akka23TestLib,
     akka24Common,
     akka24ConductRBundleLib,
     akka24ConductRClientLib,
     akka24TestLib,
-    play23Common,
-    play23ConductRBundleLib,
-    play23ConductRClientLib,
-    play24Common,
-    play24ConductRBundleLib,
-    play24ConductRClientLib,
+    akka25Common,
+    akka25ConductRBundleLib,
+    akka25ConductRClientLib,
+    akka25TestLib,
     play25Common,
     play25ConductRBundleLib,
     play25ConductRClientLib,
-    lagom1JavaConductRBundleLib,
-    lagom1ScalaConductRBundleLib)
+    play26Common,
+    play26ConductRBundleLib,
+    play26ConductRClientLib,
+    lagom13JavaConductRBundleLib,
+    lagom13ScalaConductRBundleLib)
   .enablePlugins(CrossPerProjectPlugin)
 
 // When executing tests the projects are running sequentially.
@@ -47,6 +45,7 @@ lazy val conductRBundleLib = project
   .dependsOn(akka24TestLib % "test->compile")
   .enablePlugins(CrossPerProjectPlugin)
 
+
 // Java
 lazy val javaCommon = project
   .in(file("java-common"))
@@ -60,6 +59,7 @@ lazy val javaConductRBundleLib = project
   .dependsOn(javaTestLib % "test->compile")
   .dependsOn(akka24TestLib % "test->compile")
   .enablePlugins(CrossPerProjectPlugin)
+
 
 // Scala
 lazy val scalaCommon = project
@@ -80,18 +80,6 @@ lazy val scalaConductRClientLib = project
   .dependsOn(akka24TestLib % "test->compile")
   .enablePlugins(CrossPerProjectPlugin)
 
-// Akka 2.3
-lazy val akka23Common = project
-  .in(file("akka23-common"))
-  .dependsOn(scalaCommon)
-  .enablePlugins(CrossPerProjectPlugin)
-
-lazy val akka23ConductRBundleLib = project
-  .in(file("akka23-conductr-bundle-lib"))
-  .dependsOn(scalaConductRBundleLib)
-  .dependsOn(akka23Common)
-  .dependsOn(akka23TestLib % "test->compile")
-  .enablePlugins(CrossPerProjectPlugin)
 
 // Akka 2.4
 lazy val akka24Common = project
@@ -113,46 +101,27 @@ lazy val akka24ConductRClientLib = project
   .dependsOn(akka24TestLib % "test->compile")
   .enablePlugins(CrossPerProjectPlugin)
 
-// Play 2.3
-lazy val play23Common = project
-  .in(file("play23-common"))
+
+// Akka 2.4
+lazy val akka25Common = project
+  .in(file("akka25-common"))
   .dependsOn(scalaCommon)
   .enablePlugins(CrossPerProjectPlugin)
 
-lazy val play23ConductRBundleLib = project
-  .in(file("play23-conductr-bundle-lib"))
-  .dependsOn(akka23ConductRBundleLib)
-  .dependsOn(play23Common)
-  .dependsOn(akka23TestLib % "test->compile")
+lazy val akka25ConductRBundleLib = project
+  .in(file("akka25-conductr-bundle-lib"))
+  .dependsOn(scalaConductRBundleLib)
+  .dependsOn(akka25Common)
+  .dependsOn(akka25TestLib % "test->compile")
   .enablePlugins(CrossPerProjectPlugin)
 
-lazy val play23ConductRClientLib = project
-  .in(file("play23-conductr-client-lib"))
+lazy val akka25ConductRClientLib = project
+  .in(file("akka25-conductr-client-lib"))
   .dependsOn(scalaConductRClientLib)
-  .dependsOn(play23Common)
-  .dependsOn(akka23TestLib % "test->compile")
+  .dependsOn(akka25Common)
+  .dependsOn(akka25TestLib % "test->compile")
   .enablePlugins(CrossPerProjectPlugin)
 
-
-// Play 2.4
-lazy val play24Common = project
-  .in(file("play24-common"))
-  .dependsOn(scalaCommon)
-  .enablePlugins(CrossPerProjectPlugin)
-
-lazy val play24ConductRBundleLib = project
-  .in(file("play24-conductr-bundle-lib"))
-  .dependsOn(akka23ConductRBundleLib)
-  .dependsOn(play24Common)
-  .dependsOn(akka23TestLib % "test->compile")
-  .enablePlugins(CrossPerProjectPlugin)
-
-lazy val play24ConductRClientLib = project
-  .in(file("play24-conductr-client-lib"))
-  .dependsOn(scalaConductRClientLib)
-  .dependsOn(play24Common)
-  .dependsOn(akka23TestLib % "test->compile")
-  .enablePlugins(CrossPerProjectPlugin)
 
 // Play 2.5
 lazy val play25Common = project
@@ -177,28 +146,54 @@ lazy val play25ConductRClientLib = project
   .dependsOn(akka24TestLib % "test->compile")
   .enablePlugins(CrossPerProjectPlugin)
 
+
+// Play 2.6
+lazy val play26Common = project
+  .in(file("play26-common"))
+  .dependsOn(javaCommon)
+  .dependsOn(scalaCommon)
+  .enablePlugins(CrossPerProjectPlugin)
+
+lazy val play26ConductRBundleLib = project
+  .in(file("play26-conductr-bundle-lib"))
+  .dependsOn(akka25ConductRBundleLib)
+  .dependsOn(play26Common)
+  .dependsOn(javaTestLib % "test->compile")
+  .dependsOn(akka25TestLib % "test->compile")
+  .enablePlugins(CrossPerProjectPlugin)
+
+lazy val play26ConductRClientLib = project
+  .in(file("play26-conductr-client-lib"))
+  .dependsOn(scalaConductRClientLib)
+  .dependsOn(play26Common)
+  .dependsOn(javaTestLib % "test->compile")
+  .dependsOn(akka25TestLib % "test->compile")
+  .enablePlugins(CrossPerProjectPlugin)
+
+
 // Lagom version 1
-lazy val lagom1JavaConductRBundleLib = project
-  .in(file("lagom1-java-conductr-bundle-lib"))
+lazy val lagom13JavaConductRBundleLib = project
+  .in(file("lagom13-java-conductr-bundle-lib"))
   .dependsOn(play25ConductRBundleLib)
   .dependsOn(javaTestLib % "test->compile")
   .dependsOn(akka24TestLib % "test->compile")
   .enablePlugins(CrossPerProjectPlugin)
 
-lazy val lagom1ScalaConductRBundleLib = project
-  .in(file("lagom1-scala-conductr-bundle-lib"))
+lazy val lagom13ScalaConductRBundleLib = project
+  .in(file("lagom13-scala-conductr-bundle-lib"))
   .dependsOn(play25ConductRBundleLib)
   .dependsOn(javaTestLib % "test->compile")
   .dependsOn(akka24TestLib % "test->compile")
   .enablePlugins(CrossPerProjectPlugin)
+
 
 // Test libraries
-lazy val akka23TestLib = project
-  .in(file("akka23-test-lib"))
-  .enablePlugins(CrossPerProjectPlugin)
-
 lazy val akka24TestLib = project
   .in(file("akka24-test-lib"))
+  .enablePlugins(CrossPerProjectPlugin)
+
+lazy val akka25TestLib = project
+  .in(file("akka25-test-lib"))
   .enablePlugins(CrossPerProjectPlugin)
 
 lazy val javaTestLib = project
