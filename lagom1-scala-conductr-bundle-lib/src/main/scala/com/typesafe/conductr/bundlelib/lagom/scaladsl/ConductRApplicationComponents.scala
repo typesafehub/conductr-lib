@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import com.lightbend.lagom.internal.client.{ CircuitBreakerConfig, CircuitBreakerMetricsProviderImpl, CircuitBreakers }
 import com.lightbend.lagom.internal.spi.CircuitBreakerMetricsProvider
 import com.lightbend.lagom.scaladsl.api.{ AdditionalConfiguration, ProvidesAdditionalConfiguration, ServiceLocator }
-import com.lightbend.lagom.scaladsl.client.{ CircuitBreakerComponents, ConfigurationServiceLocator }
+import com.lightbend.lagom.scaladsl.client.{ CircuitBreakerComponents, ConfigurationServiceLocator, LagomServiceClientComponents }
 import com.typesafe.conductr.bundlelib.akka.{ Env => AkkaEnv }
 import com.typesafe.conductr.bundlelib.play.api.{ BundlelibComponents, ConductRLifecycleComponents, Env => PlayEnv }
 import com.typesafe.conductr.bundlelib.scala.Env
@@ -36,13 +36,13 @@ trait ConductRApplicationComponents extends ConductRServiceLocatorComponents wit
 /**
  * Provides the ConductR service locator.
  */
-trait ConductRServiceLocatorComponents extends BundlelibComponents with CircuitBreakerComponents {
+trait ConductRServiceLocatorComponents extends BundlelibComponents with LagomServiceClientComponents {
   def actorSystem: ActorSystem
   def configuration: Configuration
 
-  def circuitBreakerConfig: CircuitBreakerConfig
-  def circuitBreakers: CircuitBreakers
-  def circuitBreakerMetricsProvider: CircuitBreakerMetricsProvider
+  lazy val circuitBreakerMetricsProvider: CircuitBreakerMetricsProvider = new CircuitBreakerMetricsProviderImpl(actorSystem)
+  lazy val circuitBreakerConfig: CircuitBreakerConfig = new CircuitBreakerConfig(configuration)
+  lazy val circuitBreakers: CircuitBreakers = new CircuitBreakers(actorSystem, circuitBreakerConfig, circuitBreakerMetricsProvider)
 
   lazy val serviceLocator: ServiceLocator =
     if (Env.isRunByConductR)
