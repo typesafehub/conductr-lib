@@ -11,7 +11,7 @@ import akka.stream.ActorMaterializer
 import akka.testkit.TestProbe
 import com.lightbend.lagom.internal.client.{ CircuitBreakerConfig, CircuitBreakerMetricsProviderImpl, CircuitBreakers }
 import com.lightbend.lagom.internal.spi.CircuitBreakerMetricsProvider
-import com.lightbend.lagom.scaladsl.api.Descriptor
+import com.lightbend.lagom.scaladsl.api.{ Descriptor, ServiceAcl, ServiceInfo }
 import com.typesafe.conductr.bundlelib.play.api.{ Env => PlayEnv }
 import com.typesafe.conductr.bundlelib.scala.{ URI, URL }
 import com.typesafe.conductr.lib.AkkaUnitTestWithFixture
@@ -20,6 +20,7 @@ import play.api.routing.Router
 import play.api.test.Helpers._
 import play.api.{ ApplicationLoader, BuiltInComponentsFromContext, Environment }
 
+import scala.collection.immutable
 import scala.concurrent.Await
 import scala.util.{ Failure, Success }
 
@@ -38,6 +39,8 @@ class ConductRServiceLocatorSpecWithEnv extends AkkaUnitTestWithFixture("Conduct
       override lazy val circuitBreakerMetricsProvider: CircuitBreakerMetricsProvider = new CircuitBreakerMetricsProviderImpl(actorSystem)
       override lazy val circuitBreakerConfig: CircuitBreakerConfig = new CircuitBreakerConfig(configuration)
       override lazy val circuitBreakers: CircuitBreakers = new CircuitBreakers(actorSystem, circuitBreakerConfig, circuitBreakerMetricsProvider)
+
+      override lazy val serviceInfo: ServiceInfo = ServiceInfo("conductr-service.-est", Map.empty[String, immutable.Seq[ServiceAcl]])
     }
   }
 
