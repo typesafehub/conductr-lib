@@ -8,16 +8,16 @@ This project provides a number of libraries to facilitate [ConductR](http://type
 
 Add one of the following libraries to your project.
 
-* `"com.typesafe.conductr" %  "conductr-bundle-lib"         % "1.9.4"`
-* `"com.typesafe.conductr" %  "java-conductr-bundle-lib"    % "1.9.4"`
-* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"   % "1.9.4"`
-* `"com.typesafe.conductr" %% "akka23-conductr-bundle-lib"  % "1.9.4"`
-* `"com.typesafe.conductr" %% "akka24-conductr-bundle-lib"  % "1.9.4"`
-* `"com.typesafe.conductr" %% "play23-conductr-bundle-lib"  % "1.9.4"`
-* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib"  % "1.9.4"`
-* `"com.typesafe.conductr" %% "play25-conductr-bundle-lib"  % "1.9.4"`
-* `"com.typesafe.conductr" %% "lagom1-java-conductr-bundle-lib"  % "1.9.4"`
-* `"com.typesafe.conductr" %% "lagom1-scala-conductr-bundle-lib"  % "1.9.4"`
+* `"com.typesafe.conductr" %  "conductr-bundle-lib"         % "2.0.0"`
+* `"com.typesafe.conductr" %  "java-conductr-bundle-lib"    % "2.0.0"`
+* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"   % "2.0.0"`
+* `"com.typesafe.conductr" %% "akka24-conductr-bundle-lib"  % "2.0.0"`
+* `"com.typesafe.conductr" %% "akka25-conductr-bundle-lib"  % "2.0.0"`
+* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib"  % "2.0.0"`
+* `"com.typesafe.conductr" %% "play25-conductr-bundle-lib"  % "2.0.0"`
+* `"com.typesafe.conductr" %% "play26-conductr-bundle-lib"  % "2.0.0"`
+* `"com.typesafe.conductr" %% "lagom13-java-conductr-bundle-lib"  % "2.0.0"`
+* `"com.typesafe.conductr" %% "lagom13-scala-conductr-bundle-lib"  % "2.0.0"`
 
 Note that the examples here use the following import to conveniently build the JDK `URI` and `URL` types. 
 
@@ -29,11 +29,10 @@ import com.typesafe.conductr.bundlelib.scala.{URL, URI}
 
 * [conductr-bundle-lib](#conductr-bundle-lib)
 * [scala-conductr-bundle-lib](#scala-conductr-bundle-lib)
-* [akka[23|24]-conductr-bundle-lib](#akka2324-conductr-bundle-lib)
-* [play[23|24]-conductr-bundle-lib](#play2324-conductr-bundle-lib)
+* [akka[24|25]-conductr-bundle-lib](#akka2425-conductr-bundle-lib)
 * [play25-conductr-bundle-lib](#play25-conductr-bundle-lib)
-* [lagom1-java-conductr-bundle-lib](#lagom1-java-conductr-bundle-lib)
-* [lagom1-scala-conductr-bundle-lib](#lagom1-scala-conductr-bundle-lib)
+* [lagom13-java-conductr-bundle-lib](#lagom13-java-conductr-bundle-lib)
+* [lagom13-scala-conductr-bundle-lib](#lagom13-scala-conductr-bundle-lib)
 
 ## conductr-bundle-lib
 
@@ -155,7 +154,7 @@ In general, the return value of `signalStartedOrExit` is not used and your progr
 
 In case you are interested, the function returns a `Future[Option[Unit]]` where a future `Some(())` indicates that ConductR has successfully acknowledged the startup signal. A future of `None` indicates that the bundle has not been started by ConductR.
 
-## akka[23|24]-conductr-bundle-lib
+## akka[24|25]-conductr-bundle-lib
 
 This library provides a reactive API using [Akka Http](http://akka.io/docs/) and should be used when you are using Akka. The library depends on `scala-conductr-bundle-lib` and can be used for both Java and Scala.
 
@@ -260,9 +259,9 @@ BundleKeys.endpoints := Map("akka-remote" -> Endpoint("tcp"))
 
 In the above, no declaration of `services` is required as akka remoting is an internal, cluster-wide TCP service.
 
-## play25-conductr-bundle-lib
+## play[25|26]-conductr-bundle-lib
 
-> If you are using Play 2.5 then this section is for you. Otherwise jump below to the "play[23|24]-conductr-bundle-lib" section.
+> If you are using Play 2.5 or 2.6 then this section is for you.
 
 [sbt-conductr](https://github.com/typesafehub/sbt-conductr) is automatically adding this library to your Play project.
 
@@ -309,94 +308,7 @@ class MyCustomApplicationLoader extends ApplicationLoader {
 }
 ```
 
-## play[23|24]-conductr-bundle-lib
-
-Please select the Play 2.3 or 2.4 variant depending on whether you are using Play 2.3 or Play 2.4 respectively.
-
-[sbt-conductr](https://github.com/typesafehub/sbt-conductr) is automatically adding this library to your Play project.
-
-This library provides a reactive API using [Play WS](https://www.playframework.com/documentation/2.3.x/ScalaWS) and should be used when you are using Play. The library depends on `akka23-conductr-bundle-lib` and can be used for both Java and Scala.
-
-As with `conductr-bundle-lib` there are two services:
-
-* `com.typesafe.conductr.bundlelib.play.LocationService`
-* `com.typesafe.conductr.bundlelib.play.StatusService`
-
-and there is also another:
-
-* `com.typesafe.conductr.bundlelib.play.Env`
-
-Please read the section on `conductr-bundle-lib` and then `scala-conductr-bundle-lib` for an introduction to these services. The `Env` one is discussed in the section below. Other than the `import`s for the types, the only difference in terms of API are usage is how a `ConnectionContext` is established. A `ConnectionContext` for Play requires an `ExecutionContext` at a minimum. For convenience, we provide a default ConnectionContext using the default execution context. This may be imported e.g. (note use com.typesafe.lib.play for 1.2 of this library onwards):
-
-```scala
-  import com.typesafe.conductr.bundlelib.play.ConnectionContext.Implicits.defaultContext
-```
-
-There is also a lower level method where the `ExecutionContext` is passed in:
-
-```scala
-implicit val cc = ConnectionContext(executionContext)
-```
-
-### Java
-
-The following example illustrates how status is signalled using the Play Java API:
-
-```java
-ConnectionContext cc =
-    ConnectionContext.create(HttpExecution.defaultContext());
-
-  ...
-
-StatusService.getInstance().signalStartedOrExitWithContext(cc);
-```
-
-Similarly here is a service lookup:
-
-```java
-ConnectionContext cc =
-    ConnectionContext.create(HttpExecution.defaultContext());
-
-  ...
-
-LocationService.getInstance().lookupWithContext("whatever", new URI("tcp://localhost:1234"), cache, cc)
-```
-
-In order for an application or service to take advantage of setting important Play related properties, the following is required in order to associate ConductR configuration with that of Play and Akka:
-
-
-#### Play 2.4
-
-Note that if you are using your own application loader then you should ensure that the Akka and Play ConductR-related properties are loaded. Here's a complete implementation:
-
-```scala
-class MyCustomApplicationLoader extends ApplicationLoader {
-  def load(context: ApplicationLoader.Context): Application = {
-    val systemName = AkkaEnv.mkSystemName("application")
-    val conductRConfig = Configuration(AkkaEnv.asConfig(systemName)) ++ Configuration(PlayEnv.asConfig(systemName))
-    val newConfig = context.initialConfiguration ++ conductRConfig
-    val newContext = context.copy(initialConfiguration = newConfig)
-    val prodEnv = Environment.simple(mode = Mode.Prod)
-    (new GuiceApplicationLoader(new GuiceApplicationBuilder(environment = prodEnv))).load(newContext)
-  }
-}
-```
-
-#### Play 2.3
-
-```scala
-import play.api._
-import com.typesafe.conductr.bundlelib.play.Env
-
-object Global extends GlobalSettings {
-  val totalConfiguration = super.configuration ++ Configuration(Env.asConfig)
-
-  override def configuration: Configuration =
-    totalConfiguration
-}
-```
-
-## lagom1-java-conductr-bundle-lib
+## lagom13-java-conductr-bundle-lib
 
 > If you are using Lagom 1.x with Java, then this section is for you.
 
@@ -422,7 +334,7 @@ class MyCustomApplicationLoader extends ApplicationLoader {
 }
 ```
 
-## lagom1-scala-conductr-bundle-lib
+## lagom13-scala-conductr-bundle-lib
 
 > If you are using Lagom 1.x with Scala, then this section is for you.
 
