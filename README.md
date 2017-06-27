@@ -13,7 +13,6 @@ Add one of the following libraries to your project.
 * `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"   % "2.0.0"`
 * `"com.typesafe.conductr" %% "akka24-conductr-bundle-lib"  % "2.0.0"`
 * `"com.typesafe.conductr" %% "akka25-conductr-bundle-lib"  % "2.0.0"`
-* `"com.typesafe.conductr" %% "play24-conductr-bundle-lib"  % "2.0.0"`
 * `"com.typesafe.conductr" %% "play25-conductr-bundle-lib"  % "2.0.0"`
 * `"com.typesafe.conductr" %% "play26-conductr-bundle-lib"  % "2.0.0"`
 * `"com.typesafe.conductr" %% "lagom13-java-conductr-bundle-lib"  % "2.0.0"`
@@ -30,7 +29,7 @@ import com.typesafe.conductr.bundlelib.scala.{URL, URI}
 * [conductr-bundle-lib](#conductr-bundle-lib)
 * [scala-conductr-bundle-lib](#scala-conductr-bundle-lib)
 * [akka[24|25]-conductr-bundle-lib](#akka2425-conductr-bundle-lib)
-* [play25-conductr-bundle-lib](#play25-conductr-bundle-lib)
+* [play[25|26]-conductr-bundle-lib](#play2526-conductr-bundle-lib)
 * [lagom13-java-conductr-bundle-lib](#lagom13-java-conductr-bundle-lib)
 * [lagom13-scala-conductr-bundle-lib](#lagom13-scala-conductr-bundle-lib)
 
