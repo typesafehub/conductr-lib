@@ -5,7 +5,7 @@ import java.net.HttpURLConnection
 import com.typesafe.conductr.lib.HttpPayload
 import scala.concurrent._
 import scala.util.{ Failure, Success, Try }
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 object ConnectionContext {
   def apply(executionContext: ExecutionContext): ConnectionContext =
@@ -52,7 +52,7 @@ class ConnectionHandler extends AbstractConnectionHandler {
             connection.setRequestMethod(p.getRequestMethod)
             connection.setInstanceFollowRedirects(p.getFollowRedirects)
             connection.setRequestProperty("User-Agent", UserAgent)
-            p.getRequestHeaders.foreach { v =>
+            p.getRequestHeaders.asScala.foreach { v =>
               val (header, headerValue) = v
               connection.setRequestProperty(header, headerValue)
             }

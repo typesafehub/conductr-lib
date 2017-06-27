@@ -22,7 +22,7 @@ object Build extends AutoPlugin {
       // Core settings
       organization := "com.typesafe.conductr",
       scalaVersion := Version.scala,
-      crossScalaVersions := List(scalaVersion.value, "2.12.1"),
+      crossScalaVersions := List(scalaVersion.value, "2.12.2"),
       scalacOptions ++= List(
         "-unchecked",
         "-deprecation",
@@ -40,9 +40,7 @@ object Build extends AutoPlugin {
       // Scalariform settings
       ScalariformKeys.preferences := ScalariformKeys.preferences.value
         .setPreference(AlignSingleLineCaseStatements, true)
-        .setPreference(AlignSingleLineCaseStatements.MaxArrowIndent, 100)
-        .setPreference(DoubleIndentClassDeclaration, true)
-        .setPreference(PreserveDanglingCloseParenthesis, true),
+        .setPreference(AlignSingleLineCaseStatements.MaxArrowIndent, 100),
       // Release settings
       releasePublishArtifactsAction := publishSigned.value,
       releaseCrossBuild := false,

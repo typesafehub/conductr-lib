@@ -1,7 +1,7 @@
 package com.typesafe.conductr.lib
 
 import _root_.java.net.URL
-import _root_.scala.collection.JavaConversions._
+import _root_.scala.collection.JavaConverters._
 
 class HttpPayloadSpec extends UnitTest {
   "An HttpPayload" should {
@@ -10,11 +10,11 @@ class HttpPayloadSpec extends UnitTest {
       val method = "GET"
       val redirects = true
       val headers = Map("Accept" -> "multipart/form-data")
-      val payload = new HttpPayload(url, method, redirects, headers)
+      val payload = new HttpPayload(url, method, redirects, headers.asJava)
       payload.getFollowRedirects shouldBe redirects
       payload.getRequestMethod shouldBe method
       payload.getUrl shouldBe url
-      payload.getRequestHeaders.toMap shouldBe headers
+      payload.getRequestHeaders.asScala shouldBe headers
     }
   }
 }
