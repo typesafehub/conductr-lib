@@ -1,6 +1,6 @@
 import Tests._
 
-name := "lagom13-scala-conductr-bundle-lib"
+name := "lagom14-scala-conductr-bundle-lib"
 
 libraryDependencies ++= List(
   Library.lagom14ClientScaladsl,
