@@ -18,7 +18,7 @@ Add one of the following libraries to your project.
 * `"com.typesafe.conductr" %% "lagom13-java-conductr-bundle-lib"  % "2.0.0"`
 * `"com.typesafe.conductr" %% "lagom13-scala-conductr-bundle-lib"  % "2.0.0"`
 
-Note that the examples here use the following import to conveniently build the JDK `URI` and `URL` types. 
+Note that the examples here use the following import to conveniently build the JDK `URI` and `URL` types.
 
 ```scala
 import com.typesafe.conductr.bundlelib.scala.{URL, URI}
@@ -352,13 +352,11 @@ class HelloApplicationLoader extends LagomApplicationLoader {
   override def loadDevMode(context: LagomApplicationContext) =
     new HelloApplication(context) with LagomDevModeComponents
 
-  override def describeServices = List(
-    readDescriptor[HelloService]
-  )
+  override def describeService = Some(readDescriptor[HelloService])
 }
 ```
 
-Once you have added this to each of your services, you should be ready to run in ConductR. Also note that it’s very important to implement the `describeServices` method on `LagomApplicationLoader`, as this will ensure that the ConductR sbt tooling is able to correctly discover the Lagom service APIs offered by each service.
+Once you have added this to each of your services, you should be ready to run in ConductR. Also note that it’s very important to implement the `describeService` method on `LagomApplicationLoader`, as this will ensure that the ConductR sbt tooling is able to correctly discover the Lagom service APIs offered by each service. If using a version of Lagom earlier than 1.3.6, you should implement `describeServices` (which returns `immutable.Seq[Descriptor]`) instead of `describeService`, however returning more than one service descriptor from `describeServices` is not supported by ConductR.
 
 # For Developers
 
