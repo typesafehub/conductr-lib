@@ -5,9 +5,8 @@ import java.util.Optional
 import java.util.concurrent.CompletionStage
 import javax.inject.Inject
 
-import com.lightbend.lagom.internal.client.CircuitBreakers
 import com.lightbend.lagom.javadsl.api.Descriptor
-import com.lightbend.lagom.javadsl.client.CircuitBreakingServiceLocator
+import com.lightbend.lagom.javadsl.client.{ CircuitBreakersPanel, CircuitBreakingServiceLocator }
 import com.typesafe.conductr.bundlelib.play.api.LocationService
 import com.typesafe.conductr.bundlelib.scala.{ CacheLike, URI }
 
@@ -19,7 +18,7 @@ import scala.language.reflectiveCalls
 /**
  * ConductRServiceLocator implements Lagom's ServiceLocator by using the ConductR Service Locator.
  */
-class ConductRServiceLocator @Inject() (locationService: LocationService, cache: CacheLike, circuitBreakers: CircuitBreakers) extends CircuitBreakingServiceLocator(circuitBreakers) {
+class ConductRServiceLocator @Inject() (locationService: LocationService, cache: CacheLike, circuitBreakers: CircuitBreakersPanel) extends CircuitBreakingServiceLocator(circuitBreakers) {
 
   import locationService.cc.executionContext
 

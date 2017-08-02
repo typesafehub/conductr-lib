@@ -2,7 +2,8 @@ package com.typesafe.conductr.bundlelib.lagom.javadsl
 
 import javax.inject.Singleton
 
-import com.lightbend.lagom.javadsl.api.{ ConfigurationServiceLocator, ServiceLocator }
+import com.lightbend.lagom.javadsl.api.ServiceLocator
+import com.lightbend.lagom.javadsl.client.ConfigurationServiceLocator
 import com.typesafe.conductr.bundlelib.scala.Env
 import play.api.inject.{ Binding, Module }
 import play.api.{ Configuration, Environment, Mode }

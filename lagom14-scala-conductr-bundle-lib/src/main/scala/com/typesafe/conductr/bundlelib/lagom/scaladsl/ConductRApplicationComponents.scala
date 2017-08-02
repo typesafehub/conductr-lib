@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import com.lightbend.lagom.internal.client.{ CircuitBreakerConfig, CircuitBreakerMetricsProviderImpl, CircuitBreakers }
 import com.lightbend.lagom.internal.spi.CircuitBreakerMetricsProvider
 import com.lightbend.lagom.scaladsl.api.{ AdditionalConfiguration, ProvidesAdditionalConfiguration, ServiceLocator }
-import com.lightbend.lagom.scaladsl.client.{ CircuitBreakerComponents, ConfigurationServiceLocator, LagomServiceClientComponents }
+import com.lightbend.lagom.scaladsl.client.{ CircuitBreakerComponents, CircuitBreakersPanel, ConfigurationServiceLocator, LagomServiceClientComponents }
 import com.typesafe.conductr.bundlelib.akka.{ Env => AkkaEnv }
 import com.typesafe.conductr.bundlelib.play.api.{ BundlelibComponents, ConductRLifecycleComponents, Env => PlayEnv }
 import com.typesafe.conductr.bundlelib.scala.Env
@@ -36,18 +36,16 @@ trait ConductRApplicationComponents extends ConductRServiceLocatorComponents wit
 /**
  * Provides the ConductR service locator.
  */
-trait ConductRServiceLocatorComponents extends BundlelibComponents with LagomServiceClientComponents {
+trait ConductRServiceLocatorComponents extends BundlelibComponents with LagomServiceClientComponents with CircuitBreakerComponents {
   def actorSystem: ActorSystem
   def configuration: Configuration
 
   override lazy val circuitBreakerMetricsProvider: CircuitBreakerMetricsProvider = new CircuitBreakerMetricsProviderImpl(actorSystem)
-  lazy val circuitBreakerConfig: CircuitBreakerConfig = new CircuitBreakerConfig(configuration)
-  lazy val circuitBreakers: CircuitBreakers = new CircuitBreakers(actorSystem, circuitBreakerConfig, circuitBreakerMetricsProvider)
 
   lazy val serviceLocator: ServiceLocator =
     if (Env.isRunByConductR)
-      new ConductRServiceLocator(conductRLocationSevice, conductRCacheLike, circuitBreakers)(executionContext)
+      new ConductRServiceLocator(conductRLocationSevice, conductRCacheLike, circuitBreakersPanel)(executionContext)
     else
-      new ConfigurationServiceLocator(configuration, circuitBreakers)(executionContext)
+      new ConfigurationServiceLocator(config, circuitBreakersPanel)(executionContext)
 }
 

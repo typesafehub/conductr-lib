@@ -16,7 +16,7 @@ object Version {
   val play26             = "2.6.0"
   // This should stay at 1.3.x for lagom1 - it is the lowest version we support - let the user bring in later versions
   val lagom13            = "1.3.5"
-  val lagom14            = "1.4.0-M1"
+  val lagom14            = "1.4.0-a3768955"
   val reactiveStreams    = "1.0.0"
   val typesafeConfig     = "1.3.0"
   val scala              = "2.11.8"
