@@ -3,7 +3,7 @@ import Tests._
 name := "lagom13-java-conductr-bundle-lib"
 
 libraryDependencies ++= List(
-  Library.lagom1ClientJavadsl,
+  Library.lagom13ClientJavadsl,
   Library.akka24Testkit % "test",
   Library.play25Test    % "test",
   Library.scalaTest     % "test"

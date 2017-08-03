@@ -1,16 +1,14 @@
 import Tests._
 
-name := "lagom13-scala-conductr-bundle-lib"
+name := "lagom14-scala-conductr-bundle-lib"
 
 libraryDependencies ++= List(
-  Library.lagom13ClientScaladsl,
-  Library.lagom13ServerScaladsl % "test",
-  Library.akka24Testkit         % "test",
-  Library.play25Test            % "test",
-  Library.scalaTest             % "test"
+  Library.lagom14ClientScaladsl,
+  Library.lagom14ServerScaladsl % "test",
+  Library.akka25Testkit        % "test",
+  Library.play26Test           % "test",
+  Library.scalaTest            % "test"
 )
-
-crossScalaVersions := crossScalaVersions.value.filterNot(_.startsWith("2.12"))
 
 fork in Test := true
 
