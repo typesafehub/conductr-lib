@@ -17,7 +17,14 @@ class ConductRApplicationLoader extends ApplicationLoader {
     val systemName = AkkaEnv.mkSystemName("application")
     val conductRConfig = Configuration(AkkaEnv.asConfig(systemName)) ++ Configuration(PlayEnv.asConfig(systemName))
     val newConfig = context.initialConfiguration ++ conductRConfig
-    val newContext = context.copy(initialConfiguration = newConfig)
+    val newContext =
+      ApplicationLoader.Context(
+        environment = context.environment,
+        sourceMapper = context.sourceMapper,
+        webCommands = context.webCommands,
+        initialConfiguration = newConfig,
+        lifecycle = context.lifecycle
+      ) // Avoid copy to work-around bin incompatibility for Play: https://github.com/typesafehub/conductr-lib/issues/157
     val prodEnv = Environment.simple(mode = Mode.Prod)
     new GuiceApplicationLoader(GuiceApplicationBuilder(environment = prodEnv)).load(newContext)
   }
