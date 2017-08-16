@@ -8,15 +8,15 @@ This project provides a number of libraries to facilitate [ConductR](http://type
 
 Add one of the following libraries to your project.
 
-* `"com.typesafe.conductr" %  "conductr-bundle-lib"         % "2.0.0"`
-* `"com.typesafe.conductr" %  "java-conductr-bundle-lib"    % "2.0.0"`
-* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"   % "2.0.0"`
-* `"com.typesafe.conductr" %% "akka24-conductr-bundle-lib"  % "2.0.0"`
-* `"com.typesafe.conductr" %% "akka25-conductr-bundle-lib"  % "2.0.0"`
-* `"com.typesafe.conductr" %% "play25-conductr-bundle-lib"  % "2.0.0"`
-* `"com.typesafe.conductr" %% "play26-conductr-bundle-lib"  % "2.0.0"`
-* `"com.typesafe.conductr" %% "lagom13-java-conductr-bundle-lib"  % "2.0.0"`
-* `"com.typesafe.conductr" %% "lagom13-scala-conductr-bundle-lib"  % "2.0.0"`
+* `"com.typesafe.conductr" %  "conductr-bundle-lib"         % "2.0.1"`
+* `"com.typesafe.conductr" %  "java-conductr-bundle-lib"    % "2.0.1"`
+* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"   % "2.0.1"`
+* `"com.typesafe.conductr" %% "akka24-conductr-bundle-lib"  % "2.0.1"`
+* `"com.typesafe.conductr" %% "akka25-conductr-bundle-lib"  % "2.0.1"`
+* `"com.typesafe.conductr" %% "play25-conductr-bundle-lib"  % "2.0.1"`
+* `"com.typesafe.conductr" %% "play26-conductr-bundle-lib"  % "2.0.1"`
+* `"com.typesafe.conductr" %% "lagom13-java-conductr-bundle-lib"  % "2.0.1"`
+* `"com.typesafe.conductr" %% "lagom13-scala-conductr-bundle-lib"  % "2.0.1"`
 
 Note that the examples here use the following import to conveniently build the JDK `URI` and `URL` types.
 
@@ -364,7 +364,7 @@ Once you have added this to each of your services, you should be ready to run in
 
 You'll need permissions to release to the typesafe.com organization at Sonatype. You will also require a PGP key.
 
-This projects uses `sbt-release`. To release use the `release` command. This will cross publish releases for Scala. Note that you will see messages like this:
+This projects uses `sbt-release`. To release use the `release` command (no `+` required as a prefix). This will cross publish releases for Scala. Note that you will see messages like this:
 
 ```
 [trace] Stack trace suppressed: run last conductRBundleLib/*:publish for the full output.
@@ -375,4 +375,4 @@ This projects uses `sbt-release`. To release use the `release` command. This wil
 
 This is because the same Java libraries are used for multiple Scala versions. Do not be concerned, the publishing tool is actually just warning you i.e. they are not errors.
 
-Once released you need to close the Sonatype repository. While you can do that from within sbt, you should visit the staging repository on Sonatype and verify that the packages that you expect to see there are indeed there.
+Everything is released to Maven Central via the Sonatype repository, including automated staging to release.
