@@ -331,7 +331,7 @@ class ControlClient(handler: ConnectionHandler, conductrAddress: URL, apiVersion
             .map(_ => v)
             .recoverWith {
               case BundlesConnector.TimeoutException =>
-                Future.failed(BundleRequestTimedOut(s"Timed out waiting for bundle [$bundleIdActual] to be installed"))
+                Future.failed(BundleRequestTimedOut(s"Timed out waiting for bundle [$bundleIdActual] to be installed in $completeTimeout"))
             }
         } yield result
 
@@ -397,7 +397,7 @@ class ControlClient(handler: ConnectionHandler, conductrAddress: URL, apiVersion
             .map(_ => v)
             .recoverWith {
               case BundlesConnector.TimeoutException =>
-                val errorMessage = s"Timed out waiting for bundle [$bundleIdActual] to be scaled to ${scale.getOrElse(1)} instance"
+                val errorMessage = s"Timed out waiting for bundle [$bundleIdActual] to be scaled to ${scale.getOrElse(1)} instance in $completeTimeout"
                 Future.failed(BundleRequestTimedOut(errorMessage))
             }
         } yield result
