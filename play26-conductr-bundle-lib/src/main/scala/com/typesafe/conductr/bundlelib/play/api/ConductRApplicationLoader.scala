@@ -17,16 +17,22 @@ class ConductRApplicationLoader extends ApplicationLoader {
     val systemName = AkkaEnv.mkSystemName("application")
     val conductRConfig = Configuration(AkkaEnv.asConfig(systemName)) ++ Configuration(PlayEnv.asConfig(systemName))
     val newConfig = context.initialConfiguration ++ conductRConfig
-    val newContext =
-      ApplicationLoader.Context(
-        environment = context.environment,
-        sourceMapper = context.sourceMapper,
-        webCommands = context.webCommands,
-        initialConfiguration = newConfig,
-        lifecycle = context.lifecycle
-      ) // Avoid copy to work-around bin incompatibility for Play: https://github.com/typesafehub/conductr-lib/issues/157
     val prodEnv = Environment.simple(mode = Mode.Prod)
-    new GuiceApplicationLoader(GuiceApplicationBuilder(environment = prodEnv)).load(newContext)
+    // The logic below is the default GuiceApplicationLoader behavior, but
+    // with a patched environment and config. We can't use the default
+    // GuiceApplicationLoader because there are binary incompatibilities
+    // between Play 2.6.0 and 2.6.1. These incompatibilities make it difficult
+    // to work directly with some methods of Application.Context. If we use
+    // a GuiceApplicationBuilder then we can avoid using those methods on
+    // the ApplicationLoader.Context.
+    //
+    // See: https://github.com/typesafehub/conductr-lib/issues/157
+    GuiceApplicationBuilder(environment = prodEnv)
+      .disableCircularProxies()
+      .in(context.environment)
+      .loadConfig(newConfig)
+      .overrides(GuiceApplicationLoader.defaultOverrides(context): _*)
+      .build()
   }
 }
 
