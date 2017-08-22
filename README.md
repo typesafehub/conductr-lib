@@ -8,15 +8,14 @@ This project provides a number of libraries to facilitate [ConductR](http://type
 
 Add one of the following libraries to your project.
 
-* `"com.typesafe.conductr" %  "conductr-bundle-lib"         % "2.0.1"`
-* `"com.typesafe.conductr" %  "java-conductr-bundle-lib"    % "2.0.1"`
-* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"   % "2.0.1"`
-* `"com.typesafe.conductr" %% "akka24-conductr-bundle-lib"  % "2.0.1"`
-* `"com.typesafe.conductr" %% "akka25-conductr-bundle-lib"  % "2.0.1"`
-* `"com.typesafe.conductr" %% "play25-conductr-bundle-lib"  % "2.0.1"`
-* `"com.typesafe.conductr" %% "play26-conductr-bundle-lib"  % "2.0.1"`
-* `"com.typesafe.conductr" %% "lagom13-java-conductr-bundle-lib"  % "2.0.1"`
-* `"com.typesafe.conductr" %% "lagom13-scala-conductr-bundle-lib"  % "2.0.1"`
+* `"com.typesafe.conductr" %  "java-conductr-bundle-lib"    % "2.0.2"`
+* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"   % "2.0.2"`
+* `"com.typesafe.conductr" %% "akka24-conductr-bundle-lib"  % "2.0.2"`
+* `"com.typesafe.conductr" %% "akka25-conductr-bundle-lib"  % "2.0.2"`
+* `"com.typesafe.conductr" %% "play25-conductr-bundle-lib"  % "2.0.2"`
+* `"com.typesafe.conductr" %% "play26-conductr-bundle-lib"  % "2.0.2"`
+* `"com.typesafe.conductr" %% "lagom13-java-conductr-bundle-lib"  % "2.0.2"`
+* `"com.typesafe.conductr" %% "lagom13-scala-conductr-bundle-lib"  % "2.0.2"`
 
 Note that the examples here use the following import to conveniently build the JDK `URI` and `URL` types.
 
