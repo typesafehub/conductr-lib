@@ -13,7 +13,7 @@ This is the process for committing code into master. There are of course excepti
     1. There is a ticket for your work in the project's issue tracker. If not, create it first.
     2. The ticket has been scheduled for the current milestone.
     3. The ticket is estimated by the team.
-    4. The ticket have been discussed and prioritized by the team.
+    4. The ticket has been discussed and prioritized by the team.
 3. You should always perform your work in a Git feature branch. The branch should be given a descriptive name that explains its intent. Some teams also like adding the ticket number and/or the [GitHub](http://github.com) user ID to the branch name, these details is up to each of the individual teams.
 4. When the feature or fix is completed you should open a [Pull Request](https://help.github.com/articles/using-pull-requests) on GitHub.
 5. The Pull Request should be reviewed by other maintainers (as many as feasible/practical). Note that the maintainers can consist of outside contributors, both within and outside Typesafe. Outside contributors (for example from EPFL or independent committers) are encouraged to participate in the review process, it is not a closed process.
