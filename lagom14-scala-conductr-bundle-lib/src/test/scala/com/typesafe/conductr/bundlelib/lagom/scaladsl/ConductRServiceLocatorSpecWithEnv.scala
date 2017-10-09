@@ -9,9 +9,10 @@ import akka.http.scaladsl.model.{ HttpEntity, HttpResponse, StatusCodes }
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.testkit.TestProbe
-import com.lightbend.lagom.internal.client.{ CircuitBreakerConfig, CircuitBreakerMetricsProviderImpl, CircuitBreakers }
+import com.lightbend.lagom.internal.client.CircuitBreakerMetricsProviderImpl
 import com.lightbend.lagom.internal.spi.CircuitBreakerMetricsProvider
 import com.lightbend.lagom.scaladsl.api.{ Descriptor, Service, ServiceAcl, ServiceInfo }
+import com.lightbend.lagom.scaladsl.client.CircuitBreakerComponents
 import com.lightbend.lagom.scaladsl.server.{ LagomApplication, LagomApplicationContext }
 import com.typesafe.conductr.bundlelib.play.api.{ Env => PlayEnv }
 import com.typesafe.conductr.bundlelib.scala.{ URI, URL }
@@ -39,16 +40,13 @@ class ConductRServiceLocatorSpecWithEnv extends AkkaUnitTestWithFixture("Conduct
     implicit val system = f.system
     implicit val timeout = f.timeout
     implicit val mat = ActorMaterializer.create(system)
-    implicit val ec = play.api.libs.concurrent.Execution.defaultContext
-    val app = new LagomApplication(LagomApplicationContext.Test) with AhcWSComponents with ConductRServiceLocatorComponents {
+    val app = new LagomApplication(LagomApplicationContext.Test) with AhcWSComponents with ConductRServiceLocatorComponents with CircuitBreakerComponents {
       override lazy val lagomServer = serverFor[ConductRServiceLocatorSpecWithEnv.DummyService](new ConductRServiceLocatorSpecWithEnv.DummyService())
       override lazy val actorSystem = system
       override lazy val materializer = mat
       override lazy val executionContext = actorSystem.dispatcher
       override lazy val router = Router.empty
       override lazy val circuitBreakerMetricsProvider: CircuitBreakerMetricsProvider = new CircuitBreakerMetricsProviderImpl(actorSystem)
-      override lazy val circuitBreakerConfig: CircuitBreakerConfig = new CircuitBreakerConfig(configuration)
-      override lazy val circuitBreakers: CircuitBreakers = new CircuitBreakers(actorSystem, circuitBreakerConfig, circuitBreakerMetricsProvider)
       override lazy val serviceInfo: ServiceInfo = ServiceInfo("conductr-service.-est", Map.empty[String, immutable.Seq[ServiceAcl]])
     }
   }
