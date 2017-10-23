@@ -24,7 +24,9 @@ lazy val root = project
     play26ConductRBundleLib,
     play26ConductRClientLib,
     lagom13JavaConductRBundleLib,
-    lagom13ScalaConductRBundleLib)
+    lagom13ScalaConductRBundleLib,
+    lagom14JavaConductRBundleLib,
+    lagom14ScalaConductRBundleLib)
   .enablePlugins(CrossPerProjectPlugin)
 
 // When executing tests the projects are running sequentially.
@@ -171,7 +173,7 @@ lazy val play26ConductRClientLib = project
   .enablePlugins(CrossPerProjectPlugin)
 
 
-// Lagom version 1
+// Lagom version 1.3
 lazy val lagom13JavaConductRBundleLib = project
   .in(file("lagom13-java-conductr-bundle-lib"))
   .dependsOn(play25ConductRBundleLib)
@@ -186,6 +188,20 @@ lazy val lagom13ScalaConductRBundleLib = project
   .dependsOn(akka24TestLib % "test->compile")
   .enablePlugins(CrossPerProjectPlugin)
 
+// Lagom version 1.4
+lazy val lagom14JavaConductRBundleLib = project
+  .in(file("lagom14-java-conductr-bundle-lib"))
+  .dependsOn(play26ConductRBundleLib)
+  .dependsOn(javaTestLib % "test->compile")
+  .dependsOn(akka25TestLib % "test->compile")
+  .enablePlugins(CrossPerProjectPlugin)
+
+lazy val lagom14ScalaConductRBundleLib = project
+  .in(file("lagom14-scala-conductr-bundle-lib"))
+  .dependsOn(play26ConductRBundleLib)
+  .dependsOn(javaTestLib % "test->compile")
+  .dependsOn(akka25TestLib % "test->compile")
+  .enablePlugins(CrossPerProjectPlugin)
 
 // Test libraries
 lazy val akka24TestLib = project

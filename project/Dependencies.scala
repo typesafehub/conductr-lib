@@ -14,7 +14,8 @@ object Version {
   val play24             = "2.4.11"
   val play25             = "2.5.15"
   val play26             = "2.6.0"
-  val lagom1             = "1.3.5" // This should stay at 1.3.x for lagom1 - it is the lowest version we support - let the user bring in later versions
+  val lagom13            = "1.3.5"
+  val lagom14            = "1.4.0-M2"
   val reactiveStreams    = "1.0.0"
   val typesafeConfig     = "1.3.0"
   val scala              = "2.11.8"
@@ -36,9 +37,12 @@ object Library {
   val akka25HttpTestkit     = "com.typesafe.akka"      %% "akka-http-testkit"              % Version.akka25Http
   val akka24ContribExtra    = "com.typesafe.akka"      %% "akka-contrib-extra"             % Version.akka24ContribExtra
   val akka25ContribExtra    = "com.typesafe.akka"      %% "akka-contrib-extra"             % Version.akka25ContribExtra
-  val lagom1ClientJavadsl   = "com.lightbend.lagom"    %% "lagom-javadsl-client"           % Version.lagom1
-  val lagom1ClientScaladsl  = "com.lightbend.lagom"    %% "lagom-scaladsl-client"          % Version.lagom1
-  val lagom1ServerScaladsl  = "com.lightbend.lagom"    %% "lagom-scaladsl-server"          % Version.lagom1
+  val lagom13ClientJavadsl  = "com.lightbend.lagom"    %% "lagom-javadsl-client"           % Version.lagom13
+  val lagom13ClientScaladsl = "com.lightbend.lagom"    %% "lagom-scaladsl-client"          % Version.lagom13
+  val lagom13ServerScaladsl = "com.lightbend.lagom"    %% "lagom-scaladsl-server"          % Version.lagom13
+  val lagom14ClientJavadsl  = "com.lightbend.lagom"    %% "lagom-javadsl-client"           % Version.lagom14
+  val lagom14ClientScaladsl = "com.lightbend.lagom"    %% "lagom-scaladsl-client"          % Version.lagom14
+  val lagom14ServerScaladsl = "com.lightbend.lagom"    %% "lagom-scaladsl-server"          % Version.lagom14
   val java8Compat           = "org.scala-lang.modules" %% "scala-java8-compat"             % Version.java8Compat
   val reactiveStreams       = "org.reactivestreams"    % "reactive-streams"                % Version.reactiveStreams
   val junit                 = "junit"                  %  "junit"                          % Version.junit

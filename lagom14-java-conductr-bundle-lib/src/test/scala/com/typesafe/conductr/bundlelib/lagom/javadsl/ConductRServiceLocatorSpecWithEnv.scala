@@ -1,4 +1,4 @@
-package com.typesafe.conductr.bundlelib.lagom.scaladsl
+package com.typesafe.conductr.bundlelib.lagom.javadsl
 
 import java.net.{ InetSocketAddress, URI => JavaURI }
 
@@ -9,29 +9,17 @@ import akka.http.scaladsl.model.{ HttpEntity, HttpResponse, StatusCodes }
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.testkit.TestProbe
-import com.lightbend.lagom.internal.client.{ CircuitBreakerConfig, CircuitBreakerMetricsProviderImpl, CircuitBreakers }
-import com.lightbend.lagom.internal.spi.CircuitBreakerMetricsProvider
-import com.lightbend.lagom.scaladsl.api.{ Descriptor, Service, ServiceAcl, ServiceInfo }
-import com.lightbend.lagom.scaladsl.server.{ LagomApplication, LagomApplicationContext }
-import com.typesafe.conductr.bundlelib.play.api.{ Env => PlayEnv }
+import com.lightbend.lagom.javadsl.api.Descriptor
+import com.typesafe.conductr.bundlelib.play.api.{ ConductRLifecycleModule, Env => PlayEnv }
 import com.typesafe.conductr.bundlelib.scala.{ URI, URL }
 import com.typesafe.conductr.lib.AkkaUnitTestWithFixture
-import play.api.libs.ws.ahc.AhcWSComponents
-import play.api.routing.Router
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers._
 
-import scala.collection.immutable
+import scala.compat.java8.FutureConverters._
+import scala.compat.java8.OptionConverters._
 import scala.concurrent.Await
 import scala.util.{ Failure, Success }
-
-object ConductRServiceLocatorSpecWithEnv {
-  class DummyService extends Service {
-    override def descriptor: Descriptor = {
-      import Service._
-      named("dummy")
-    }
-  }
-}
 
 class ConductRServiceLocatorSpecWithEnv extends AkkaUnitTestWithFixture("ConductRServiceLocatorSpecWithEnv") {
 
@@ -39,18 +27,7 @@ class ConductRServiceLocatorSpecWithEnv extends AkkaUnitTestWithFixture("Conduct
     implicit val system = f.system
     implicit val timeout = f.timeout
     implicit val mat = ActorMaterializer.create(system)
-    implicit val ec = play.api.libs.concurrent.Execution.defaultContext
-    val app = new LagomApplication(LagomApplicationContext.Test) with AhcWSComponents with ConductRServiceLocatorComponents {
-      override lazy val lagomServer = serverFor[ConductRServiceLocatorSpecWithEnv.DummyService](new ConductRServiceLocatorSpecWithEnv.DummyService())
-      override lazy val actorSystem = system
-      override lazy val materializer = mat
-      override lazy val executionContext = actorSystem.dispatcher
-      override lazy val router = Router.empty
-      override lazy val circuitBreakerMetricsProvider: CircuitBreakerMetricsProvider = new CircuitBreakerMetricsProviderImpl(actorSystem)
-      override lazy val circuitBreakerConfig: CircuitBreakerConfig = new CircuitBreakerConfig(configuration)
-      override lazy val circuitBreakers: CircuitBreakers = new CircuitBreakers(actorSystem, circuitBreakerConfig, circuitBreakerMetricsProvider)
-      override lazy val serviceInfo: ServiceInfo = ServiceInfo("conductr-service.-est", Map.empty[String, immutable.Seq[ServiceAcl]])
-    }
+    implicit val ec = scala.concurrent.ExecutionContext.Implicits.global
   }
 
   "The ConductR service locator" should {
@@ -60,10 +37,14 @@ class ConductRServiceLocatorSpecWithEnv extends AkkaUnitTestWithFixture("Conduct
       import sys._
 
       val serviceUri = URI("http://service_interface:4711/known")
-
+      // GuiceApplicationBuilder uses the enabled modules from the `reference.conf`
+      val app = new GuiceApplicationBuilder()
+        .disable(classOf[ConductRLifecycleModule])
+        .build()
       withServerWithKnownService(serviceUri) {
-        running(app.application) {
-          val service = app.serviceLocator.locate("/known", Descriptor.NoCall)
+        running(app) {
+          val serviceLocator = app.injector.instanceOf[ConductRServiceLocator]
+          val service = serviceLocator.locate("/known", Descriptor.Call.NONE).toScala.map(_.asScala)
           Await.result(service, timeout.duration) shouldBe Some(serviceUri)
         }
       }
@@ -74,9 +55,14 @@ class ConductRServiceLocatorSpecWithEnv extends AkkaUnitTestWithFixture("Conduct
       import sys._
 
       val serviceUri = URI("http://service_interface:4711/known")
+      // GuiceApplicationBuilder uses the enabled modules from the `reference.conf`
+      val app = new GuiceApplicationBuilder()
+        .disable(classOf[ConductRLifecycleModule])
+        .build()
       withServerWithKnownService(serviceUri) {
-        running(app.application) {
-          val service = app.serviceLocator.locate("known", Descriptor.NoCall)
+        running(app) {
+          val serviceLocator = app.injector.instanceOf[ConductRServiceLocator]
+          val service = serviceLocator.locate("known", Descriptor.Call.NONE).toScala.map(_.asScala)
           Await.result(service, timeout.duration) shouldBe Some(serviceUri)
         }
       }
