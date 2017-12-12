@@ -14,9 +14,11 @@ import play.api.{ Application, ApplicationLoader, Configuration, Environment, Mo
  */
 class ConductRApplicationLoader extends ApplicationLoader {
   def load(context: ApplicationLoader.Context): Application = {
+    val existingConfig = context.initialConfiguration
+
     val systemName = AkkaEnv.mkSystemName("application")
-    val conductRConfig = Configuration(AkkaEnv.asConfig(systemName)) ++ Configuration(PlayEnv.asConfig(systemName))
-    val newConfig = context.initialConfiguration ++ conductRConfig
+    val conductRConfig = Configuration(AkkaEnv.asConfig(systemName)) ++ Configuration(PlayEnv.asConfig(systemName, existingConfig.underlying))
+    val newConfig = existingConfig ++ conductRConfig
     val prodEnv = Environment.simple(mode = Mode.Prod)
     // The logic below is the default GuiceApplicationLoader behavior, but
     // with a patched environment and config. We can't use the default
