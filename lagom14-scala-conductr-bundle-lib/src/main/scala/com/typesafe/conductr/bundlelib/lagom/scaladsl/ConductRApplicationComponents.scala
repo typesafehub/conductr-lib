@@ -2,7 +2,7 @@ package com.typesafe.conductr.bundlelib.lagom.scaladsl
 
 import akka.actor.ActorSystem
 import com.lightbend.lagom.scaladsl.api.{ AdditionalConfiguration, ProvidesAdditionalConfiguration, ServiceLocator }
-import com.lightbend.lagom.scaladsl.client.{ CircuitBreakersPanel, ConfigurationServiceLocator, LagomServiceClientComponents }
+import com.lightbend.lagom.scaladsl.client.{ CircuitBreakerComponents, CircuitBreakersPanel, ConfigurationServiceLocator, LagomServiceClientComponents }
 import com.typesafe.conductr.bundlelib.akka.{ Env => AkkaEnv }
 import com.typesafe.conductr.bundlelib.play.api.{ BundlelibComponents, ConductRLifecycleComponents, Env => PlayEnv }
 import com.typesafe.conductr.bundlelib.scala.Env
@@ -34,11 +34,7 @@ trait ConductRApplicationComponents extends ConductRServiceLocatorComponents wit
 /**
  * Provides the ConductR service locator.
  */
-trait ConductRServiceLocatorComponents extends BundlelibComponents with LagomServiceClientComponents {
-  def actorSystem: ActorSystem
-  def circuitBreakersPanel: CircuitBreakersPanel
-  def configuration: Configuration
-
+trait ConductRServiceLocatorComponents extends BundlelibComponents with LagomServiceClientComponents with CircuitBreakerComponents {
   lazy val serviceLocator: ServiceLocator =
     if (Env.isRunByConductR)
       new ConductRServiceLocator(conductRLocationSevice, conductRCacheLike, circuitBreakersPanel)(executionContext)
