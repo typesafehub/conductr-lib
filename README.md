@@ -8,14 +8,16 @@ This project provides a number of libraries to facilitate [ConductR](http://type
 
 Add one of the following libraries to your project.
 
-* `"com.typesafe.conductr" %  "java-conductr-bundle-lib"    % "2.0.2"`
-* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"   % "2.0.2"`
-* `"com.typesafe.conductr" %% "akka24-conductr-bundle-lib"  % "2.0.2"`
-* `"com.typesafe.conductr" %% "akka25-conductr-bundle-lib"  % "2.0.2"`
-* `"com.typesafe.conductr" %% "play25-conductr-bundle-lib"  % "2.0.2"`
-* `"com.typesafe.conductr" %% "play26-conductr-bundle-lib"  % "2.0.2"`
-* `"com.typesafe.conductr" %% "lagom13-java-conductr-bundle-lib"  % "2.0.2"`
-* `"com.typesafe.conductr" %% "lagom13-scala-conductr-bundle-lib"  % "2.0.2"`
+* `"com.typesafe.conductr" %  "java-conductr-bundle-lib"    % "2.1.1"`
+* `"com.typesafe.conductr" %% "scala-conductr-bundle-lib"   % "2.1.1"`
+* `"com.typesafe.conductr" %% "akka24-conductr-bundle-lib"  % "2.1.1"`
+* `"com.typesafe.conductr" %% "akka25-conductr-bundle-lib"  % "2.1.1"`
+* `"com.typesafe.conductr" %% "play25-conductr-bundle-lib"  % "2.1.1"`
+* `"com.typesafe.conductr" %% "play26-conductr-bundle-lib"  % "2.1.1"`
+* `"com.typesafe.conductr" %% "lagom13-java-conductr-bundle-lib"  % "2.1.1"`
+* `"com.typesafe.conductr" %% "lagom13-scala-conductr-bundle-lib" % "2.1.1"`
+* `"com.typesafe.conductr" %% "lagom14-java-conductr-bundle-lib"  % "2.1.1"`
+* `"com.typesafe.conductr" %% "lagom14-scala-conductr-bundle-lib" % "2.1.1"`
 
 Note that the examples here use the following import to conveniently build the JDK `URI` and `URL` types.
 
@@ -29,8 +31,8 @@ import com.typesafe.conductr.bundlelib.scala.{URL, URI}
 * [scala-conductr-bundle-lib](#scala-conductr-bundle-lib)
 * [akka[24|25]-conductr-bundle-lib](#akka2425-conductr-bundle-lib)
 * [play[25|26]-conductr-bundle-lib](#play2526-conductr-bundle-lib)
-* [lagom13-java-conductr-bundle-lib](#lagom13-java-conductr-bundle-lib)
-* [lagom13-scala-conductr-bundle-lib](#lagom13-scala-conductr-bundle-lib)
+* [lagom[13|14]-java-conductr-bundle-lib](#lagom1314-java-conductr-bundle-lib)
+* [lagom[13|14]-scala-conductr-bundle-lib](#lagom1314-scala-conductr-bundle-lib)
 
 ## conductr-bundle-lib
 
@@ -306,11 +308,21 @@ class MyCustomApplicationLoader extends ApplicationLoader {
 }
 ```
 
-## lagom13-java-conductr-bundle-lib
+## lagom[13|14]-java-conductr-bundle-lib
 
 > If you are using Lagom 1.x with Java, then this section is for you.
 
 [sbt-conductr](https://github.com/typesafehub/sbt-conductr) automatically adds this library to your Lagom project. You don't need set any additional settings for your Lagom services.
+
+Maven users should add the dependency directly to your Lagom service implementation projects. For example:
+
+```xml
+<dependency>
+    <groupId>com.typesafe.conductr</groupId>
+    <artifactId>lagom14-java-conductr-bundle-lib_2.11</artifactId>
+    <version>2.1.1</version>
+</dependency>
+```
 
 Note that if you are using your own application loader then you should ensure that the Akka, Play and Lagom ConductR-related properties are loaded. Here's a complete implementation (in Scala):
 
@@ -332,7 +344,7 @@ class MyCustomApplicationLoader extends ApplicationLoader {
 }
 ```
 
-## lagom13-scala-conductr-bundle-lib
+## lagom[13|14]-scala-conductr-bundle-lib
 
 > If you are using Lagom 1.x with Scala, then this section is for you.
 
