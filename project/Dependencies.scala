@@ -15,7 +15,7 @@ object Version {
   val play25             = "2.5.15"
   val play26             = "2.6.0"
   val lagom13            = "1.3.5"
-  val lagom14            = "1.4.0-M3"
+  val lagom14            = "1.4.0-RC1"
   val reactiveStreams    = "1.0.0"
   val typesafeConfig     = "1.3.0"
   val scala              = "2.11.8"
