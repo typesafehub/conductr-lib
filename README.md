@@ -2,6 +2,8 @@
 
 [![Build Status](https://api.travis-ci.org/typesafehub/conductr-lib.png?branch=master)](https://travis-ci.org/typesafehub/conductr-lib)
 
+*Note that this project is EOL as of 2018-01-31.*
+
 ## Introduction
 
 This project provides a number of libraries to facilitate [ConductR](http://typesafe.com/products/conductr)'s status service and its service lookup service. Note that usage of the libraries in your code is entirely benign when used outside of the context of ConductR i.e. you will find that your applications and services will continue to function normally when used without ConductR. We have also designed the libraries to be a convenience to ConductR's REST and environment variable based APIs, and to have a very low impact on your code.
